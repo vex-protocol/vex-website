@@ -6,7 +6,6 @@ import haloRed from "../assets/halo-red.jpeg";
 import { WitchyHero } from "../components/WitchyHero";
 import { WitchyFeatures } from "../components/WitchyFeatures";
 import { WitchyAbout } from "../components/WitchyAbout";
-import { Footer } from "../components";
 import { Navbar } from "../components/Hero";
 import { Link, useHistory } from "react-router-dom";
 import {
@@ -102,9 +101,8 @@ export function Home() {
                         </div>
                         <div className="column is-half section-content">
                             <div className="content-frame content">
-                                <h2 className="title">
-                                    Private and secure messaging for everyone,
-                                    everywhere.
+                                <h2 className="title card-title--aviation">
+                                    PRIVACY IS NOT A CRIME
                                 </h2>
                                 <p className="subtitle">
                                     Vex Chat is a secure instant messaging
@@ -145,6 +143,9 @@ export function Home() {
                     <div className="columns container has-text-left features-columns">
                         <div className="column is-half section-content">
                             <div className="content-frame content">
+                                <h2 className="title card-title--aviation">
+                                    ENCRYPTED BY DEFAULT
+                                </h2>
                                 <h2 className="title">Your conversation</h2>
                                 <p className="subtitle">
                                     Vex is open-source, encrypted and free. It
@@ -187,7 +188,6 @@ export function Home() {
                     </div>
                 </section>
             </div>
-            <Footer />
         </div>
     );
 }

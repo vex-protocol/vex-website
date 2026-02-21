@@ -1,5 +1,5 @@
 import ax from "axios";
-import { Hero, Footer, Avatar } from "../components";
+import { Hero, Avatar } from "../components";
 import { useMemo, useRef, useState } from "react";
 import { IInvite, IServer, IUser } from "../Router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -58,7 +58,6 @@ export function Invites(props: { match: any }): JSX.Element {
         return (
             <div className="view">
                 <Hero content={<span />} />
-                <Footer />
             </div>
         );
     }
@@ -76,7 +75,6 @@ export function Invites(props: { match: any }): JSX.Element {
                         </div>
                     }
                 />
-                <Footer />
             </div>
         );
     }
@@ -94,7 +92,6 @@ export function Invites(props: { match: any }): JSX.Element {
                         </div>
                     }
                 />
-                <Footer />
             </div>
         );
     }
@@ -170,7 +167,6 @@ export function Invites(props: { match: any }): JSX.Element {
                     </div>
                 }
             />
-            <Footer />
         </div>
     );
 }

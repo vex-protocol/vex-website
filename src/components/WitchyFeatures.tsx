@@ -1,39 +1,22 @@
 import React from "react";
-import "../stylesheets/style.sass";
+import vexNu from "../assets/vex-nu.png";
 
 export function WitchyFeatures(): JSX.Element {
     return (
-        <div className="witchy-container">
-            <div
-                className="witchy-rune"
-                style={{
-                    top: "50%",
-                    left: "50%",
-                    marginTop: "-90px",
-                    marginLeft: "-90px",
-                }}
-                aria-hidden
-            />
-            <div
-                className="witchy-orb witchy-orb--sm"
-                style={{ top: "20%", left: "30%" }}
-                aria-hidden
-            >
-                <div className="witchy-orb__particles" aria-hidden>
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
+        <div className="witchy-container witchy-container--features">
+            <div className="card-mascot card-mascot--logo" aria-hidden>
+                <div className="card-mascot__glow" aria-hidden />
+                <div className="card-mascot__frame">
+                    <img
+                        src={vexNu}
+                        alt=""
+                        className="card-mascot__img"
+                    />
                 </div>
-            </div>
-            <div
-                className="witchy-orb witchy-orb--sm"
-                style={{ top: "75%", left: "70%" }}
-                aria-hidden
-            >
-                <div className="witchy-orb__particles" aria-hidden>
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
+                <div className="card-mascot__particles" aria-hidden>
+                    <span className="card-mascot__particle" />
+                    <span className="card-mascot__particle" />
+                    <span className="card-mascot__particle" />
                 </div>
             </div>
         </div>

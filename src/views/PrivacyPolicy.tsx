@@ -1,7 +1,7 @@
 import ax from "axios";
 import { Fragment, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Footer, Hero } from "../components";
+import { Hero } from "../components";
 import {
     GITHUB_ENDPOINTS,
     GITHUB_RAW_URLS,
@@ -80,7 +80,6 @@ export function PrivacyPolicy(): JSX.Element {
                     </div>
                 </div>
             </section>
-            <Footer />
         </div>
     );
 }
