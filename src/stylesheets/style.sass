@@ -136,12 +136,31 @@ $section-background: $vex-black
 //
 ////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////
+// Mobile-first: touch targets, tap feedback, no delay
+////////////////////////////////////////////////////////////////
+$touch-min: 44px
+
+// Remove 300ms tap delay, prevent accidental double-tap zoom on controls
+button,
+.button,
+a.button,
+a[href],
+[role="button"],
+.navbar-burger,
+.navbar-item
+  touch-action: manipulation
+  -webkit-touch-callout: none
+  cursor: pointer
+
 // Base: allow scroll for pages without .app (e.g. PrivacyPolicy uses .view)
 html
   overflow-x: clip !important
   width: 100%
   max-width: 100vw
   height: 100%
+  -webkit-tap-highlight-color: rgba(231, 0, 0, 0.15)
+  tap-highlight-color: rgba(231, 0, 0, 0.15)
 
 body
   background: linear-gradient(180deg, $panel-dark 0%, $vex-black 30%, $vex-black 70%, $panel-dark 100%)
@@ -248,8 +267,18 @@ $instrument-glow: rgba(231, 0, 0, 0.06)
   white-space: nowrap
   display: block
 
+// Hamburger: min 44px touch target (mobile-first)
 .navbar-sticky-wrapper .navbar-burger
   flex-shrink: 0
+  min-width: $touch-min
+  min-height: $touch-min
+  padding: 0
+  display: flex
+  align-items: center
+  justify-content: center
+  cursor: pointer
+  user-select: none
+  -webkit-user-select: none
 
 .navbar-menu--portaled
   position: fixed
@@ -263,7 +292,10 @@ $instrument-glow: rgba(231, 0, 0, 0.06)
   display: block
   .navbar-item
     color: $vex-red !important
-  .navbar-item:hover
+    min-height: $touch-min
+    padding: 0.75rem 1rem
+  .navbar-item:hover,
+  .navbar-item:active
     color: $vex-red-bright !important
 
 @media (max-width: 768px)
@@ -281,6 +313,14 @@ $instrument-glow: rgba(231, 0, 0, 0.06)
 .navbar-item
   color: $vex-red !important
   font-weight: 700
+  min-height: $touch-min
+  display: flex
+  align-items: center
+  padding-top: 0.5rem
+  padding-bottom: 0.5rem
+  -webkit-tap-highlight-color: rgba(231, 0, 0, 0.15)
+  &:active
+    color: $vex-red-bright !important
 
 .hero
   background: $vex-black !important
@@ -777,9 +817,11 @@ a
 a:hover
   color: $vex-red-bright
 
-// BAe 146 annunciator / warning panel style (from cockpit refs)
-// Primary = CAT I / red warning indicators: flat red, white text
-// Outlined = dark annunciator wells: recessed, illuminated red text
+// BAe 146 / industrial switch aesthetic – plastic on/off switch with LED
+// Angular, square, no rounded corners. LED: fire red (standby) → incinerator green (on/hover)
+$led-red: $vex-red
+$led-green: $incinerator-green-300
+
 button,
 .button,
 a.button
@@ -787,22 +829,53 @@ a.button
   margin: 0.5rem 0
   font-family: $font-aeronautical !important
   letter-spacing: 0.1em
-  border-radius: 0
-  transition: box-shadow 0.12s ease, filter 0.12s ease
+  border-radius: 0 !important
+  transition: box-shadow 0.15s ease, color 0.15s ease, border-color 0.15s ease
+  min-height: $touch-min
+  min-width: $touch-min
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  padding-left: 1rem
+  padding-right: 1rem
 
+// Override Bulma is-rounded – cockpit switches are square
+.button.is-rounded,
+a.button.is-rounded
+  border-radius: 0 !important
+
+// Filled primary – solid red switch (engaged)
 .button.is-primary,
 a.button.is-primary
   background: #c41e00
   color: #fff !important
   border: 2px solid #8b0000
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 2px 4px rgba(0, 0, 0, 0.3)
-  text-shadow: 0 0 6px rgba(255, 200, 200, 0.4)
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 0 8px rgba(231, 0, 0, 0.3)
+  position: relative
+  padding-left: 1.75em
+  &::before
+    content: ""
+    position: absolute
+    left: 0.5em
+    top: 50%
+    transform: translateY(-50%)
+    width: 6px
+    height: 6px
+    background: $led-red
+    box-shadow: 0 0 6px $led-red, inset 0 0 2px rgba(255, 255, 255, 0.3)
+    transition: background 0.15s ease, box-shadow 0.15s ease
   &:hover
-    background: #d42a0a
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 12px rgba(196, 30, 0, 0.4)
-    filter: brightness(1.08)
+    background: #0a0c0e
+    border-color: $panel-bezel
+    color: $led-green !important
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(20, 22, 26, 0.9), 0 0 12px rgba(71, 131, 17, 0.35)
+    text-shadow: 0 0 8px rgba(71, 131, 17, 0.6)
+    &::before
+      background: $led-green
+      box-shadow: 0 0 8px $led-green, 0 0 4px $led-green, inset 0 0 2px rgba(255, 255, 255, 0.4)
+      animation: led-blink 1.5s ease-in-out infinite
   &:active
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5)
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.7)
 
 .button.is-secondary,
 a.button.is-secondary
@@ -810,19 +883,44 @@ a.button.is-secondary
   color: $vex-red
   border: 2px solid $panel-bezel
 
+// Outlined = recessed plastic switch well, LED indicator (red standby → green on hover)
 .button.is-primary.is-outlined,
 a.button.is-primary.is-outlined
-  color: #e70000 !important
+  color: $led-red !important
   background: #0a0c0e
-  border: 2px solid #1a1d22
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(20, 22, 26, 0.8)
-  text-shadow: 0 0 8px rgba(231, 0, 0, 0.5)
+  border: 2px solid $panel-bezel
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(20, 22, 26, 0.8), 0 0 6px rgba(231, 0, 0, 0.2)
+  text-shadow: 0 0 6px rgba(231, 0, 0, 0.5)
+  position: relative
+  padding-left: 1.75em
+  &::before
+    content: ""
+    position: absolute
+    left: 0.5em
+    top: 50%
+    transform: translateY(-50%)
+    width: 6px
+    height: 6px
+    background: $led-red
+    box-shadow: 0 0 6px $led-red, inset 0 0 2px rgba(255, 255, 255, 0.2)
+    transition: background 0.15s ease, box-shadow 0.15s ease
   &:hover
-    color: #ff4422 !important
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 0 24px rgba(231, 0, 0, 0.12)
-    text-shadow: 0 0 12px rgba(231, 0, 0, 0.7)
+    color: $led-green !important
+    border-color: rgba(71, 131, 17, 0.4)
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(20, 22, 26, 0.8), 0 0 12px rgba(71, 131, 17, 0.4)
+    text-shadow: 0 0 10px rgba(71, 131, 17, 0.7)
+    &::before
+      background: $led-green
+      box-shadow: 0 0 8px $led-green, 0 0 4px $led-green, inset 0 0 2px rgba(255, 255, 255, 0.4)
+      animation: led-blink 1.5s ease-in-out infinite
   &:active
     box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6)
+
+@keyframes led-blink
+  0%, 100%
+    opacity: 1
+  50%
+    opacity: 0.7
 
 .button .icon-left,
 a.button .icon-left
@@ -837,6 +935,8 @@ a.button .icon-right
   display: inline-flex
   align-items: center
   justify-content: center
+  min-width: $touch-min
+  min-height: $touch-min
   width: 2.25rem
   height: 2.25rem
   border-radius: 50%
@@ -1198,8 +1298,10 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     height: 44px
 .features-ctas
   display: flex
+  flex-direction: row
   flex-wrap: wrap
-  gap: 0.75rem
+  align-items: center
+  gap: 0.5rem
   margin-top: 1.5rem
 
 

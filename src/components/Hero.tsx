@@ -56,7 +56,7 @@ const NAVBAR_MENU_CONTENT = (
         </span>
         {DOWNLOAD_ENABLED && (
             <span className="navbar-item">
-                <Link className="button is-primary is-rounded" to="/download">
+                <Link className="button is-primary" to="/download">
                     <span>DOWNLOAD</span>
                 </Link>
             </span>
@@ -72,22 +72,26 @@ export function Navbar() {
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") setMenuOpen(false);
         };
-        const onClickOutside = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-            if (
+        const isOutside = (target: EventTarget | null) => {
+            const el = target as HTMLElement;
+            return (
                 menuOpen &&
                 wrapperRef.current &&
-                !wrapperRef.current.contains(target) &&
-                !target.closest(".navbar-menu--portaled")
-            ) {
-                setMenuOpen(false);
-            }
+                !wrapperRef.current.contains(el) &&
+                !el?.closest?.(".navbar-menu--portaled")
+            );
         };
+        const onPointerDownOutside = (e: MouseEvent | TouchEvent) => {
+            if (isOutside(e.target)) setMenuOpen(false);
+        };
+        // click for mouse, touchend for touch (faster tap response on mobile)
         window.addEventListener("keydown", onKeyDown);
-        document.addEventListener("click", onClickOutside);
+        document.addEventListener("click", onPointerDownOutside);
+        document.addEventListener("touchend", onPointerDownOutside, { passive: true });
         return () => {
             window.removeEventListener("keydown", onKeyDown);
-            document.removeEventListener("click", onClickOutside);
+            document.removeEventListener("click", onPointerDownOutside);
+            document.removeEventListener("touchend", onPointerDownOutside);
         };
     }, [menuOpen]);
 
@@ -130,9 +134,18 @@ export function Navbar() {
                                 className={`navbar-burger burger ${
                                     menuOpen ? "is-active" : ""
                                 }`}
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => setMenuOpen(!menuOpen)}
-                                data-target="navbarMenuHeroC"
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" || e.key === " ") {
+                                        e.preventDefault();
+                                        setMenuOpen(!menuOpen);
+                                    }
+                                }}
                                 aria-expanded={menuOpen}
+                                aria-label="Toggle menu"
+                                data-target="navbarMenuHeroC"
                             >
                                 <span></span>
                                 <span></span>

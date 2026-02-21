@@ -66,7 +66,7 @@ export function Home() {
                                             onClick={() => {
                                                 history.push("/download");
                                             }}
-                                            className="button is-medium is-primary is-rounded"
+                                            className="button is-medium is-primary"
                                         >
                                             Download Now
                                         </button>
@@ -75,7 +75,7 @@ export function Home() {
                                             href={TWITTER_URL}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="button is-medium is-primary is-rounded"
+                                            className="button is-medium is-primary"
                                             aria-label={`Follow @${TWITTER_HANDLE} on X for updates`}
                                         >
                                             Follow us{" "}
@@ -118,7 +118,7 @@ export function Home() {
                                         onClick={() => {
                                             history.push("/download");
                                         }}
-                                        className="button is-medium is-primary is-rounded"
+                                        className="button is-medium is-primary"
                                     >
                                         Download Now
                                     </button>
@@ -127,7 +127,7 @@ export function Home() {
                                         href={TWITTER_URL}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="button is-medium is-primary is-rounded"
+                                        className="button is-medium is-primary"
                                         aria-label={`Follow @${TWITTER_HANDLE} on X for updates`}
                                     >
                                         Follow us{" "}
@@ -179,7 +179,7 @@ export function Home() {
                                 <div className="features-ctas">
                                     <Link
                                         to="/privacy-policy"
-                                        className="button is-medium is-rounded is-primary is-outlined"
+                                        className="button is-small is-primary is-outlined"
                                     >
                                         Privacy Policy
                                     </Link>
@@ -187,7 +187,7 @@ export function Home() {
                                         href={GITHUB_WEB_URLS.VEX_CHAT_ORG}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="button is-medium is-rounded is-primary is-outlined"
+                                        className="button is-small is-primary is-outlined"
                                     >
                                         Read the code
                                     </a>
