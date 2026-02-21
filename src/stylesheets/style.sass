@@ -142,19 +142,31 @@ body
   color: $vex-red
   font-weight: 600
 
+$holographic-tint-nav: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0, 80, 0.08) 25%, rgba(231, 0, 0, 0.1) 50%, rgba(120, 0, 120, 0.06) 75%, rgba(231, 0, 0, 0.12) 100%)
+
 .navbar-sticky-wrapper
   position: sticky
   top: 0
   z-index: 100
-  background: $vex-black
+  min-height: 120px
+  width: 100vw
+  max-width: 100vw
+  margin-left: calc(-50vw + 50%)
+  margin-right: calc(-50vw + 50%)
+  left: 0
+  right: 0
+  box-sizing: border-box
+  background: $holographic-tint-nav
+  box-shadow: inset 0 0 60px rgba(231, 0, 0, 0.08), 0 1px 0 rgba(255, 100, 100, 0.12)
+  border-bottom: 1px solid rgba(231, 0, 0, 0.15)
 
 .navbar-halo
   width: 100%
-  height: 100px
+  height: 120px
   background: transparent
   background-repeat: no-repeat
 .navbar-halo--tint
-  background: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0, 80, 0.08) 25%, rgba(231, 0, 0, 0.1) 50%, rgba(120, 0, 120, 0.06) 75%, rgba(231, 0, 0, 0.12) 100%)
+  background: $holographic-tint-nav
   box-shadow: inset 0 0 60px rgba(231, 0, 0, 0.06), 0 1px 0 rgba(255, 100, 100, 0.1)
 
 .navbar-over-halo
@@ -163,10 +175,12 @@ body
   left: 0
   right: 0
   background: transparent !important
+  min-height: 120px
 
 
 .navbar
-  background-color: $vex-black !important
+  min-height: 120px
+  background: transparent !important
   font-family: $font-esoteric
 .navbar-over-halo .navbar-item
   color: $vex-red !important
@@ -448,6 +462,84 @@ $vex-red-glow-20: rgba(231, 0, 0, 0.2)
 .navbar-item:focus
   color: $vex-red-bright !important
 
+.logo-link
+  display: inline-flex
+  align-items: center
+  gap: 0.5rem
+.logo-glitch
+  position: relative
+  display: inline-block
+  overflow: hidden
+  animation: glitch-flicker 4s ease-in-out infinite
+  &:hover
+    animation: glitch-flicker 2s ease-in-out infinite
+  &::before
+    content: ""
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0, 0, 0, 0.2) 2px, rgba(0, 0, 0, 0.2) 3px)
+    pointer-events: none
+    z-index: 1
+    animation: scanline-drift 6s linear infinite
+  &::after
+    content: ""
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
+    height: 4px
+    background: linear-gradient(90deg, transparent, rgba(231, 0, 0, 0.2), transparent)
+    pointer-events: none
+    z-index: 2
+    animation: scanline-sweep 2.5s ease-in-out infinite
+@keyframes scanline-drift
+  0%
+    transform: translateY(0)
+  100%
+    transform: translateY(3px)
+@keyframes scanline-sweep
+  0%
+    transform: translateY(-100%)
+  100%
+    transform: translateY(300%)
+@keyframes glitch-flicker
+  0%, 20%, 40%, 60%, 80%, 100%
+    opacity: 1
+  21%, 61%
+    opacity: 0.9
+  41%, 81%
+    opacity: 1.08
+.logo--square
+  width: 48px
+  height: 48px
+  object-fit: contain
+  display: block
+.logo-text
+  font-family: $font-aeronautical
+  font-size: 1.25rem
+  font-weight: 400
+  color: rgba(231, 0, 0, 0.75)
+  line-height: 1
+  letter-spacing: 0.1em
+  text-transform: uppercase
+  text-shadow: 0 0 10px rgba(231, 0, 0, 0.5), 0 0 3px rgba(231, 0, 0, 0.8)
+  filter: drop-shadow(0 0 2px rgba(231, 0, 0, 0.4))
+.hero-logo
+  display: inline-flex
+  align-items: center
+  gap: 0.75rem
+  margin-bottom: 0.5rem
+.hero-logo .logo--square
+  width: 64px
+  height: 64px
+.hero-logo .logo-text
+  font-size: 1.75rem
+  color: rgba(231, 0, 0, 0.7)
+  text-shadow: 0 0 12px rgba(231, 0, 0, 0.5), 0 0 4px rgba(231, 0, 0, 0.7)
+
 .content
   h1, h2, h3, h4, h5, h6, .title
     font-family: $font-cursive
@@ -483,12 +575,84 @@ a.button
 .button.is-primary,
 a.button.is-primary
   color: #000 !important
+.button.is-primary.is-outlined,
+a.button.is-primary.is-outlined
+  color: $vex-red !important
+  border-color: $vex-red
+  background: transparent
+  &:hover
+    color: $vex-red-bright !important
+    border-color: $vex-red-bright
+    background: rgba(231, 0, 0, 0.1)
+
+.button .icon-left,
+a.button .icon-left
+  margin-right: 0.5em
+  vertical-align: middle
+.button .icon-right,
+a.button .icon-right
+  margin-left: 0.5em
+  vertical-align: middle
+
+.icon-circle
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  width: 2.25rem
+  height: 2.25rem
+  border-radius: 50%
+  background: $vex-red
+  color: #000
+  text-decoration: none
+  transition: background 0.2s, transform 0.2s
+  &:hover
+    background: $vex-red-bright
+  &:focus
+    outline: 2px solid $vex-red-bright
+.icon-circle--lg
+  width: 3rem
+  height: 3rem
+.icon-circle--xl
+  width: 4rem
+  height: 4rem
+.navbar-icons
+  display: flex
+  gap: 0.5rem
+  align-items: center
+
+.footer-sticky
+  position: fixed
+  bottom: 0
+  left: 0
+  right: 0
+  padding: 0.35rem 1rem
+  background: $vex-black
+  border-top: 2px solid $vex-red
+  text-align: center
+  font-family: $font-aeronautical
+  font-size: 0.7rem
+  font-weight: 600
+  color: $vex-red
+  z-index: 50
+  box-shadow: 0 -1px 0 rgba(231, 0, 0, 0.3)
+.footer-copyright
+  letter-spacing: 0.05em
 
 .section 
   padding: 8rem 1.5rem
 
 .content 
   z-index: 99
+
+$holographic-frame: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0, 80, 0.08) 25%, rgba(231, 0, 0, 0.1) 50%, rgba(120, 0, 120, 0.06) 75%, rgba(231, 0, 0, 0.12) 100%)
+.content-frame
+  background: $holographic-frame
+  box-shadow: inset 0 0 60px rgba(231, 0, 0, 0.08), 0 1px 0 rgba(255, 100, 100, 0.12)
+  padding: 1.5rem
+  border-radius: 12px
+  border: 1px solid rgba(231, 0, 0, 0.15)
+  width: 100%
+  box-sizing: border-box
 
 #hero 
   .content h2:not(:first-child)
@@ -503,8 +667,6 @@ a.button.is-primary
     z-index: 0
     pointer-events: none
 
-
-
 #about 
   .witchy-container--about
     width: 100%
@@ -512,15 +674,11 @@ a.button.is-primary
     position: relative
     overflow: hidden
 
-
 #features 
-
   .media + .media 
     margin-top: 2rem
     padding-top: 2rem
     border-top: none
-
-
   .witchy-container
     width: 100%
     height: 100%
@@ -528,6 +686,188 @@ a.button.is-primary
     min-height: 320px
     z-index: 0
     overflow: hidden
+
+////////////////////////////////////////////////////////////////
+// Desktop: ensure sections stack and page scrolls
+////////////////////////////////////////////////////////////////
+$tablet-up: 769px
+@media (min-width: $tablet-up)
+  .mobile-cards
+    display: block
+    height: auto
+    overflow: visible
+  html, body
+    overflow-y: auto
+
+////////////////////////////////////////////////////////////////
+// Mobile: swipeable cards – minimal gap, cards fill viewport
+////////////////////////////////////////////////////////////////
+$mobile: 768px
+$mobile-gap: 0.5rem
+$holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0, 80, 0.08) 25%, rgba(231, 0, 0, 0.1) 50%, rgba(120, 0, 120, 0.06) 75%, rgba(231, 0, 0, 0.12) 100%)
+
+@media (max-width: $mobile)
+  .navbar-sticky-wrapper
+    min-height: 56px
+    margin-top: 0
+  .navbar-halo
+    height: 56px
+  .navbar-over-halo
+    min-height: 56px
+  .navbar
+    min-height: 56px
+  .app.container
+    max-width: 100%
+    width: 100%
+    padding: 0
+    box-sizing: border-box
+  .mobile-cards
+    display: flex
+    flex-direction: row
+    overflow-x: auto
+    overflow-y: hidden
+    scroll-snap-type: x mandatory
+    scroll-behavior: smooth
+    -webkit-overflow-scrolling: touch
+    height: calc(100vh - 56px)
+    width: 100%
+    -ms-overflow-style: none
+    scrollbar-width: none
+  .mobile-cards::-webkit-scrollbar
+    display: none
+  .mobile-card
+    flex: 0 0 100%
+    width: 100%
+    min-width: 100%
+    min-height: 100%
+    scroll-snap-align: start
+    scroll-snap-stop: always
+    padding: $mobile-gap
+    box-sizing: border-box
+    display: flex
+    flex-direction: column
+  .mobile-card .container
+    padding: 0
+    max-width: none
+  .section.mobile-card
+    padding: $mobile-gap
+  .section.mobile-card .columns
+    flex: 1
+    min-height: 0
+  .section.mobile-card .section-content
+    flex: 1
+    display: flex
+    flex-direction: column
+    min-height: 0
+  .section.mobile-card .content-frame
+    flex: 1
+    min-height: 0
+    overflow-y: auto
+  .hero--with-halo .hero-body
+    padding: $mobile-gap
+    flex: 1
+    display: flex
+    min-height: 0
+  #hero.hero.is-fullheight
+    min-height: 0
+  #hero .hero-columns
+    flex: 1
+    min-height: 0
+  #about .about-columns,
+  #features .features-columns
+    flex: 1
+    min-height: 0
+  .hero-halo-bg
+    background-size: cover
+    background-position: center 20%
+    opacity: 0.7
+  #hero .hero-columns,
+  #about .about-columns,
+  #features .features-columns
+    display: flex
+    flex-direction: column
+    position: relative
+  .section-bg
+    position: absolute !important
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    z-index: 0
+    width: 100% !important
+    margin: 0 !important
+    padding: 0 !important
+    .witchy-container
+      width: 100%
+      height: 100%
+      min-height: 0
+      transform: scale(0.7)
+      transform-origin: center center
+    .witchy-orb--lg
+      width: 120px
+      height: 120px
+    .witchy-orb--md
+      width: 90px
+      height: 90px
+    .witchy-orb--sm
+      width: 50px
+      height: 50px
+    .mascot-witchy-orb--float
+      width: 120px
+      height: 120px
+  #hero .section-bg .mascot-witchy-orb--float
+    display: none
+  .section-bg .witchy-rune
+      width: 120px
+      height: 120px
+      margin-top: -60px
+      margin-left: -60px
+  .section-content
+    position: relative
+    z-index: 1
+    width: 100% !important
+    max-width: 100%
+    flex: none
+    order: 0
+  .section-bg
+    order: 1
+  .content-frame
+    background: $holographic-tint
+    box-shadow: inset 0 0 60px rgba(231, 0, 0, 0.08), 0 1px 0 rgba(255, 100, 100, 0.12)
+    padding: $mobile-gap
+    border-radius: 8px
+    border: 1px solid rgba(231, 0, 0, 0.15)
+    width: 100%
+    box-sizing: border-box
+  #hero .content-frame .title.is-2
+    font-size: 1.75rem
+  #hero .content-frame .subtitle.is-4
+    font-size: 1.1rem
+  .navbar-brand
+    min-width: 0
+    flex: 1
+  .navbar .logo-link
+    min-width: 0
+    max-width: 100%
+  .navbar .logo-text
+    font-size: 0.65rem
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+  .navbar .logo--square
+    width: 40px
+    height: 40px
+    flex-shrink: 0
+  .hero-logo .logo-text
+    font-size: 1rem
+  .hero-logo .logo--square
+    width: 48px
+    height: 48px
+.features-ctas
+  display: flex
+  flex-wrap: wrap
+  gap: 0.75rem
+  margin-top: 1.5rem
 
 
 

@@ -1,6 +1,7 @@
 import { Download } from "./Download";
+import { Home } from "./Home";
 import { Invites } from "./Invites";
 import { PrivacyPolicy } from "./PrivacyPolicy";
-import { Home } from "./Home";
+import { Team } from "./Team";
 
-export { Download, Invites, PrivacyPolicy, Home };
+export { Download, Home, Invites, PrivacyPolicy, Team };

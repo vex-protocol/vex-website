@@ -1,7 +1,16 @@
 import React, { Fragment, useState } from "react";
 import { Link } from "react-router-dom";
-import logo from "../images/vex-logo.svg";
-import { DOWNLOAD_ENABLED } from "./constants";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGithub, faTwitter } from "@fortawesome/free-brands-svg-icons";
+import logo from "../assets/vex_icon.svg";
+import {
+    CEO_TWITTER_URL,
+    DOWNLOAD_ENABLED,
+    GITHUB_WEB_URLS,
+    LOGO_TEXT,
+    TWITTER_HANDLE,
+    TWITTER_URL,
+} from "./constants";
 
 export function Hero(props: { content: JSX.Element }): JSX.Element {
     return (
@@ -27,8 +36,19 @@ export function Navbar() {
             <header className="navbar navbar-over-halo">
                 <div className="container">
                     <div className="navbar-brand">
-                        <Link to={"/"} className="logo-link navbar-item">
-                            <img className="logo" src={logo} alt={"Vex"} />
+                        <Link
+                            to={"/"}
+                            className="logo-link navbar-item"
+                            aria-label="Vex"
+                        >
+                            <span className="logo-glitch">
+                                <img
+                                    className="logo logo--square"
+                                    src={logo}
+                                    alt=""
+                                />
+                            </span>
+                            <span className="logo-text">{LOGO_TEXT}</span>
                         </Link>
                         <span
                             className={`navbar-burger burger ${
@@ -50,6 +70,28 @@ export function Navbar() {
                             <Link className="navbar-item" to="/privacy-policy">
                                 Privacy Policy
                             </Link>
+                            <span className="navbar-item navbar-icons">
+                                {!DOWNLOAD_ENABLED && (
+                                    <a
+                                        href={TWITTER_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="icon-circle"
+                                        aria-label={`Follow @${TWITTER_HANDLE} on X`}
+                                    >
+                                        <FontAwesomeIcon icon={faTwitter} />
+                                    </a>
+                                )}
+                                <a
+                                    href={GITHUB_WEB_URLS.VEX_CHAT_ORG}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="icon-circle"
+                                    aria-label="Vex on GitHub"
+                                >
+                                    <FontAwesomeIcon icon={faGithub} />
+                                </a>
+                            </span>
                             {DOWNLOAD_ENABLED && (
                                 <span className="navbar-item">
                                     <Link
