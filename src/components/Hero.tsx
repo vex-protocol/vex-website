@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faTwitter } from "@fortawesome/free-brands-svg-icons";
 import logo from "../assets/vex_icon.svg";
 import {
-    CEO_TWITTER_URL,
     DOWNLOAD_ENABLED,
     GITHUB_WEB_URLS,
     LOGO_TEXT,
