@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter } from "@fortawesome/free-brands-svg-icons";
 import logo from "../assets/vex_icon.svg";
 import haloRed from "../assets/halo-red.jpeg";
 import girlRed from "../assets/girl-red.jpg";
-import basedmilio from "../assets/basedmilio4.jpeg";
+import basedmilio from "../assets/FIRERED/basedmilio4.jpeg";
 import { WitchyHero } from "../components/WitchyHero";
+import { WitchyOrbs } from "../components/WitchyOrbs";
 import { Navbar } from "../components/Hero";
 import { Link, useHistory } from "react-router-dom";
 import {
@@ -16,13 +17,66 @@ import {
     TWITTER_URL,
 } from "../components/constants";
 
+const SECTION_IDS = ["hero", "about", "features"];
+
 export function Home() {
     const history = useHistory();
+    const scrollRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+            const target = e.target as HTMLElement;
+            if (
+                target.tagName === "INPUT" ||
+                target.tagName === "TEXTAREA" ||
+                target.isContentEditable
+            ) {
+                return;
+            }
+            const sections = SECTION_IDS.map((id) =>
+                el.querySelector(`#${id}`)
+            ).filter((s): s is HTMLElement => s !== null);
+            if (sections.length === 0) return;
+
+            const containerScroll = el.scrollTop;
+            const containerHeight = el.clientHeight;
+            let currentIndex = 0;
+            for (let i = 0; i < sections.length; i++) {
+                const top = (sections[i] as HTMLElement).offsetTop;
+                if (containerScroll < top + containerHeight / 2) {
+                    currentIndex = i;
+                    break;
+                }
+                currentIndex = i;
+            }
+
+            if (e.key === "ArrowDown" && currentIndex < sections.length - 1) {
+                e.preventDefault();
+                sections[currentIndex + 1].scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            } else if (e.key === "ArrowUp" && currentIndex > 0) {
+                e.preventDefault();
+                sections[currentIndex - 1].scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, []);
 
     return (
         <div className="app container">
             <Navbar />
-            <div className="mobile-cards">
+            <div className="mobile-cards" ref={scrollRef}>
                 <section
                     className="section hero is-fullheight hero--with-halo mobile-card"
                     id="hero"
@@ -93,6 +147,9 @@ export function Home() {
 
                 <section className="section mobile-card" id="about">
                     <div className="columns container has-text-left is-vcentered about-columns">
+                        <div className="column section-bg" aria-hidden>
+                            <WitchyOrbs section="about" />
+                        </div>
                         <div className="column is-12 section-content">
                             <div className="content-frame content">
                                 <span className="card-header">
@@ -144,6 +201,9 @@ export function Home() {
 
                 <section className="section mobile-card" id="features">
                     <div className="columns container has-text-left features-columns">
+                        <div className="column section-bg" aria-hidden>
+                            <WitchyOrbs section="features" />
+                        </div>
                         <div className="column is-12 section-content">
                             <div className="content-frame content">
                                 <span className="card-header">

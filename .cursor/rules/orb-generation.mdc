@@ -1,0 +1,18 @@
+---
+description: Rules for witchy orb image selection and pool balance
+globs: src/assets/orbImages.ts, src/components/WitchyOrbs.tsx, src/components/WitchyHero.tsx
+alwaysApply: false
+---
+
+# Orb Generation Rules
+
+When implementing or modifying orb selection logic:
+
+1. **Prefer images over empty orbs**  
+   Always assign an available image to an orb before creating an empty orb. Never generate an empty orb (`image: ""`) if an unused image exists for that color or any other color.
+
+2. **Balance may use extra empty orbs**  
+   You may add extra empty orbs later in the pool to fix color/layout balance (e.g. fill gaps, hit target counts). Do this only after exhausting all available images for the slots that need them.
+
+3. **Color-specific first**  
+   When picking an image for a color, use that color's folder first. Fall back to other colors only when the color's folder has no unused images (e.g. rainbow fallback).

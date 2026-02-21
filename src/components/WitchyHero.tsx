@@ -1,65 +1,94 @@
-import React from "react";
+import React, { useMemo } from "react";
 import "../stylesheets/style.sass";
 import girlRed from "../assets/girl-red.jpg";
+import { generateOrbs, OrbColor } from "../assets/orbImages";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 const STAR_COUNT = 24;
+const STAR_COUNT_MOBILE = 10;
+const ORB_COUNT = 4;
+const ORB_COUNT_MOBILE = 2;
+
+const ORB_POSITIONS: [string, string][] = [
+    ["15%", "20%"],
+    ["60%", "60%"],
+    ["30%", "70%"],
+    ["70%", "25%"],
+];
+
+// Fewer orbs, spread across empty spaces
+const ORB_POSITIONS_MOBILE: [string, string][] = [
+    ["18%", "22%"],
+    ["72%", "68%"],
+];
+
+const ORB_SIZES = [
+    "witchy-orb--lg",
+    "witchy-orb--md",
+    "witchy-orb--sm",
+    "witchy-orb--sm",
+];
+const ORB_SIZES_MOBILE = ["witchy-orb--md", "witchy-orb--md"];
+
+const COLOR_TO_MODIFIER: Record<OrbColor, string> = {
+    red: "",
+    purple: "witchy-orb--purple",
+    green: "witchy-orb--green",
+    blue: "witchy-orb--blue",
+    pink: "witchy-orb--pink",
+    cream: "witchy-orb--cream",
+    rainbow: "witchy-orb--rainbow",
+};
 
 export function WitchyHero(): JSX.Element {
-    const stars = Array.from({ length: STAR_COUNT }, (_, i) => ({
+    const isMobile = useIsMobile();
+    const orbCount = isMobile ? ORB_COUNT_MOBILE : ORB_COUNT;
+    const positions = isMobile ? ORB_POSITIONS_MOBILE : ORB_POSITIONS;
+    const sizes = isMobile ? ORB_SIZES_MOBILE : ORB_SIZES;
+    const starCount = isMobile ? STAR_COUNT_MOBILE : STAR_COUNT;
+
+    const orbs = useMemo(() => generateOrbs(orbCount, "hero"), [orbCount]);
+
+    const stars = Array.from({ length: starCount }, (_, i) => ({
         id: i,
         left: `${(i * 7 + 3) % 100}%`,
         top: `${(i * 11 + 5) % 100}%`,
-        delay: `${(i % 5) * 0.4}s`,
-        duration: `${2.5 + (i % 3)}s`,
+        delay: `${(i % 6) * 0.6}s`,
+        duration: `${7 + (i % 4)}s`,
     }));
 
     return (
         <div className="witchy-container">
             <div className="witchy-mist" aria-hidden />
-            <div
-                className="witchy-orb witchy-orb--lg"
-                style={{ top: "15%", left: "20%" }}
-                aria-hidden
-            >
-                <div className="witchy-orb__particles" aria-hidden>
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
-                </div>
-            </div>
-            <div
-                className="witchy-orb witchy-orb--md"
-                style={{ top: "60%", left: "60%" }}
-                aria-hidden
-            >
-                <div className="witchy-orb__particles" aria-hidden>
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
-                </div>
-            </div>
-            <div
-                className="witchy-orb witchy-orb--sm"
-                style={{ top: "30%", left: "70%" }}
-                aria-hidden
-            >
-                <div className="witchy-orb__particles" aria-hidden>
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
-                </div>
-            </div>
-            <div
-                className="witchy-orb witchy-orb--sm"
-                style={{ top: "70%", left: "25%" }}
-                aria-hidden
-            >
-                <div className="witchy-orb__particles" aria-hidden>
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
-                    <span className="witchy-orb__particle" />
-                </div>
-            </div>
+            {orbs.map((orb, i) => {
+                const [left, top] = positions[i];
+                const modifier = COLOR_TO_MODIFIER[orb.color];
+                return (
+                    <div
+                        key={`${orb.color}-${i}-${orb.image || "empty"}`}
+                        className={`witchy-orb ${
+                            orb.image ? "witchy-orb--with-image" : ""
+                        } ${sizes[i]} ${modifier}`}
+                        style={{ top, left }}
+                        aria-hidden
+                    >
+                        {orb.image ? (
+                            <div className="witchy-orb__inner">
+                                <img
+                                    src={orb.image}
+                                    alt=""
+                                    className="witchy-orb__img"
+                                />
+                            </div>
+                        ) : null}
+                        <div className="witchy-orb__particles" aria-hidden>
+                            <span className="witchy-orb__particle" />
+                            <span className="witchy-orb__particle" />
+                            <span className="witchy-orb__particle" />
+                        </div>
+                    </div>
+                );
+            })}
             <div
                 className="mascot-witchy-orb mascot-witchy-orb--float"
                 style={{ top: "32%", left: "6%" }}

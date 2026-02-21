@@ -1,8 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGithub, faTwitter } from "@fortawesome/free-brands-svg-icons";
 import logo from "../assets/vex_icon.svg";
 import {
     DOWNLOAD_ENABLED,
@@ -29,37 +27,33 @@ export function Hero(props: { content: JSX.Element }): JSX.Element {
 
 const NAVBAR_MENU_CONTENT = (
     <>
-        <Link className="navbar-item" to="/privacy-policy">
+        <Link className="navbar-item navbar-menu-item" to="/privacy-policy">
             Privacy Policy
         </Link>
-        <span className="navbar-item navbar-icons">
-            {!DOWNLOAD_ENABLED && (
-                <a
-                    href={TWITTER_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="icon-circle"
-                    aria-label={`Follow @${TWITTER_HANDLE} on X`}
-                >
-                    <FontAwesomeIcon icon={faTwitter} />
-                </a>
-            )}
+        {!DOWNLOAD_ENABLED && (
             <a
-                href={GITHUB_WEB_URLS.VEX_CHAT_ORG}
+                href={TWITTER_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="icon-circle"
-                aria-label="Vex on GitHub"
+                className="navbar-item navbar-menu-item"
+                aria-label={`Follow @${TWITTER_HANDLE} on X`}
             >
-                <FontAwesomeIcon icon={faGithub} />
+                Twitter
             </a>
-        </span>
+        )}
+        <a
+            href={GITHUB_WEB_URLS.VEX_CHAT_ORG}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="navbar-item navbar-menu-item"
+            aria-label="Vex on GitHub"
+        >
+            GitHub
+        </a>
         {DOWNLOAD_ENABLED && (
-            <span className="navbar-item">
-                <Link className="button is-primary" to="/download">
-                    <span>DOWNLOAD</span>
-                </Link>
-            </span>
+            <Link className="navbar-item navbar-menu-item" to="/download">
+                Download
+            </Link>
         )}
     </>
 );
@@ -87,7 +81,9 @@ export function Navbar() {
         // click for mouse, touchend for touch (faster tap response on mobile)
         window.addEventListener("keydown", onKeyDown);
         document.addEventListener("click", onPointerDownOutside);
-        document.addEventListener("touchend", onPointerDownOutside, { passive: true });
+        document.addEventListener("touchend", onPointerDownOutside, {
+            passive: true,
+        });
         return () => {
             window.removeEventListener("keydown", onKeyDown);
             document.removeEventListener("click", onPointerDownOutside);
@@ -131,7 +127,7 @@ export function Navbar() {
                                 <span className="logo-text">{LOGO_TEXT}</span>
                             </Link>
                             <span
-                                className={`navbar-burger burger ${
+                                className={`navbar-reticle ${
                                     menuOpen ? "is-active" : ""
                                 }`}
                                 role="button"
@@ -147,9 +143,10 @@ export function Navbar() {
                                 aria-label="Toggle menu"
                                 data-target="navbarMenuHeroC"
                             >
-                                <span></span>
-                                <span></span>
-                                <span></span>
+                                <span className="reticle-cross reticle-cross--h" />
+                                <span className="reticle-cross reticle-cross--v" />
+                                <span className="reticle-dot" />
+                                <span className="reticle-ring" />
                             </span>
                         </div>
                     </div>

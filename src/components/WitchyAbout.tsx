@@ -7,11 +7,7 @@ export function WitchyAbout(): JSX.Element {
             <div className="card-mascot card-mascot--privacy" aria-hidden>
                 <div className="card-mascot__glow" aria-hidden />
                 <div className="card-mascot__frame">
-                    <img
-                        src={girlRed}
-                        alt=""
-                        className="card-mascot__img"
-                    />
+                    <img src={girlRed} alt="" className="card-mascot__img" />
                 </div>
                 <div className="card-mascot__particles" aria-hidden>
                     <span className="card-mascot__particle" />

@@ -7,11 +7,7 @@ export function WitchyFeatures(): JSX.Element {
             <div className="card-mascot card-mascot--logo" aria-hidden>
                 <div className="card-mascot__glow" aria-hidden />
                 <div className="card-mascot__frame">
-                    <img
-                        src={vexNu}
-                        alt=""
-                        className="card-mascot__img"
-                    />
+                    <img src={vexNu} alt="" className="card-mascot__img" />
                 </div>
                 <div className="card-mascot__particles" aria-hidden>
                     <span className="card-mascot__particle" />
