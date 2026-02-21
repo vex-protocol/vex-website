@@ -1,8 +1,18 @@
 $text-padding: 0.75rem;
 
 .logo {
-    width: 4rem;
+    width: 6rem;
     height: auto;
+    display: block;
+}
+
+.logo-link {
+    padding-bottom: 0.75rem;
+}
+
+/* Red logo (SVG fill set in vex-logo.svg) */
+.logo-link .logo {
+    filter: none;
 }
 
 .section {

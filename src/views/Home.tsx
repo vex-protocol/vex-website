@@ -1,16 +1,15 @@
 import React from "react";
 import logo from "../images/vex-logo.svg";
-
-// Import icons
+import haloRed from "../assets/halo-red.jpeg";
 import conversation from "../images/conversation.svg";
 import secure from "../images/secure.svg";
 import privacy from "../images/private.svg";
-
-// Import parallax illustrations
-import { Anim1 } from "../components/anim1";
-import { Anim3 } from "../components/anim3";
+import { WitchyHero } from "../components/WitchyHero";
+import { WitchyFeatures } from "../components/WitchyFeatures";
+import { WitchyAbout } from "../components/WitchyAbout";
 import { Navbar } from "../components/Hero";
 import { useHistory } from "react-router-dom";
+import { DOWNLOAD_ENABLED } from "../components/constants";
 
 export function Home() {
     const history = useHistory();
@@ -18,14 +17,19 @@ export function Home() {
     return (
         <div className="app container">
             <Navbar />
-            <section className="section hero is-fullheight" id="hero">
+            <section className="section hero is-fullheight hero--with-halo" id="hero">
+                <div
+                    className="hero-halo-bg"
+                    style={{ backgroundImage: `url(${haloRed})` }}
+                    aria-hidden
+                />
                 <div className="hero-body">
                     <div className="columns container has-text-left ">
                         <div className="column is-half">
-                            <Anim1 />
+                            <WitchyHero />
                         </div>
                         <div className="column is-half content">
-                            <img src={logo} width="192" alt={"logo"} />
+                            <img src={logo} width="192" alt={"Vex"} />
                             <h2 className="title is-spaced is-2">
                                 Secure. Private. Encrypted.
                             </h2>
@@ -36,14 +40,16 @@ export function Home() {
                                 or chatting with your friends without
                                 compromising your privacy.
                             </p>
-                            <button
-                                onClick={() => {
-                                    history.push("/download");
-                                }}
-                                className="button is-medium is-primary is-rounded"
-                            >
-                                Download Now
-                            </button>
+                            {DOWNLOAD_ENABLED && (
+                                <button
+                                    onClick={() => {
+                                        history.push("/download");
+                                    }}
+                                    className="button is-medium is-primary is-rounded"
+                                >
+                                    Download Now
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -52,13 +58,7 @@ export function Home() {
             <section className="section" id="about">
                 <div className="columns container has-text-left is-vcentered">
                     <div className="column is-half">
-                        <div className="container showcase">
-                            <img
-                                className=""
-                                src="https://picsum.photos/1920/1080"
-                                alt=""
-                            />
-                        </div>
+                        <WitchyAbout />
                     </div>
                     <div className="column is-half content">
                         <h2 className="title">
@@ -71,14 +71,16 @@ export function Home() {
                             ideas that protects your identity and keeps you in
                             control.
                         </p>
-                        <button
-                            onClick={() => {
-                                history.push("/download");
-                            }}
-                            className="button is-medium is-primary is-rounded"
-                        >
-                            Download Now
-                        </button>
+                        {DOWNLOAD_ENABLED && (
+                            <button
+                                onClick={() => {
+                                    history.push("/download");
+                                }}
+                                className="button is-medium is-primary is-rounded"
+                            >
+                                Download Now
+                            </button>
+                        )}
                     </div>
                 </div>
             </section>
@@ -139,7 +141,7 @@ export function Home() {
                         </div>
                     </div>
                     <div className="column is-half">
-                        <Anim3 />
+                        <WitchyFeatures />
                     </div>
                 </div>
             </section>

@@ -16,38 +16,47 @@
 ////////////////////////////////////////////////////////////////
 
 
-// Brand colors
+// Brand colors – dark theme (80% red, 10% blue, 5% yellow, 2.5% pink, 2.5% green)
 $green: $vex-green
-$turquoise: $vex-aqua
-$cyan: $vex-blue
-$blue: $vex-blue
-$purple: $vex-purple
-$pink: $vex-pink
-$red: $vex-red
-$orange: $vex-orange
+$turquoise: $ice-blue-500
+$cyan: $ice-blue-500
+$blue: $ice-blue-600
+$purple: $fire-red-500
+$pink: $peach-pink-500
+$red: $fire-red-500
+$orange: $vex-yellow
 $yellow: $vex-yellow
-$black: $vex-black-darkest
-$black-bis: $vex-black-dark
-$black-ter: $vex-black
-$grey-darker: $vex-black-light
-$grey-dark: $vex-black-lightest
-$grey: $vex-grey-dark
-$grey-light: $vex-grey
-$grey-lighter: $vex-grey-light
-$grey-lightest: $vex-grey-light
-$white-bis: $vex-white
-$white-ter: $vex-white
-$white: $vex-white-light
+$black: $night-black-900
+$black-bis: $night-black-800
+$black-ter: $night-black-700
+$grey-darker: $night-black-400
+$grey-dark: $bright-white-600
+$grey: $bright-white-700
+$grey-light: $bright-white-800
+$grey-lighter: $bright-white-900
+$grey-lightest: $night-black-500
+$white-bis: $bright-white-400
+$white-ter: $bright-white-300
+$white: $bright-white-100
 
-// Override bulma variables
-$primary: $vex-purple
-$link: $turquoise
-$info: $blue
-$success: $green
-$warning: $yellow
-$danger: $red
-$dark: $grey-darker
-$text: $grey-dark
+// Override bulma – black + red (#e70000) + witchy accents
+$primary: $vex-red
+$link: $vex-red-bright
+$info: $vex-red-dim
+$success: $witch-gold
+$warning: $witch-gold
+$danger: $vex-red-bright
+$dark: $night-black-600
+$text: $bright-white-100
+$text-strong: $bright-white-100
+$background: $night-black-900
+$body-background-color: $night-black-900
+$scheme-main: $night-black-900
+$scheme-main-bis: $night-black-800
+$scheme-main-ter: $night-black-700
+$scheme-invert: $bright-white-100
+$scheme-invert-bis: $bright-white-200
+$scheme-invert-ter: $bright-white-300
 
 
 // Typography
@@ -101,7 +110,7 @@ $rtl: false !default
 
 
 
-$family-sans-serif: $font-body
+$family-sans-serif: $font-sans
 
 
 ////////////////////////////////////////////////////////////////
@@ -110,10 +119,319 @@ $family-sans-serif: $font-body
 //
 ////////////////////////////////////////////////////////////////
 
-$navbar-item-img-max-height: 4rem;
+$navbar-item-img-max-height: 6rem
+$navbar-background-color: $vex-black
+$navbar-item-color: $vex-red
+$navbar-item-hover-color: $vex-red-bright
+$navbar-item-active-color: $vex-red-bright
+$hero-background-color: $vex-black
+$section-background: $vex-black
 
 @import "~bulma/bulma.sass"
 
+
+////////////////////////////////////////////////////////////////
+//
+//  Black + red theme
+//
+////////////////////////////////////////////////////////////////
+
+html,
+body
+  background-color: $vex-black
+  color: $vex-red
+  font-weight: 600
+
+.navbar-sticky-wrapper
+  position: sticky
+  top: 0
+  z-index: 100
+  background: $vex-black
+
+.navbar-halo
+  width: 100%
+  height: 100px
+  background: transparent
+  background-repeat: no-repeat
+.navbar-halo--tint
+  background: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0, 80, 0.08) 25%, rgba(231, 0, 0, 0.1) 50%, rgba(120, 0, 120, 0.06) 75%, rgba(231, 0, 0, 0.12) 100%)
+  box-shadow: inset 0 0 60px rgba(231, 0, 0, 0.06), 0 1px 0 rgba(255, 100, 100, 0.1)
+
+.navbar-over-halo
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  background: transparent !important
+
+
+.navbar
+  background-color: $vex-black !important
+  font-family: $font-esoteric
+.navbar-over-halo .navbar-item
+  color: $vex-red !important
+  font-weight: 700
+.navbar-item
+  color: $vex-red !important
+  font-weight: 700
+
+.hero
+  background-color: $vex-black !important
+
+.hero--with-halo
+  position: relative
+  overflow: hidden
+.hero-halo-bg
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  padding: 4rem 0
+  background-size: contain
+  background-position: center 15%
+  background-repeat: no-repeat
+  z-index: 0
+  pointer-events: none
+.hero--with-halo .hero-body
+  position: relative
+  z-index: 1
+
+.section
+  background-color: $vex-black
+
+.has-background-light
+  background-color: $vex-black-soft !important
+  color: $vex-red
+
+.subtitle
+  color: $vex-red !important
+  font-weight: 600
+
+////////////////////////////////////////////////////////////////
+// Witchy animations (GPU-friendly: transform + opacity only)
+////////////////////////////////////////////////////////////////
+$vex-red-glow-20: rgba(231, 0, 0, 0.2)
+
+@keyframes witchy-float-spin
+  0%
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1)
+  25%
+    transform: translate3d(8%, -5%, 0) rotate(90deg) scale(1.02)
+  50%
+    transform: translate3d(-5%, 8%, 0) rotate(180deg) scale(0.98)
+  75%
+    transform: translate3d(-8%, -3%, 0) rotate(270deg) scale(1.01)
+  100%
+    transform: translate3d(0, 0, 0) rotate(360deg) scale(1)
+@keyframes witchy-particle-orbit
+  to
+    transform: translate3d(0, 0, 0) rotate(360deg)
+@keyframes witchy-star
+  0%, 100%
+    opacity: 0.2
+  50%
+    opacity: 0.8
+@keyframes witchy-mist
+  0%
+    opacity: 0.03
+    transform: translateX(-10%)
+  100%
+    opacity: 0.08
+    transform: translateX(10%)
+@keyframes witchy-rune
+  0%, 100%
+    transform: rotate(0deg) scale(1)
+    filter: brightness(0.8)
+  50%
+    transform: rotate(180deg) scale(1.1)
+    filter: brightness(1.2)
+@keyframes mascot-orb-spin
+  to
+    transform: translate3d(0, 0, 0) rotate(360deg)
+@keyframes witchy-float-only
+  0%
+    transform: translate3d(0, 0, 0) scale(1)
+  25%
+    transform: translate3d(6%, -4%, 0) scale(1.02)
+  50%
+    transform: translate3d(-4%, 6%, 0) scale(0.98)
+  75%
+    transform: translate3d(-6%, -2%, 0) scale(1.01)
+  100%
+    transform: translate3d(0, 0, 0) scale(1)
+@keyframes mascot-orb-rotate
+  to
+    transform: rotate(360deg)
+
+// Floating orbs: visible, semi-see-through (~50%), 3D look, spin + particles
+.witchy-orb
+  border-radius: 50%
+  position: absolute
+  opacity: 0.55
+  background: radial-gradient(circle at 30% 30%, #ff5555, #e70000 45%, #8b0000 100%)
+  box-shadow: inset -10px -10px 25px rgba(0,0,0,0.4), inset 8px 8px 20px rgba(255,100,100,0.25), 0 0 50px 15px rgba(231, 0, 0, 0.5), 0 0 90px 25px rgba(231, 0, 0, 0.25)
+  animation: witchy-float-spin 20s ease-in-out infinite
+  will-change: transform
+.witchy-orb__particles
+  position: absolute
+  width: 100%
+  height: 100%
+  top: 0
+  left: 0
+  pointer-events: none
+  animation: witchy-particle-orbit 12s linear infinite
+  will-change: transform
+.witchy-orb__particle
+  position: absolute
+  left: 50%
+  top: 50%
+  width: 4px
+  height: 4px
+  margin-left: -2px
+  margin-top: -2px
+  background: rgba(255, 80, 80, 0.6)
+  border-radius: 50%
+  transform-origin: 50% 50%
+.witchy-orb--sm
+  width: 80px
+  height: 80px
+  animation-duration: 18s
+  animation-delay: -2s
+  .witchy-orb__particle
+    transform: translate3d(0, -32px, 0)
+  .witchy-orb__particles
+    animation-duration: 10s
+.witchy-orb--sm .witchy-orb__particle:nth-child(2)
+  transform: translate3d(28px, 16px, 0)
+.witchy-orb--sm .witchy-orb__particle:nth-child(3)
+  transform: translate3d(-28px, 16px, 0)
+.witchy-orb--md
+  width: 140px
+  height: 140px
+  animation-duration: 24s
+  animation-delay: -5s
+  .witchy-orb__particle
+    transform: translate3d(0, -52px, 0)
+  .witchy-orb__particles
+    animation-duration: 14s
+.witchy-orb--md .witchy-orb__particle:nth-child(2)
+  transform: translate3d(45px, 26px, 0)
+.witchy-orb--md .witchy-orb__particle:nth-child(3)
+  transform: translate3d(-45px, 26px, 0)
+.witchy-orb--lg
+  width: 220px
+  height: 220px
+  animation-duration: 28s
+  animation-delay: -8s
+  .witchy-orb__particle
+    transform: translate3d(0, -82px, 0)
+  .witchy-orb__particles
+    animation-duration: 18s
+.witchy-orb--lg .witchy-orb__particle:nth-child(2)
+  transform: translate3d(71px, 41px, 0)
+.witchy-orb--lg .witchy-orb__particle:nth-child(3)
+  transform: translate3d(-71px, 41px, 0)
+.witchy-star
+  position: absolute
+  width: 2px
+  height: 2px
+  background: $vex-white
+  border-radius: 50%
+  animation: witchy-star 3s ease-in-out infinite
+.witchy-mist
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  background: radial-gradient(ellipse at 50% 50%, transparent 30%, $vex-red-dim 100%)
+  opacity: 0.05
+  animation: witchy-mist 20s ease-in-out infinite
+.witchy-rune
+  width: 180px
+  height: 180px
+  border: 2px solid $vex-red
+  border-radius: 50%
+  position: absolute
+  opacity: 0.5
+  box-shadow: 0 0 50px rgba(231, 0, 0, 0.5), inset 0 0 40px rgba(231, 0, 0, 0.2)
+  animation: witchy-rune 20s linear infinite
+  will-change: transform
+
+// Girl inside a visible witchy orb (crystal ball)
+.mascot-witchy-orb
+  position: relative
+  width: 140px
+  height: 140px
+  margin-bottom: 1rem
+  flex-shrink: 0
+// Same layer & float as other orbs when inside witchy-container (float only, no rotate)
+.witchy-container .mascot-witchy-orb--float
+  position: absolute
+  margin: 0
+  width: 200px
+  height: 200px
+  animation: witchy-float-only 24s ease-in-out infinite
+  animation-delay: -4s
+  will-change: transform
+// Orb shell (background) – rotates; image stays upright
+.mascot-witchy-orb__orb
+  position: absolute
+  inset: 0
+  z-index: 0
+  border-radius: 50%
+  overflow: visible
+  background: radial-gradient(circle at 35% 35%, rgba(255, 80, 80, 0.35), rgba(231, 0, 0, 0.5) 50%, rgba(139, 0, 0, 0.7) 100%)
+  box-shadow: 0 0 35px 12px rgba(231, 0, 0, 0.6), 0 0 60px 20px rgba(231, 0, 0, 0.35), inset -5px -5px 20px rgba(0,0,0,0.25), inset 5px 5px 15px rgba(255,100,100,0.2)
+  border: 2px solid rgba(231, 0, 0, 0.6)
+  animation: mascot-orb-rotate 20s linear infinite
+  will-change: transform
+// Image layer – fixed on top, no rotation
+.mascot-witchy-orb__inner
+  position: absolute
+  inset: 12px
+  z-index: 1
+  border-radius: 50%
+  overflow: hidden
+  border: 1px solid rgba(231, 0, 0, 0.25)
+  box-shadow: inset 0 0 30px rgba(231, 0, 0, 0.2)
+  pointer-events: none
+.hero-mascot
+  width: 100%
+  height: 100%
+  object-fit: cover
+  display: block
+  filter: contrast(1.05) saturate(1.1)
+.mascot-witchy-orb__particles
+  position: absolute
+  inset: -5px
+  pointer-events: none
+  animation: witchy-particle-orbit 18s linear infinite
+  will-change: transform
+.mascot-witchy-orb__particle
+  position: absolute
+  left: 50%
+  top: 50%
+  width: 4px
+  height: 4px
+  margin-left: -2px
+  margin-top: -2px
+  background: rgba(255, 80, 80, 0.8)
+  border-radius: 50%
+  box-shadow: 0 0 6px rgba(231, 0, 0, 0.8)
+.mascot-witchy-orb__particle:nth-child(1)
+  transform: translate3d(0, -62px, 0)
+.mascot-witchy-orb__particle:nth-child(2)
+  transform: translate3d(54px, 31px, 0)
+.mascot-witchy-orb__particle:nth-child(3)
+  transform: translate3d(-54px, 31px, 0)
+.mascot-witchy-orb--float .mascot-witchy-orb__particle:nth-child(1)
+  transform: translate3d(0, -88px, 0)
+.mascot-witchy-orb--float .mascot-witchy-orb__particle:nth-child(2)
+  transform: translate3d(77px, 44px, 0)
+.mascot-witchy-orb--float .mascot-witchy-orb__particle:nth-child(3)
+  transform: translate3d(-77px, 44px, 0)
 
 ////////////////////////////////////////////////////////////////
 //
@@ -128,31 +446,43 @@ $navbar-item-img-max-height: 4rem;
   color: $primary !important
 
 .navbar-item:focus
-  color: $vex-purple-dark !important
+  color: $vex-red-bright !important
 
 .content
   h1, h2, h3, h4, h5, h6, .title
-    font-family: $font-title
-    color: $vex-black
-
+    font-family: $font-cursive
+    color: $vex-red
+    font-weight: 600
+p, .subtitle
+  color: $vex-red
+  font-weight: 500
+  font-family: $font-sans
+  font-size: 1rem
+  line-height: 1.55
+  letter-spacing: 0.01em
 a
-  color: $primary
+  color: $vex-red
 
 a:hover
-  color: $vex-purple-dark
-
-p 
-  font-family: $font-body
+  color: $vex-red-bright
 
 button
   text-transform: uppercase
   margin: 0.5rem 0
+  font-family: $font-esoteric !important
 
   .is-primary
-    background-color: $vex-purple
+    background-color: $vex-red
+    color: #000 !important
 
   .is-secondary
-    background-color: $vex-black
+    background-color: $vex-black-mid
+.button,
+a.button
+  font-family: $font-esoteric !important
+.button.is-primary,
+a.button.is-primary
+  color: #000 !important
 
 .section 
   padding: 8rem 1.5rem
@@ -161,65 +491,26 @@ button
   z-index: 99
 
 #hero 
-
   .content h2:not(:first-child)
     margin-top: 1rem
-  
-  .animation-container 
+  .witchy-container
     width: 100%
     height: 100%
-    display: flex
-    align-items: center
-    justify-content: center
-    z-index: 0
-
-  .card1,
-  .card2,
-  .card3,
-  .card4 
     position: absolute
-    border-radius: 5px
-    background-size: contain
-    background-position: center center
-    background-repeat: no-repeat
-    will-change: transform
-
-  .card1 
-    width: 75vw
-    height: 75vw
-    max-width: 75ch
-    max-height: 75ch
-    background-image: url(../images/animation-1/animation-1-0.svg)
-
-  .card2 
-    width: 100ch
-    height: 100ch
-    background-image: url(../images/animation-1/animation-1-3.svg)
-
-  .card3 
-    width: 60ch
-    height: 60ch
-    background-image: url(../images/animation-1/animation-1-2.svg)
-
-  .card4 
-    width: 90ch
-    height: 90ch
-    background-image: url(../images/animation-1/animation-1-1.svg)
-
-  .animation-container
-    width: 100%
-    height: 100%
-    display: flex
-    align-items: center
-    justify-content: center
+    top: 0
+    left: 0
+    overflow: hidden
     z-index: 0
+    pointer-events: none
 
 
 
 #about 
-
-  .showcase 
-    background-image: url(../images/blob-bg.svg)
+  .witchy-container--about
+    width: 100%
+    min-height: 320px
+    position: relative
+    overflow: hidden
 
 
 #features 
@@ -230,167 +521,39 @@ button
     border-top: none
 
 
-  .media-content 
-
-    &::before
-      content: ""
-      position: absolute
-      width: 20px
-      height: 20px
-      border-radius: 50%
-      margin-top: 122px
-      z-index: 99
-  
-    &::after
-      content: ""
-      background-color: $vex-grey-light
-      position: absolute    
-      width: 75%
-      height: 1px
-      margin-top: 2.25rem
-      z-index: 0
-
-  .media
-
-    &:nth-child(1) .media-content::before
-      background-color: $vex-aqua
-      
-    &:nth-child(2) .media-content::before
-      background-color: $vex-pink
-      
-    &:nth-child(3) .media-content::before
-      background-color: $vex-orange
-      
-  .animation-container 
+  .witchy-container
     width: 100%
     height: 100%
-    display: flex
-    align-items: center
-    justify-content: flex-start
     position: relative
-    z-index: 99
-
-  .card1,
-  .card2,
-  .card3,
-  .card4 
-    position: absolute
-    border-radius: 5px
-    background-size: contain
-    background-position: center center
-    background-repeat: no-repeat
-    will-change: transform
-
-  .card1 
-    width: 100vw
-    height: 100vw
-    max-width: 100ch
-    max-height: 100ch
-    background-image: url(../images/animation-3/animation-3-0.svg)
-
-  .card2 
-    width: 100ch
-    height: 100ch
-    background-image: url(../images/animation-3/animation-3-3.svg)
-
-  .card3 
-    width: 100ch
-    height: 100ch
-    background-image: url(../images/animation-3/animation-3-2.svg)
-
-  .card4 
-    width: 100ch
-    height: 100ch
-    background-image: url(../images/animation-3/animation-3-1.svg)
+    min-height: 320px
+    z-index: 0
+    overflow: hidden
 
 
 
 
 #progress
-
   .project-progress
-    
     .title
       margin-bottom: 0
-
     .completion
       display: flex
       align-items: center
       padding: 0.5rem
       padding-left: 0
-
       h3
         margin-right: 10px
-
     progress
       margin: 1.5rem
       margin-left: 0
-
     nav 
       padding: 0.5rem
       padding-left: 0
-
-  .animation-container 
-    width: 100%
-    height: 100%
-    display: flex
-    align-items: center
-    justify-content: center
-    z-index: 0
-
-  .card1,
-  .card2,
-  .card3,
-  .card4,
-  .card5
-    position: absolute
-    border-radius: 5px
-    background-size: contain
-    background-position: center center
-    background-repeat: no-repeat
-    will-change: transform
-
-  .card1 
-    width: 75vw
-    height: 75vw
-    max-width: 75ch
-    max-height: 75ch
-    background-image: url(../images/animation-2/animation-2-0.svg)
-
-  .card2 
-    width: 75ch
-    height: 75ch
-    background-image: url(../images/animation-2/animation-2-4.svg)
-
-  .card3 
-    width: 75ch
-    height: 75ch
-    background-image: url(../images/animation-2/animation-2-3.svg)
-
-  .card4 
-    width: 75ch
-    height: 75ch
-    background-image: url(../images/animation-2/animation-2-2.svg)
-    
-  .card5 
-    width: 75ch
-    height: 75ch
-    background-image: url(../images/animation-2/animation-2-1.svg)
-
-  .animation-container
-    width: 100%
-    height: 100%
-    display: flex
-    align-items: center
-    justify-content: center
-    z-index: 0
-
   progress::-moz-progress-bar,
   progress::-webkit-progress-value
-    background: $vex-purple
+    background: $vex-red
   progress
-    color: $vex-purple
-
+    color: $vex-red
   .cta
     display: flex
     justify-content: center

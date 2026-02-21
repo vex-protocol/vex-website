@@ -43,5 +43,9 @@ export const GITHUB_WEB_URLS = {
     PRIVACY_POLICY_COMMITS: `${GITHUB_WEB_BASE}/vex-chat/privacy-policy/commits/main`,
 };
 
+// Feature flags
+export const DOWNLOAD_ENABLED =
+    process.env.REACT_APP_DOWNLOAD_ENABLED === "true";
+
 // Other constants
 export const DIVISOR = 10;

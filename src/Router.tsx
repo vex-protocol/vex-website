@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { Switch, Route, BrowserRouter } from "react-router-dom";
+import { Switch, Route, Redirect, BrowserRouter } from "react-router-dom";
 import { Download, Home, Invites, PrivacyPolicy } from "./views";
+import { DOWNLOAD_ENABLED } from "./components/constants";
 
 export interface IServer {
     serverID: string;
@@ -28,7 +29,17 @@ export function Router(): JSX.Element {
         <BrowserRouter>
             <Switch>
                 <Route exact path={"/"} render={() => <Home />} />
-                <Route exact path={"/download"} render={() => <Download />} />
+                <Route
+                    exact
+                    path={"/download"}
+                    render={() =>
+                        DOWNLOAD_ENABLED ? (
+                            <Download />
+                        ) : (
+                            <Redirect to="/" />
+                        )
+                    }
+                />
                 <Route
                     exact
                     path={"/privacy-policy"}

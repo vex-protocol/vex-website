@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import reportWebVitals from "./reportWebVitals";
 import { Router } from "./Router";
+import "./tailwind.css";
 import "./stylesheets/colors.sass";
 import "./stylesheets/old-style.scss";
 import "./stylesheets/style.sass";
