@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter } from "@fortawesome/free-brands-svg-icons";
 import logo from "../assets/vex_icon.svg";
 import haloRed from "../assets/halo-red.jpeg";
+import girlRed from "../assets/girl-red.jpg";
+import basedmilio from "../assets/basedmilio4.jpeg";
 import { WitchyHero } from "../components/WitchyHero";
-import { WitchyFeatures } from "../components/WitchyFeatures";
-import { WitchyAbout } from "../components/WitchyAbout";
 import { Navbar } from "../components/Hero";
 import { Link, useHistory } from "react-router-dom";
 import {
@@ -42,21 +42,18 @@ export function Home() {
                             </div>
                             <div className="column is-half section-content">
                                 <div className="content-frame content">
-                                    <span className="hero-logo">
+                                    <span className="card-header hero-logo">
                                         <span className="logo-glitch">
                                             <img
                                                 src={logo}
-                                                className="logo logo--square"
+                                                className="logo logo--square card-header__img"
                                                 alt=""
                                             />
                                         </span>
-                                        <span className="logo-text">
+                                        <span className="card-header__title card-title--aviation">
                                             {LOGO_TEXT}
                                         </span>
                                     </span>
-                                    <h2 className="title is-spaced is-2">
-                                        Secure. Private. Encrypted.
-                                    </h2>
                                     <p className="subtitle is-4">
                                         Simple privacy and powerful end to end
                                         encryption technology for communication.
@@ -96,14 +93,20 @@ export function Home() {
 
                 <section className="section mobile-card" id="about">
                     <div className="columns container has-text-left is-vcentered about-columns">
-                        <div className="column is-half section-bg" aria-hidden>
-                            <WitchyAbout />
-                        </div>
-                        <div className="column is-half section-content">
+                        <div className="column is-12 section-content">
                             <div className="content-frame content">
-                                <h2 className="title card-title--aviation">
-                                    PRIVACY IS NOT A CRIME
-                                </h2>
+                                <span className="card-header">
+                                    <span className="card-header__img-wrap">
+                                        <img
+                                            src={girlRed}
+                                            alt=""
+                                            className="card-header__img"
+                                        />
+                                    </span>
+                                    <span className="card-header__title card-title--aviation">
+                                        PRIVACY IS NOT A CRIME
+                                    </span>
+                                </span>
                                 <p className="subtitle">
                                     Vex Chat is a secure instant messaging
                                     platform for social and commercial use. A
@@ -141,11 +144,20 @@ export function Home() {
 
                 <section className="section mobile-card" id="features">
                     <div className="columns container has-text-left features-columns">
-                        <div className="column is-half section-content">
+                        <div className="column is-12 section-content">
                             <div className="content-frame content">
-                                <h2 className="title card-title--aviation">
-                                    ENCRYPTED BY DEFAULT
-                                </h2>
+                                <span className="card-header">
+                                    <span className="card-header__img-wrap">
+                                        <img
+                                            src={basedmilio}
+                                            alt=""
+                                            className="card-header__img"
+                                        />
+                                    </span>
+                                    <span className="card-header__title card-title--aviation">
+                                        ENCRYPTED BY DEFAULT
+                                    </span>
+                                </span>
                                 <h2 className="title">Your conversation</h2>
                                 <p className="subtitle">
                                     Vex is open-source, encrypted and free. It
@@ -181,9 +193,6 @@ export function Home() {
                                     </a>
                                 </div>
                             </div>
-                        </div>
-                        <div className="column is-half section-bg" aria-hidden>
-                            <WitchyFeatures />
                         </div>
                     </div>
                 </section>

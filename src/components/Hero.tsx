@@ -105,7 +105,7 @@ export function Navbar() {
           )
         : null;
 
-    return (
+    const navbarEl = (
         <>
             <div className="navbar-sticky-wrapper" ref={wrapperRef}>
                 <div className="navbar-halo navbar-halo--tint" />
@@ -145,4 +145,6 @@ export function Navbar() {
             {menuDropdown}
         </>
     );
+
+    return ReactDOM.createPortal(navbarEl, document.body);
 }
