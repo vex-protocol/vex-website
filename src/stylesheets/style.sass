@@ -203,9 +203,9 @@ body:has(.app) #root
 $holographic-tint-nav: linear-gradient(180deg, rgba(12, 14, 16, 0.98) 0%, rgba(8, 10, 12, 0.99) 100%)
 $glare-shield-glow: 0 1px 0 rgba(231, 0, 0, 0.2)
 
-// Retro glass UI – Mac-style frosted glass with cockpit red tint
-$glass-bg: rgba(8, 10, 12, 0.55)
-$glass-bg-nav: rgba(6, 8, 9, 0.72)
+// Retro glass UI – thick distorted glass, ~10% diffuse transparency so orbs peek through
+$glass-bg: rgba(8, 10, 12, 0.4)
+$glass-bg-nav: rgba(6, 8, 9, 0.52)
 $glass-border: rgba(231, 0, 0, 0.12)
 $glass-border-light: rgba(255, 255, 255, 0.06)
 $glass-blur: 24px
@@ -216,6 +216,263 @@ $navbar-height: 120px
 $navbar-height-mobile: 56px
 $panel-face: linear-gradient(180deg, $vex-black-soft 0%, $panel-dark 100%)
 $instrument-glow: rgba(231, 0, 0, 0.06)
+
+// Page indicator – 3D cube with crystal cells, glowing orbs inside
+.page-indicator
+  position: fixed
+  z-index: 900
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  padding: 0.5rem 0.65rem
+  background: linear-gradient(145deg, rgba(25, 25, 28, 0.98) 0%, rgba(12, 14, 16, 0.99) 50%, rgba(18, 18, 20, 0.98) 100%)
+  border: 1px solid rgba(80, 82, 90, 0.5)
+  border-radius: 4px
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -2px 4px rgba(0, 0, 0, 0.4), inset 2px 0 4px rgba(0, 0, 0, 0.2), inset -2px 0 4px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 24px $instrument-glow
+  pointer-events: auto
+.page-indicator__rounds
+  display: flex
+  gap: 0.4rem
+  align-items: center
+// Each round = square crystal cell containing an orb
+.page-indicator__round
+  position: relative
+  display: flex
+  align-items: center
+  justify-content: center
+  width: 24px
+  height: 24px
+  padding: 10px
+  border: none
+  border-radius: 3px
+  background: linear-gradient(145deg, rgba(35, 36, 40, 0.6) 0%, rgba(20, 22, 26, 0.85) 100%)
+  cursor: pointer
+  transition: background 0.2s, box-shadow 0.2s
+  overflow: hidden
+  // Glass/crystal face – facet highlight
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), inset 2px 2px 6px rgba(0, 0, 0, 0.4), inset -1px -1px 3px rgba(255, 255, 255, 0.03), 0 1px 0 rgba(255, 255, 255, 0.05)
+  &::before
+    content: ""
+    position: absolute
+    inset: 0
+    border-radius: inherit
+    pointer-events: none
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 40%, rgba(0, 0, 0, 0.15) 100%)
+  &:focus
+    outline: 2px solid rgba(231, 0, 0, 0.5)
+    outline-offset: 2px
+// Inner orb – 3D sphere with glow
+.page-indicator__round-inner
+  position: relative
+  width: 12px
+  height: 12px
+  border-radius: 50%
+  transition: box-shadow 0.25s, filter 0.25s
+  z-index: 1
+// Spent: dim orb deep in crystal
+.page-indicator__round--spent .page-indicator__round-inner
+  background: radial-gradient(circle at 35% 35%, rgba(70, 72, 80, 0.9), rgba(40, 42, 48, 0.95) 50%, rgba(25, 26, 30, 0.98) 100%)
+  box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.1), inset -2px -2px 4px rgba(0, 0, 0, 0.6), 0 0 4px rgba(0, 0, 0, 0.3)
+// Loaded: glowing magic orb
+.page-indicator__round--loaded .page-indicator__round-inner
+  background: radial-gradient(circle at 35% 35%, rgba(255, 120, 100, 1), $vex-red 45%, rgba(180, 0, 0, 0.95) 70%, rgba(120, 0, 0, 0.9) 100%)
+  box-shadow: inset 2px 2px 4px rgba(255, 180, 160, 0.4), inset -1px -1px 2px rgba(0, 0, 0, 0.3), 0 0 10px rgba(231, 0, 0, 0.8), 0 0 20px rgba(231, 0, 0, 0.5), 0 0 30px rgba(231, 0, 0, 0.3)
+.page-indicator__round:hover .page-indicator__round-inner
+  box-shadow: 0 0 8px rgba(231, 0, 0, 0.5), 0 0 16px rgba(231, 0, 0, 0.3)
+
+// Mobile: bottom center, horizontal rounds
+@media (max-width: 768px)
+  .page-indicator
+    bottom: 1.25rem
+    left: 50%
+    transform: translateX(-50%)
+  .page-indicator__rounds
+    flex-direction: row
+
+// Desktop: right side, vertical rounds
+@media (min-width: 769px)
+  .page-indicator
+    right: 1.25rem
+    top: 50%
+    transform: translateY(-50%)
+  .page-indicator__rounds
+    flex-direction: column
+
+@keyframes page-indicator-shake-x
+  0%, 100%
+    transform: translateX(-50%)
+  15%, 35%, 55%, 75%
+    transform: translateX(calc(-50% - 5px))
+  25%, 45%, 65%, 85%
+    transform: translateX(calc(-50% + 5px))
+@keyframes page-indicator-shake-y
+  0%, 100%
+    transform: translateY(-50%)
+  15%, 35%, 55%, 75%
+    transform: translateY(calc(-50% - 5px))
+  25%, 45%, 65%, 85%
+    transform: translateY(calc(-50% + 5px))
+.page-indicator--shake
+  animation: page-indicator-shake-x 0.4s ease-in-out
+@media (min-width: 769px)
+  .page-indicator--shake
+    animation-name: page-indicator-shake-y
+
+////////////////////////////////////////////////////////////////
+// Position gauge – plus shape, center = current (x,y), arms = available moves
+////////////////////////////////////////////////////////////////
+.position-gauge
+  position: fixed
+  z-index: 900
+  padding: 0.4rem
+  background: linear-gradient(145deg, rgba(25, 25, 28, 0.98) 0%, rgba(12, 14, 16, 0.99) 50%, rgba(18, 18, 20, 0.98) 100%)
+  border: 1px solid rgba(80, 82, 90, 0.5)
+  border-radius: 4px
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -2px 4px rgba(0, 0, 0, 0.4), inset 2px 0 4px rgba(0, 0, 0, 0.2), inset -2px 0 4px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 24px $instrument-glow
+  pointer-events: auto
+
+$position-gauge-cell: 36px
+
+.position-gauge--plus .position-gauge__cross
+  display: grid
+  grid-template-columns: $position-gauge-cell $position-gauge-cell $position-gauge-cell
+  grid-template-rows: $position-gauge-cell $position-gauge-cell $position-gauge-cell
+  grid-template-areas: ". n ." "w c e" ". s ."
+  gap: 0
+  align-items: center
+  justify-items: center
+
+.position-gauge__arm--n,
+.position-gauge__arm--s,
+.position-gauge__arm--w,
+.position-gauge__arm--e,
+.position-gauge__arm--c
+  display: flex
+  align-items: center
+  justify-content: center
+  width: $position-gauge-cell
+  height: $position-gauge-cell
+  min-width: $position-gauge-cell
+  min-height: $position-gauge-cell
+  max-width: $position-gauge-cell
+  max-height: $position-gauge-cell
+
+.position-gauge__arm--n
+  grid-area: n
+.position-gauge__arm--s
+  grid-area: s
+.position-gauge__arm--w
+  grid-area: w
+.position-gauge__arm--e
+  grid-area: e
+.position-gauge__arm--c
+  grid-area: c
+
+.position-gauge__round
+  position: relative
+  display: flex
+  align-items: center
+  justify-content: center
+  flex: 0 0 $position-gauge-cell
+  width: $position-gauge-cell
+  height: $position-gauge-cell
+  min-width: $position-gauge-cell
+  min-height: $position-gauge-cell
+  max-width: $position-gauge-cell
+  max-height: $position-gauge-cell
+  padding: 8px
+  border: none
+  box-sizing: border-box
+  border-radius: 3px
+  background: linear-gradient(145deg, rgba(35, 36, 40, 0.6) 0%, rgba(20, 22, 26, 0.85) 100%)
+  cursor: pointer
+  transition: background 0.2s, box-shadow 0.2s
+  overflow: hidden
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), inset 2px 2px 6px rgba(0, 0, 0, 0.4), inset -1px -1px 3px rgba(255, 255, 255, 0.03), 0 1px 0 rgba(255, 255, 255, 0.05)
+  &::before
+    content: ""
+    position: absolute
+    inset: 0
+    border-radius: inherit
+    pointer-events: none
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 40%, rgba(0, 0, 0, 0.15) 100%)
+  &:focus
+    outline: 2px solid rgba(231, 0, 0, 0.5)
+    outline-offset: 2px
+
+.position-gauge__round-inner
+  position: relative
+  width: 10px
+  height: 10px
+  min-width: 10px
+  min-height: 10px
+  border-radius: 50%
+  transition: box-shadow 0.25s, filter 0.25s
+  z-index: 1
+
+// Center: fire red luminescent orb (you are here) – same cube, no pointer
+.position-gauge__round--center
+  cursor: default
+  pointer-events: none
+.position-gauge__round--center .position-gauge__round-inner
+  background: radial-gradient(circle at 35% 35%, rgba(255, 120, 100, 1), $fire-red 45%, rgba(180, 0, 0, 0.95) 70%, rgba(120, 0, 0, 0.9) 100%)
+  box-shadow: inset 2px 2px 4px rgba(255, 180, 160, 0.4), inset -1px -1px 2px rgba(0, 0, 0, 0.3), 0 0 10px rgba(231, 0, 0, 0.8), 0 0 20px rgba(231, 0, 0, 0.5), 0 0 30px rgba(231, 0, 0, 0.3)
+
+// Arm rounds: available = incinerator green luminescent (can navigate)
+.position-gauge__round--available .position-gauge__round-inner
+  background: radial-gradient(circle at 35% 35%, rgba(170, 240, 120, 1), $incinerator-green 45%, rgba(100, 200, 50, 0.95) 70%, rgba(80, 180, 40, 0.9) 100%)
+  box-shadow: inset 2px 2px 4px rgba(200, 255, 180, 0.4), inset -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 8px rgba(145, 230, 67, 0.6), 0 0 16px rgba(145, 230, 67, 0.4)
+
+// Arm rounds: unavailable = amber luminescent (at boundary)
+.position-gauge__round--unavailable .position-gauge__round-inner
+  background: radial-gradient(circle at 35% 35%, rgba(255, 220, 140, 1), $amber 45%, rgba(200, 150, 0, 0.95) 70%, rgba(180, 130, 0, 0.9) 100%)
+  box-shadow: inset 2px 2px 4px rgba(255, 240, 200, 0.4), inset -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 10px rgba(212, 148, 0, 0.8), 0 0 20px rgba(212, 148, 0, 0.5), 0 0 30px rgba(212, 148, 0, 0.3)
+
+.position-gauge__round--unavailable
+  cursor: default
+  pointer-events: none
+
+.position-gauge__round--available:hover .position-gauge__round-inner
+  box-shadow: 0 0 10px rgba(145, 230, 67, 0.8), 0 0 20px rgba(145, 230, 67, 0.5)
+
+// Mobile: bottom center, X horizontal, Y vertical (stacked)
+@media (max-width: 768px)
+  .position-gauge
+    bottom: 1.25rem
+    left: 50%
+    transform: translateX(-50%)
+  .position-gauge__axis--x .position-gauge__rounds
+    flex-direction: row
+
+// Desktop: bottom-right corner, X horizontal, Y vertical (L-shape)
+@media (min-width: 769px)
+  .position-gauge
+    right: 1.25rem
+    bottom: 1.25rem
+
+@keyframes position-gauge-shake
+  0%, 100%
+    transform: translate(0, 0)
+  15%, 35%, 55%, 75%
+    transform: translate(-3px, -3px)
+  25%, 45%, 65%, 85%
+    transform: translate(3px, 3px)
+
+@keyframes position-gauge-shake-mobile
+  0%, 100%
+    transform: translateX(-50%)
+  15%, 35%, 55%, 75%
+    transform: translateX(calc(-50% - 3px))
+  25%, 45%, 65%, 85%
+    transform: translateX(calc(-50% + 3px))
+
+@media (max-width: 768px)
+  .position-gauge--shake
+    animation: position-gauge-shake-mobile 0.4s ease-in-out
+
+@media (min-width: 769px)
+  .position-gauge--shake
+    animation: position-gauge-shake 0.4s ease-in-out
 
 .navbar-sticky-wrapper
   position: fixed
@@ -390,21 +647,32 @@ $instrument-glow: rgba(231, 0, 0, 0.06)
     transform: scale(1)
     opacity: 1
 
+// Dropdown menu – crystal cube style, fire red only, even viewport padding
+$menu-padding: 1.25rem
 .navbar-menu--portaled
   position: fixed
-  top: calc(#{$navbar-height} + 4px)
-  left: 0
-  right: 0
+  top: calc(#{$navbar-height} + #{$menu-padding})
+  left: $menu-padding
+  right: $menu-padding
+  bottom: auto
   z-index: 9999
-  background-color: $navbar-background-color
+  max-height: calc(100vh - #{$navbar-height} - #{$menu-padding} * 2)
   list-style: none
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5)
-  filter: drop-shadow(0 0 8px rgba(139, 0, 0, 0.7)) drop-shadow(0 0 20px rgba(139, 0, 0, 0.4)) drop-shadow(0 0 36px rgba(42, 7, 91, 0.5)) drop-shadow(0 0 50px rgba(42, 7, 91, 0.25))
-  border: 2px solid transparent
-  border-image: linear-gradient(180deg, rgba(139, 0, 0, 0.6), rgba(42, 7, 91, 0.6)) 1
   padding: 0
   display: block
   overflow: hidden
+  border-radius: 4px
+  // Crystal cube + fire red glow
+  background: linear-gradient(145deg, rgba(35, 20, 22, 0.98) 0%, rgba(20, 10, 12, 0.99) 50%, rgba(28, 15, 18, 0.98) 100%)
+  border: 1px solid rgba(231, 0, 0, 0.35)
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 2px 2px 8px rgba(0, 0, 0, 0.4), inset -1px -1px 4px rgba(255, 255, 255, 0.02), 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 24px rgba(231, 0, 0, 0.35), 0 0 40px rgba(231, 0, 0, 0.2)
+  &::before
+    content: ""
+    position: absolute
+    inset: 0
+    border-radius: inherit
+    pointer-events: none
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 40%, rgba(0, 0, 0, 0.12) 100%)
   .navbar-end
     display: flex
     flex-direction: column
@@ -412,9 +680,10 @@ $instrument-glow: rgba(231, 0, 0, 0.06)
     padding-left: 0
     margin: 0
   .navbar-item
+    position: relative
     color: $vex-red !important
     min-height: $touch-min
-    padding: 0.75rem 1rem
+    padding: 0.75rem 1rem 0.75rem 2.5rem
     display: flex
     align-items: center
     gap: 0.5rem
@@ -424,17 +693,36 @@ $instrument-glow: rgba(231, 0, 0, 0.06)
     width: 100%
     box-sizing: border-box
     list-style: none
+    background: transparent
+    transition: color 0.2s, background 0.2s
+    &::before
+      content: ""
+      position: absolute
+      left: 0.75rem
+      top: 50%
+      transform: translateY(-50%)
+      width: 6px
+      height: 6px
+      border-radius: 50%
+      background: radial-gradient(circle at 35% 35%, rgba(255, 120, 100, 1), $vex-red 45%, rgba(140, 0, 0, 0.95) 100%)
+      box-shadow: inset 1px 1px 1px rgba(255, 180, 160, 0.3), inset -1px -1px 1px rgba(0, 0, 0, 0.3), 0 0 6px rgba(231, 0, 0, 0.5), 0 0 10px rgba(231, 0, 0, 0.3)
   .navbar-menu-item:nth-child(odd)
-    background: rgba(6, 8, 9, 0.6)
+    background: rgba(231, 0, 0, 0.04)
   .navbar-menu-item:nth-child(even)
-    background: rgba(10, 12, 15, 0.8)
+    background: rgba(231, 0, 0, 0.02)
   .navbar-menu-item:hover,
   .navbar-menu-item:active
     color: $vex-red-bright !important
+    background: rgba(231, 0, 0, 0.1)
+    &::before
+      box-shadow: inset 1px 1px 2px rgba(255, 180, 160, 0.5), inset -1px -1px 1px rgba(0, 0, 0, 0.2), 0 0 8px rgba(231, 0, 0, 0.8), 0 0 14px rgba(231, 0, 0, 0.45)
 
 @media (max-width: 768px)
   .navbar-menu--portaled
-    top: calc(#{$navbar-height-mobile} + 4px)
+    top: calc(#{$navbar-height-mobile} + #{$menu-padding})
+    left: $menu-padding
+    right: $menu-padding
+    max-height: calc(100vh - #{$navbar-height-mobile} - #{$menu-padding} * 2)
 
 .navbar
   min-height: $navbar-height
@@ -1087,10 +1375,10 @@ a
 a:hover
   color: $vex-red-bright
 
-// Retro glass buttons – frosted, translucent, LED indicator
-// Angular, square, no rounded corners. LED: fire red (standby) → incinerator green (on/hover)
+// CTA buttons – 3D crystal cube with glowing orb (like page indicator)
 $led-red: $vex-red
-$led-green: $incinerator-green-300
+$led-purple: #7c3aed
+$led-ice-blue: $ice-blue
 
 button,
 .button,
@@ -1099,8 +1387,8 @@ a.button
   margin: 0.5rem 0
   font-family: $font-aeronautical !important
   letter-spacing: 0.1em
-  border-radius: 0 !important
-  transition: box-shadow 0.15s ease, color 0.15s ease, border-color 0.15s ease
+  border-radius: 3px !important
+  transition: box-shadow 0.25s ease, color 0.25s ease, border-color 0.25s ease
   min-height: $touch-min
   min-width: $touch-min
   display: inline-flex
@@ -1108,109 +1396,126 @@ a.button
   justify-content: center
   padding-left: 1rem
   padding-right: 1rem
+  position: relative
+  overflow: hidden
 
-// Override Bulma is-rounded – cockpit switches are square
+// Override Bulma is-rounded
 .button.is-rounded,
 a.button.is-rounded
-  border-radius: 0 !important
+  border-radius: 3px !important
 
-// Filled primary – glass button with LED (red standby → green on hover)
+// Crystal cube base – shared by primary variants
 .button.is-primary,
-a.button.is-primary
-  background: rgba(196, 30, 0, 0.65)
-  backdrop-filter: blur(12px)
-  -webkit-backdrop-filter: blur(12px)
-  color: #fff !important
-  border: 1px solid rgba(231, 0, 0, 0.25)
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08)
-  position: relative
-  padding-left: 1.75em
-  overflow: hidden
+a.button.is-primary,
+.button.is-primary.is-outlined,
+a.button.is-primary.is-outlined
+  background: linear-gradient(145deg, rgba(35, 36, 40, 0.7) 0%, rgba(20, 22, 26, 0.9) 100%)
+  border: 1px solid rgba(80, 82, 90, 0.5)
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 2px 2px 6px rgba(0, 0, 0, 0.35), inset -1px -1px 3px rgba(255, 255, 255, 0.02), 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 8px rgba(0, 0, 0, 0.3)
   &::before
     content: ""
     position: absolute
-    left: 0.5em
+    left: 0.6em
     top: 50%
     transform: translateY(-50%)
-    width: 6px
-    height: 6px
-    background: $led-red
-    box-shadow: 0 0 6px $led-red
-    transition: background 0.15s ease, box-shadow 0.15s ease
+    width: 8px
+    height: 8px
+    border-radius: 50%
+    background: radial-gradient(circle at 35% 35%, rgba(255, 120, 100, 1), $vex-red 45%, rgba(140, 0, 0, 0.95) 100%)
+    box-shadow: inset 1px 1px 2px rgba(255, 180, 160, 0.4), inset -1px -1px 2px rgba(0, 0, 0, 0.3), 0 0 8px rgba(231, 0, 0, 0.6), 0 0 12px rgba(231, 0, 0, 0.35)
+    transition: background 0.25s, box-shadow 0.25s
   &::after
     content: ""
     position: absolute
     inset: 0
-    background: $glass-tint
+    border-radius: inherit
     pointer-events: none
-    opacity: 0.3
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 40%, rgba(0, 0, 0, 0.1) 100%)
+
+// Filled primary – red orb, purple on hover
+.button.is-primary:not(.is-outlined),
+a.button.is-primary:not(.is-outlined)
+  color: #fff !important
+  background: linear-gradient(145deg, rgba(50, 20, 22, 0.9) 0%, rgba(30, 8, 10, 0.95) 100%)
+  border-color: rgba(231, 0, 0, 0.35)
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 2px 2px 6px rgba(0, 0, 0, 0.35), inset -1px -1px 3px rgba(255, 255, 255, 0.02), 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 20px rgba(231, 0, 0, 0.2)
+  padding-left: 1.85em
   &:hover
-    background: rgba(8, 10, 12, 0.6)
-    backdrop-filter: blur(12px)
-    -webkit-backdrop-filter: blur(12px)
-    border-color: rgba(71, 131, 17, 0.35)
-    color: $led-green !important
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 0 12px rgba(71, 131, 17, 0.15)
+    border-color: rgba(124, 58, 237, 0.5)
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 2px 2px 6px rgba(0, 0, 0, 0.35), 0 0 16px rgba(124, 58, 237, 0.5), 0 0 28px rgba(124, 58, 237, 0.3)
+    color: rgba(216, 180, 254, 1) !important
     &::before
-      background: $led-green
-      box-shadow: 0 0 8px $led-green
-      animation: led-blink 1.5s ease-in-out infinite
+      background: radial-gradient(circle at 35% 35%, rgba(192, 132, 252, 1), $led-purple 45%, rgba(88, 28, 135, 0.95) 100%)
+      box-shadow: inset 1px 1px 2px rgba(220, 200, 255, 0.5), inset -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 10px rgba(124, 58, 237, 0.9), 0 0 18px rgba(124, 58, 237, 0.5)
   &:active
-    background: rgba(8, 10, 12, 0.7)
+    box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3)
 
 .button.is-secondary,
 a.button.is-secondary
-  background: #0f1114
+  background: linear-gradient(145deg, rgba(25, 25, 28, 0.98) 0%, rgba(12, 14, 16, 0.99) 100%)
   color: $vex-red
-  border: 2px solid $panel-bezel
+  border: 1px solid rgba(80, 82, 90, 0.5)
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 2px 2px 6px rgba(0, 0, 0, 0.35)
 
-// Outlined = glass button, frosted with red tint
+// Outlined – glassier, red orb, ice blue on hover
 .button.is-primary.is-outlined,
 a.button.is-primary.is-outlined
-  color: $led-red !important
-  background: $glass-bg
-  backdrop-filter: blur(12px)
-  -webkit-backdrop-filter: blur(12px)
-  border: 1px solid $glass-border
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04)
-  text-shadow: 0 0 6px rgba(231, 0, 0, 0.4)
-  position: relative
-  padding-left: 1.75em
-  overflow: hidden
+  background: linear-gradient(145deg, rgba(28, 30, 35, 0.5) 0%, rgba(18, 20, 24, 0.7) 100%)
+  color: $vex-red !important
+  text-shadow: 0 0 6px rgba(231, 0, 0, 0.5)
+  padding-left: 1.85em
+  &:hover
+    color: $led-ice-blue !important
+    border-color: rgba(168, 200, 223, 0.5)
+    text-shadow: 0 0 10px rgba(168, 200, 223, 0.7)
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 2px 2px 6px rgba(0, 0, 0, 0.35), 0 0 16px rgba(168, 200, 223, 0.4), 0 0 24px rgba(168, 200, 223, 0.25)
+    &::before
+      background: radial-gradient(circle at 35% 35%, rgba(200, 230, 255, 1), $led-ice-blue 45%, rgba(100, 150, 200, 0.95) 100%)
+      box-shadow: inset 1px 1px 2px rgba(230, 245, 255, 0.5), inset -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 10px rgba(168, 200, 223, 0.8), 0 0 18px rgba(168, 200, 223, 0.4)
+  &:active
+    box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.5)
+
+// Size variants – small
+.button.is-small,
+a.button.is-small
+  padding: 0.4rem 0.75rem
+  padding-left: 1.6em
+  font-size: 0.75rem
+  min-height: 36px
   &::before
-    content: ""
-    position: absolute
-    left: 0.5em
-    top: 50%
-    transform: translateY(-50%)
     width: 6px
     height: 6px
-    background: $led-red
-    box-shadow: 0 0 6px $led-red
-    transition: background 0.15s ease, box-shadow 0.15s ease
-  &::after
-    content: ""
-    position: absolute
-    inset: 0
-    background: $glass-tint
-    pointer-events: none
-  &:hover
-    color: $led-green !important
-    border-color: rgba(71, 131, 17, 0.3)
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 0 12px rgba(71, 131, 17, 0.12)
-    text-shadow: 0 0 8px rgba(71, 131, 17, 0.5)
-    &::before
-      background: $led-green
-      box-shadow: 0 0 8px $led-green
-      animation: led-blink 1.5s ease-in-out infinite
-  &:active
-    background: rgba(6, 8, 9, 0.65)
+    left: 0.5em
+    box-shadow: inset 1px 1px 1px rgba(255, 180, 160, 0.3), inset -1px -1px 1px rgba(0, 0, 0, 0.3), 0 0 6px rgba(231, 0, 0, 0.5), 0 0 10px rgba(231, 0, 0, 0.3)
+.button.is-primary.is-small:hover::before,
+a.button.is-primary.is-small:hover::before
+  box-shadow: inset 1px 1px 1px rgba(220, 200, 255, 0.4), inset -1px -1px 1px rgba(0, 0, 0, 0.2), 0 0 8px rgba(124, 58, 237, 0.8), 0 0 14px rgba(124, 58, 237, 0.4)
+.button.is-primary.is-outlined.is-small:hover::before,
+a.button.is-primary.is-outlined.is-small:hover::before
+  box-shadow: inset 1px 1px 1px rgba(230, 245, 255, 0.4), inset -1px -1px 1px rgba(0, 0, 0, 0.2), 0 0 8px rgba(168, 200, 223, 0.7), 0 0 14px rgba(168, 200, 223, 0.35)
 
-@keyframes led-blink
-  0%, 100%
-    opacity: 1
-  50%
-    opacity: 0.7
+// Size variants – medium (default) / large
+.button.is-medium,
+a.button.is-medium
+  padding: 0.6rem 1.25rem
+  padding-left: 1.85em
+  font-size: 0.9rem
+.button.is-large,
+a.button.is-large
+  padding: 0.75rem 1.5rem
+  padding-left: 2.1em
+  font-size: 1rem
+  &::before
+    width: 10px
+    height: 10px
+    left: 0.7em
+    box-shadow: inset 2px 2px 3px rgba(255, 180, 160, 0.4), inset -1px -1px 2px rgba(0, 0, 0, 0.3), 0 0 10px rgba(231, 0, 0, 0.6), 0 0 16px rgba(231, 0, 0, 0.4)
+.button.is-primary.is-large:hover::before,
+a.button.is-primary.is-large:hover::before
+  box-shadow: inset 2px 2px 3px rgba(220, 200, 255, 0.5), inset -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 12px rgba(124, 58, 237, 0.9), 0 0 22px rgba(124, 58, 237, 0.5)
+.button.is-primary.is-outlined.is-large:hover::before,
+a.button.is-primary.is-outlined.is-large:hover::before
+  box-shadow: inset 2px 2px 3px rgba(230, 245, 255, 0.5), inset -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 12px rgba(168, 200, 223, 0.8), 0 0 22px rgba(168, 200, 223, 0.45)
 
 .button .icon-left,
 a.button .icon-left
@@ -1267,6 +1572,55 @@ a.button .icon-right
   margin-left: auto
   margin-right: auto
 
+////////////////////////////////////////////////////////////////
+// App navigator: lateral (routes) + vertical (sections) 2D nav
+////////////////////////////////////////////////////////////////
+.app.app-navigator
+  max-width: 100%
+  margin: 0
+  overflow: hidden
+  display: flex
+  flex-direction: column
+
+.lateral-strip
+  flex: 1
+  min-height: 0
+  min-width: 0
+  display: flex
+  flex-direction: row
+  overflow-x: auto
+  overflow-y: hidden
+  scroll-snap-type: x mandatory
+  scroll-behavior: smooth
+  -webkit-overflow-scrolling: touch
+  overscroll-behavior-x: contain
+  -ms-overflow-style: none
+  scrollbar-width: none
+  &::-webkit-scrollbar
+    display: none
+
+.route-panel
+  flex: 0 0 100%
+  width: 100%
+  min-width: 100%
+  min-height: 0
+  overflow-y: auto
+  overflow-x: hidden
+  scroll-snap-align: start
+  scroll-snap-stop: always
+  scroll-behavior: smooth
+  -webkit-overflow-scrolling: touch
+  // Panel-inner cards: vertical stack of sections (no horizontal scroll)
+  .mobile-cards,
+  .home-panel-cards,
+  .contact-panel-cards,
+  .privacy-panel-cards,
+  .download-panel-cards
+    display: block
+    overflow: visible
+    height: auto
+    min-height: 100%
+
 // Nested Bulma containers/columns must not exceed parent (Bulma defaults to 960px+)
 .app .container,
 .app .columns
@@ -1292,7 +1646,7 @@ a.button .icon-right
   background: $glass-bg
   backdrop-filter: blur($glass-blur)
   -webkit-backdrop-filter: blur($glass-blur)
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4), inset 0 0 80px 30px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(231, 0, 0, 0.03), 0 1px 0 $glass-border, 0 0 0 4px rgba(20, 22, 26, 0.9), 0 6px 0 rgba(0, 0, 0, 0.4)
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3), inset 0 0 80px 30px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(231, 0, 0, 0.03), 0 1px 0 $glass-border, 0 0 0 4px rgba(20, 22, 26, 0.7), 0 6px 0 rgba(0, 0, 0, 0.35)
   padding: 1rem
   border-radius: 12px
   border: 2px solid $glass-border
@@ -1310,7 +1664,7 @@ a.button .icon-right
     content: ""
     position: absolute
     inset: 0
-    background: $glass-tint, radial-gradient(ellipse 90% 90% at 50% 50%, transparent 35%, rgba(0, 0, 0, 0.12) 85%, rgba(0, 0, 0, 0.2) 100%)
+    background: $glass-tint, radial-gradient(ellipse 90% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.08) 85%, rgba(0, 0, 0, 0.14) 100%)
     pointer-events: none
     border-radius: inherit
   // Scanlines overlay
@@ -1488,7 +1842,8 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     min-height: $navbar-height-mobile
   .navbar
     min-height: $navbar-height-mobile
-  .app.container
+  .app.container,
+  .app.app-navigator
     max-width: 100%
     width: 100%
     min-width: 0
@@ -1664,7 +2019,7 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
   .section-bg
     order: 1
   .content-frame
-    background: rgba(8, 10, 12, 0.65)
+    background: rgba(8, 10, 12, 0.4)
     backdrop-filter: blur($glass-blur-mobile)
     -webkit-backdrop-filter: blur($glass-blur-mobile)
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 1px 0 $glass-border
@@ -1698,12 +2053,13 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
   .card-header.hero-logo .logo-glitch
     width: 44px
     height: 44px
-.features-ctas
+.features-ctas,
+.contact-links
   display: flex
   flex-direction: row
   flex-wrap: wrap
   align-items: center
-  gap: 0.5rem
+  gap: 0.75rem
   margin-top: 1.5rem
 
 

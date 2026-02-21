@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter } from "@fortawesome/free-brands-svg-icons";
 import logo from "../assets/vex_icon.svg";
@@ -8,6 +8,7 @@ import basedmilio from "../assets/FIRERED/basedmilio4.jpeg";
 import { WitchyHero } from "../components/WitchyHero";
 import { WitchyOrbs } from "../components/WitchyOrbs";
 import { Navbar } from "../components/Hero";
+import { PageIndicator } from "../components/PageIndicator";
 import { Link, useHistory } from "react-router-dom";
 import {
     DOWNLOAD_ENABLED,
@@ -22,13 +23,17 @@ const SECTION_IDS = ["hero", "about", "features"];
 export function Home() {
     const history = useHistory();
     const scrollRef = useRef<HTMLDivElement | null>(null);
+    const [indicatorShake, setIndicatorShake] = useState(false);
 
     useEffect(() => {
         const el = scrollRef.current;
         if (!el) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+            // Down/Right = advance (next section); Up/Left = go back (matches scroll/carousel convention)
+            const advanceKeys = ["ArrowDown", "ArrowRight"];
+            const backKeys = ["ArrowUp", "ArrowLeft"];
+            if (!advanceKeys.includes(e.key) && !backKeys.includes(e.key)) return;
             const target = e.target as HTMLElement;
             if (
                 target.tagName === "INPUT" ||
@@ -42,30 +47,41 @@ export function Home() {
             ).filter((s): s is HTMLElement => s !== null);
             if (sections.length === 0) return;
 
-            const containerScroll = el.scrollTop;
-            const containerHeight = el.clientHeight;
+            const isHorizontal = el.scrollWidth > el.clientWidth;
+            const scrollPos = isHorizontal ? el.scrollLeft : el.scrollTop;
+            const viewSize = isHorizontal ? el.clientWidth : el.clientHeight;
             let currentIndex = 0;
             for (let i = 0; i < sections.length; i++) {
-                const top = (sections[i] as HTMLElement).offsetTop;
-                if (containerScroll < top + containerHeight / 2) {
+                const pos = isHorizontal
+                    ? (sections[i] as HTMLElement).offsetLeft
+                    : (sections[i] as HTMLElement).offsetTop;
+                if (scrollPos < pos + viewSize / 2) {
                     currentIndex = i;
                     break;
                 }
                 currentIndex = i;
             }
 
-            if (e.key === "ArrowDown" && currentIndex < sections.length - 1) {
+            const advance = advanceKeys.includes(e.key);
+            const goBack = backKeys.includes(e.key);
+            if (advance && currentIndex < sections.length - 1) {
                 e.preventDefault();
                 sections[currentIndex + 1].scrollIntoView({
                     behavior: "smooth",
                     block: "start",
+                    inline: "start",
                 });
-            } else if (e.key === "ArrowUp" && currentIndex > 0) {
+            } else if (goBack && currentIndex > 0) {
                 e.preventDefault();
                 sections[currentIndex - 1].scrollIntoView({
                     behavior: "smooth",
                     block: "start",
+                    inline: "start",
                 });
+            } else if ((advance && currentIndex >= sections.length - 1) || (goBack && currentIndex <= 0)) {
+                e.preventDefault();
+                setIndicatorShake(true);
+                setTimeout(() => setIndicatorShake(false), 400);
             }
         };
 
@@ -76,6 +92,7 @@ export function Home() {
     return (
         <div className="app container">
             <Navbar />
+            <PageIndicator scrollRef={scrollRef} shake={indicatorShake} />
             <div className="mobile-cards" ref={scrollRef}>
                 <section
                     className="section hero is-fullheight hero--with-halo mobile-card"

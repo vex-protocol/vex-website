@@ -2,13 +2,7 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
 import logo from "../assets/vex_icon.svg";
-import {
-    DOWNLOAD_ENABLED,
-    GITHUB_WEB_URLS,
-    LOGO_TEXT,
-    TWITTER_HANDLE,
-    TWITTER_URL,
-} from "./constants";
+import { DOWNLOAD_ENABLED, LOGO_TEXT } from "./constants";
 
 export function Hero(props: { content: JSX.Element }): JSX.Element {
     return (
@@ -30,26 +24,9 @@ const NAVBAR_MENU_CONTENT = (
         <Link className="navbar-item navbar-menu-item" to="/privacy-policy">
             Privacy Policy
         </Link>
-        {!DOWNLOAD_ENABLED && (
-            <a
-                href={TWITTER_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="navbar-item navbar-menu-item"
-                aria-label={`Follow @${TWITTER_HANDLE} on X`}
-            >
-                Twitter
-            </a>
-        )}
-        <a
-            href={GITHUB_WEB_URLS.VEX_CHAT_ORG}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="navbar-item navbar-menu-item"
-            aria-label="Vex on GitHub"
-        >
-            GitHub
-        </a>
+        <Link className="navbar-item navbar-menu-item" to="/contact">
+            Contact
+        </Link>
         {DOWNLOAD_ENABLED && (
             <Link className="navbar-item navbar-menu-item" to="/download">
                 Download
