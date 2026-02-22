@@ -212,8 +212,8 @@ $glass-blur: 24px
 $glass-blur-mobile: 12px
 $glass-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.04) 0%, transparent 40%, rgba(231, 0, 0, 0.03) 100%)
 
-$navbar-height: 48px
-$navbar-height-mobile: 40px
+$navbar-height: 54px
+$navbar-height-mobile: 48px
 $panel-face: linear-gradient(180deg, $vex-black-soft 0%, $panel-dark 100%)
 $instrument-glow: rgba(231, 0, 0, 0.06)
 
@@ -945,11 +945,12 @@ body.scroll-to-top-active
   flex: 1
   overflow: hidden
   max-width: 100%
+  padding-left: 0.25rem
 
 .navbar .logo-link
   display: flex
   align-items: center
-  gap: 0.5rem
+  gap: 0.65rem
   min-width: 0
   overflow: hidden
   flex-shrink: 0
@@ -959,7 +960,7 @@ body.scroll-to-top-active
   border: none
   cursor: pointer
   font: inherit
-  padding: 0.25rem 0
+  padding: 0.5rem 0.75rem 0.5rem 0.5rem
 
 .navbar .logo-text
   overflow: hidden
@@ -1732,13 +1733,13 @@ $orb-rainbow: conic-gradient(#e70000, #c5698b, #2a075b, #a8c8df, #91e643, #d9c2a
   41%, 81%
     opacity: 1.08
 .logo--square
-  width: 28px
-  height: 28px
+  width: 36px
+  height: 36px
   object-fit: contain
   display: block
 .logo-text
   font-family: $font-aeronautical
-  font-size: 1rem
+  font-size: 1.2rem
   font-weight: 400
   color: rgba(231, 0, 0, 0.75)
   line-height: 1
@@ -2279,13 +2280,13 @@ $tablet-up: 769px
     padding-left: 1rem
     padding-right: 1rem
   .navbar .logo-text
-    font-size: 1.1rem
+    font-size: 1.35rem
   .navbar .logo--square
-    width: 24px
-    height: 24px
+    width: 40px
+    height: 40px
   .navbar .logo-glitch
-    width: 24px
-    height: 24px
+    width: 40px
+    height: 40px
   .app
     padding-top: $navbar-height
     height: 100%
@@ -2649,13 +2650,17 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     max-width: 100%
     overflow: hidden
   .navbar .logo-text
-    font-size: 0.95rem
+    font-size: 1.1rem
     white-space: nowrap
     overflow: hidden
     text-overflow: ellipsis
+  .navbar .logo-glitch
+    width: 32px
+    height: 32px
+    flex-shrink: 0
   .navbar .logo--square
-    width: 24px
-    height: 24px
+    width: 32px
+    height: 32px
     flex-shrink: 0
   .card-header__img-wrap
     width: 44px

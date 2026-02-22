@@ -3,12 +3,12 @@
  * Run: node scripts/generate-orb-images.js (or npm run generate-orb-images)
  * Prebuild runs this before every build.
  * Deterministic: sorted by filename; contentHash verifies folder contents.
- * Generated: 2026-02-22T19:49:04.564Z
+ * Generated: 2026-02-22T19:54:36.237Z
  * ContentHash: 96d53f51085a8210
  */
 
 export const ORB_IMAGE_KEYS_BY_COLOR: Record<string, string[]> = {
-    "red": [
+    red: [
         "./FIRERED/REDGIRL.jpeg",
         "./FIRERED/SCHIZO_FREQ.jpg",
         "./FIRERED/U8x6wLlD_400x400 (1).jpg",
@@ -20,9 +20,9 @@ export const ORB_IMAGE_KEYS_BY_COLOR: Record<string, string[]> = {
         "./FIRERED/fire-red.jpg",
         "./FIRERED/incinerator-red.jpg",
         "./FIRERED/kabuto.jpeg",
-        "./FIRERED/plane.jpg"
+        "./FIRERED/plane.jpg",
     ],
-    "purple": [
+    purple: [
         "./ROYALPURPLE/BLACKHOLE.jpg",
         "./ROYALPURPLE/Destroyed Cassette.jpg",
         "./ROYALPURPLE/Pseudonyms.jpg",
@@ -31,35 +31,35 @@ export const ORB_IMAGE_KEYS_BY_COLOR: Record<string, string[]> = {
         "./ROYALPURPLE/Shadow-Tape-Woman.png",
         "./ROYALPURPLE/Shadow.jpg",
         "./ROYALPURPLE/ShadowWoman.png",
-        "./ROYALPURPLE/royal-purple.jpg"
+        "./ROYALPURPLE/royal-purple.jpg",
     ],
-    "green": [
+    green: [
         "./INCINERATORGREEN/Destroyed Tape 2.png",
         "./INCINERATORGREEN/Poetry.jpg",
         "./INCINERATORGREEN/Zippo.png",
-        "./INCINERATORGREEN/sword.png"
+        "./INCINERATORGREEN/sword.png",
     ],
-    "blue": [
+    blue: [
         "./ICEBLUE/G7tHMybaIAATKkW.jpeg",
         "./ICEBLUE/SAYUKIXBT.jpg",
-        "./ICEBLUE/channels4_profile.jpg"
+        "./ICEBLUE/channels4_profile.jpg",
     ],
-    "pink": [
+    pink: [
         "./PEACHPINK/Manifesto.jpg",
         "./PEACHPINK/ivy-transparent.png",
         "./PEACHPINK/lollipop-transparent.png",
         "./PEACHPINK/peach.png",
-        "./PEACHPINK/yuki-transparent.png"
+        "./PEACHPINK/yuki-transparent.png",
     ],
-    "cream": [
+    cream: [
         "./CREAM/gaew1.png",
         "./CREAM/gaew2.png",
         "./CREAM/sexy-removebg-preview.png",
-        "./CREAM/yuki-transparent.png"
+        "./CREAM/yuki-transparent.png",
     ],
-    "rainbow": [
+    rainbow: [
         "./RAINBOW/PhuketRainbow.png",
         "./RAINBOW/e44bed2911c684822460870e22f653f5.jpg",
-        "./RAINBOW/mog-coin.jpeg"
-    ]
+        "./RAINBOW/mog-coin.jpeg",
+    ],
 };
