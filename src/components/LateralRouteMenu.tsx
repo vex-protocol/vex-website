@@ -6,6 +6,7 @@ import {
     pathForIndex,
 } from "../navigation/routeConfig";
 import { useRespawn } from "../context/RespawnContext";
+import { useRouteDepth } from "../context/RouteDepthContext";
 
 const ROUTE_LABELS: Record<string, string> = {
     "/": "Home",
@@ -19,14 +20,18 @@ export function LateralRouteMenu(): JSX.Element {
     const { scrollToTop } = useRespawn();
     const currentIdx = routeIndex(location.pathname);
 
+    const { getDepthForRouteIdx } = useRouteDepth();
     const goTo = (i: number) => {
-        const path = pathForIndex(i);
-        const target = { pathname: path, search: "?depth=1" };
         const isSameRoute = i === currentIdx;
         if (isSameRoute) {
             scrollToTop();
         } else {
-            history.push(target);
+            const path = pathForIndex(i);
+            const depth = getDepthForRouteIdx(i);
+            history.push({
+                pathname: path,
+                search: `?depth=${depth}`,
+            });
         }
     };
 

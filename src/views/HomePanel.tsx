@@ -12,9 +12,13 @@ import {
     TWITTER_HANDLE,
     TWITTER_URL,
 } from "../components/constants";
+import { useRouteDepth } from "../context/RouteDepthContext";
+
+const DOWNLOAD_ROUTE_INDEX = 1;
 
 export function HomePanel() {
     const history = useHistory();
+    const { getDepthForRouteIdx } = useRouteDepth();
     const { halo, card, card2, cardHero, cardContact } = useProceduralImages();
 
     return (
@@ -67,12 +71,15 @@ export function HomePanel() {
                             </p>
                             {DOWNLOAD_ENABLED ? (
                                 <button
-                                    onClick={() =>
+                                    onClick={() => {
+                                        const depth = getDepthForRouteIdx(
+                                            DOWNLOAD_ROUTE_INDEX
+                                        );
                                         history.push({
                                             pathname: "/download",
-                                            search: "?depth=1",
-                                        })
-                                    }
+                                            search: `?depth=${depth}`,
+                                        });
+                                    }}
                                     className="button is-medium is-primary"
                                 >
                                     Download Now
@@ -140,12 +147,15 @@ export function HomePanel() {
                             </p>
                             {DOWNLOAD_ENABLED ? (
                                 <button
-                                    onClick={() =>
+                                    onClick={() => {
+                                        const depth = getDepthForRouteIdx(
+                                            DOWNLOAD_ROUTE_INDEX
+                                        );
                                         history.push({
                                             pathname: "/download",
-                                            search: "?depth=1",
-                                        })
-                                    }
+                                            search: `?depth=${depth}`,
+                                        });
+                                    }}
                                     className="button is-medium is-primary"
                                 >
                                     Download Now

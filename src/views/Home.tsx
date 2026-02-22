@@ -14,11 +14,15 @@ import {
     TWITTER_HANDLE,
     TWITTER_URL,
 } from "../components/constants";
+import { useRouteDepth } from "../context/RouteDepthContext";
 
 const SECTION_IDS = ["hero", "about", "features"];
 
+const DOWNLOAD_ROUTE_INDEX = 1; // index of /download in LATERAL_ROUTES when DOWNLOAD_ENABLED
+
 export function Home() {
     const history = useHistory();
+    const { getDepthForRouteIdx } = useRouteDepth();
     const { halo, card, card2, cardHero } = useProceduralImages();
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const [indicatorShake, setIndicatorShake] = useState(false);
@@ -145,9 +149,12 @@ export function Home() {
                                 {DOWNLOAD_ENABLED ? (
                                     <button
                                         onClick={() => {
+                                            const depth = getDepthForRouteIdx(
+                                                DOWNLOAD_ROUTE_INDEX
+                                            );
                                             history.push({
                                                 pathname: "/download",
-                                                search: "?depth=1",
+                                                search: `?depth=${depth}`,
                                             });
                                         }}
                                         className="button is-medium is-primary"
@@ -218,9 +225,12 @@ export function Home() {
                                 {DOWNLOAD_ENABLED ? (
                                     <button
                                         onClick={() => {
+                                            const depth = getDepthForRouteIdx(
+                                                DOWNLOAD_ROUTE_INDEX
+                                            );
                                             history.push({
                                                 pathname: "/download",
-                                                search: "?depth=1",
+                                                search: `?depth=${depth}`,
                                             });
                                         }}
                                         className="button is-medium is-primary"

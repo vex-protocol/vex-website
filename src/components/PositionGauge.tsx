@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useHistory } from "react-router-dom";
 import { LATERAL_ROUTES, pathForIndex } from "../navigation/routeConfig";
+import { useRouteDepth } from "../context/RouteDepthContext";
 import { useIsMobile } from "../hooks/useIsMobile";
 
 type Props = {
@@ -68,14 +69,16 @@ export function PositionGauge({
         };
     }, [verticalScrollRef, updateVerticalIndex, isMobile]);
 
+    const { getDepthForRouteIdx } = useRouteDepth();
     const goToLateral = useCallback(
         (index: number) => {
+            const depth = getDepthForRouteIdx(index);
             history.push({
                 pathname: pathForIndex(index),
-                search: "?depth=1",
+                search: `?depth=${depth}`,
             });
         },
-        [history]
+        [history, getDepthForRouteIdx]
     );
 
     const goToVertical = useCallback(

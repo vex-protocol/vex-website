@@ -5,6 +5,8 @@ import logo from "../assets/vex_icon.svg";
 import { DOWNLOAD_ENABLED, LOGO_TEXT } from "./constants";
 import { LateralRouteMenu } from "./LateralRouteMenu";
 import { useRespawn } from "../context/RespawnContext";
+import { useRouteDepth } from "../context/RouteDepthContext";
+import { routeIndex } from "../navigation/routeConfig";
 
 export function Hero(props: { content: JSX.Element }): JSX.Element {
     return (
@@ -31,6 +33,7 @@ export function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const { logoClick, scrollToTop } = useRespawn();
+    const { getDepthForRouteIdx } = useRouteDepth();
     const location = useLocation();
 
     useEffect(() => {
@@ -79,7 +82,12 @@ export function Navbar() {
                                       ? "navbar-menu-item--active"
                                       : ""
                               }`}
-                              to={{ pathname: path, search: "?depth=1" }}
+                              to={{
+                                  pathname: path,
+                                  search: `?depth=${getDepthForRouteIdx(
+                                      routeIndex(path)
+                                  )}`,
+                              }}
                               replace={path === location.pathname}
                               onClick={(e) => {
                                   if (path === location.pathname) {

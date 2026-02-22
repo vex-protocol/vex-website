@@ -18,6 +18,7 @@ import { useIsMobile } from "../hooks/useIsMobile";
 import { ScrollToTopButton } from "./ScrollToTopButton";
 import { HomePanel, PrivacyPanel, DownloadPanel } from "../views";
 import { RespawnProvider } from "../context/RespawnContext";
+import { RouteDepthProvider } from "../context/RouteDepthContext";
 import { invalidateRoomCache } from "../assets/orbImages";
 
 const PANELS: Record<string, () => JSX.Element> = {
@@ -48,9 +49,10 @@ export function AppNavigator(): JSX.Element {
     const configSectionIds = LATERAL_ROUTES[currentRouteIdx]?.sectionIds ?? [];
     const sectionIds = useRouteSections(location.pathname, configSectionIds);
 
-    const [baseChangeCounter, setBaseChangeCounter] = useState(0);
     const prevPathnameRef = useRef(location.pathname);
     const pathnameChangeTimeRef = useRef(0);
+    /** Per-route last depth (route index -> depth). Used when switching x-coord so we don't force top. */
+    const lastDepthByRouteIdxRef = useRef<Record<number, number>>({});
 
     const currentVerticalRef =
         verticalRefs.current.get(currentRouteIdx) ?? null;
@@ -76,16 +78,22 @@ export function AppNavigator(): JSX.Element {
         [history, location.pathname, location.search]
     );
 
-    // Ensure URL always has depth param when on a known route – add ?depth=1 if missing
+    const getDepthForRouteIdx = useCallback((idx: number) => {
+        return lastDepthByRouteIdxRef.current[idx] ?? 1;
+    }, []);
+
+    // Ensure URL always has depth param when on a known route – use stored depth for this route if missing
     useLayoutEffect(() => {
         const path = location.pathname;
+        const idx = routeIndex(path);
         const isKnownRoute = LATERAL_ROUTES.some((r) => r.path === path);
         if (!isKnownRoute) return;
         const hasDepth = new URLSearchParams(location.search).has("depth");
         if (!hasDepth) {
-            history.replace({ pathname: path, search: "?depth=1" });
+            const depth = getDepthForRouteIdx(idx);
+            history.replace({ pathname: path, search: `?depth=${depth}` });
         }
-    }, [location.pathname, location.search, history]);
+    }, [location.pathname, location.search, history, getDepthForRouteIdx]);
 
     const scrollPanelToTopInstant = useCallback((el: HTMLDivElement) => {
         document.body.classList.add("scroll-to-top-active");
@@ -128,54 +136,59 @@ export function AppNavigator(): JSX.Element {
         invalidateRoomCache(path);
     }
 
-    // On route enter: scroll to depth param if explicit, otherwise scroll to top
+    // On route enter: sync vertical scroll to depth param so we paint at the right depth (no flash from top).
+    // Set scrollTop directly so it's applied in the same layout frame before paint.
     useLayoutEffect(() => {
         const el = currentVerticalRef;
+        const idx = routeIndex(location.pathname);
         if (!el || sectionIds.length === 0) return;
 
+        const scrollEl = (isMobile && el.querySelector(".mobile-cards")) || el;
+        const sections = sectionIds
+            .map((id) => el.querySelector(`#${id}`))
+            .filter((s): s is HTMLElement => s !== null);
+        if (sections.length === 0) return;
+
         if (depthParam != null) {
+            lastDepthByRouteIdxRef.current[idx] = depthParam;
             const targetIndex = Math.min(depthParam - 1, sectionIds.length - 1);
             if (targetIndex >= 0) {
-                const sections = sectionIds
-                    .map((id) => el.querySelector(`#${id}`))
-                    .filter((s): s is HTMLElement => s !== null);
                 const section = sections[targetIndex];
                 if (section) {
-                    section.scrollIntoView({
-                        behavior: "auto",
-                        block: "start",
-                    });
+                    // Set scroll synchronously so first paint is already at the correct slide (no top-then-scroll)
+                    const sectionTop = section.getBoundingClientRect().top;
+                    const scrollElTop = scrollEl.getBoundingClientRect().top;
+                    scrollEl.scrollTop = Math.max(
+                        0,
+                        scrollEl.scrollTop + sectionTop - scrollElTop
+                    );
                 }
                 return;
             }
         }
 
+        // No depth param: scroll to top
         scrollPanelToTopInstant(el);
-        // Belt-and-suspenders: scroll first section into view (handles any nested scroll container)
+        scrollEl.scrollTop = 0;
         const firstId = sectionIds[0];
         if (firstId) {
             const first = el.querySelector(`#${firstId}`);
-            if (first)
-                (first as HTMLElement).scrollIntoView({
-                    block: "start",
-                    behavior: "auto",
-                });
+            if (first) {
+                const firstEl = first as HTMLElement;
+                const sectionTop = firstEl.getBoundingClientRect().top;
+                const scrollElTop = scrollEl.getBoundingClientRect().top;
+                scrollEl.scrollTop = Math.max(
+                    0,
+                    scrollEl.scrollTop + sectionTop - scrollElTop
+                );
+            }
         }
-        // Retry after layout – panel may have been off-screen when we first scrolled (helps on mobile)
-        requestAnimationFrame(() => {
-            scrollPanelToTopInstant(el);
-            const first = firstId ? el.querySelector(`#${firstId}`) : null;
-            if (first)
-                (first as HTMLElement).scrollIntoView({
-                    block: "start",
-                    behavior: "auto",
-                });
-        });
     }, [
         location.pathname,
         depthParam,
         currentVerticalRef,
         sectionIds,
+        isMobile,
         scrollPanelToTopInstant,
     ]);
 
@@ -202,7 +215,9 @@ export function AppNavigator(): JSX.Element {
                 }
                 index = i;
             }
-            updateDepthParam(index + 1);
+            const depth = index + 1;
+            lastDepthByRouteIdxRef.current[currentRouteIdx] = depth;
+            updateDepthParam(depth);
         };
 
         // Don't sync immediately – we just navigated; scroll-to-top hasn't been applied to DOM yet
@@ -216,12 +231,11 @@ export function AppNavigator(): JSX.Element {
         };
     }, [currentVerticalRef, sectionIds, isMobile, updateDepthParam]);
 
-    // Base change = new playthrough: invalidate orb cache and bump counter so panels regenerate
+    // Invalidate orb cache when pathname changes (fresh orbs on that route)
     useEffect(() => {
         if (prevPathnameRef.current !== location.pathname) {
             prevPathnameRef.current = location.pathname;
             invalidateRoomCache(location.pathname);
-            setBaseChangeCounter((c) => c + 1);
         }
     }, [location.pathname]);
 
@@ -243,7 +257,16 @@ export function AppNavigator(): JSX.Element {
                     Math.max(0, Math.min(idx, LATERAL_ROUTES.length - 1))
                 );
                 if (path !== location.pathname) {
-                    history.replace({ pathname: path, search: "?depth=1" });
+                    const targetIdx = Math.max(
+                        0,
+                        Math.min(idx, LATERAL_ROUTES.length - 1)
+                    );
+                    const depth =
+                        lastDepthByRouteIdxRef.current[targetIdx] ?? 1;
+                    history.replace({
+                        pathname: path,
+                        search: `?depth=${depth}`,
+                    });
                 }
                 raf = 0;
             });
@@ -267,9 +290,10 @@ export function AppNavigator(): JSX.Element {
                 }, 400);
                 return;
             }
+            const depth = lastDepthByRouteIdxRef.current[next] ?? 1;
             history.push({
                 pathname: pathForIndex(next),
-                search: "?depth=1",
+                search: `?depth=${depth}`,
             });
         },
         [currentRouteIdx, history]
@@ -335,12 +359,16 @@ export function AppNavigator(): JSX.Element {
         scrollPanelToTopInstant(el);
     }, [currentRouteIdx, scrollPanelToTopInstant]);
 
-    /** Respawn (fresh orbs) + scroll to top of current route, or go to (1,1) if already at depth 1 on another route */
+    /** Respawn (fresh orbs) + scroll to top of current route, or go to home at last home depth if already at depth 1 on another route */
     const handleLogoClick = useCallback(() => {
         const isAtDepth1 = depthParam == null || depthParam === 1;
         const isOnAnotherRoute = location.pathname !== "/";
         if (isOnAnotherRoute && isAtDepth1) {
-            history.push({ pathname: "/", search: "?depth=1" });
+            const homeDepth = lastDepthByRouteIdxRef.current[0] ?? 1;
+            history.push({
+                pathname: "/",
+                search: `?depth=${homeDepth}`,
+            });
         } else {
             scrollToTop();
         }
@@ -479,53 +507,56 @@ export function AppNavigator(): JSX.Element {
     );
 
     return (
-        <RespawnProvider scrollToTop={scrollToTop} logoClick={handleLogoClick}>
-            <div className="app app-navigator">
-                <Navbar />
-                <div className="app-floating-controller">
-                    <div className="app-floating-controller__scroll-top">
-                        <ScrollToTopButton sectionIds={sectionIds} />
-                    </div>
-                    <div className="app-floating-controller__gauge">
-                        <PositionGauge
-                            lateralIndex={currentRouteIdx}
-                            verticalScrollRef={{ current: currentVerticalRef }}
-                            sectionIds={sectionIds}
-                            shake={indicatorShake}
-                            attemptDirection={attemptDirection}
-                            invertVertical={invertVertical}
-                            onAttemptAtBoundary={(dir) => {
-                                setAttemptDirection(dir);
-                                setIndicatorShake(true);
-                                setTimeout(() => {
-                                    setIndicatorShake(false);
-                                    setAttemptDirection(null);
-                                }, 400);
-                            }}
-                        />
-                    </div>
-                </div>
-                <div
-                    className="lateral-strip"
-                    ref={lateralRef}
-                    onTouchStart={handleTouchStart}
-                    onTouchEnd={handleTouchEnd}
-                >
-                    {LATERAL_ROUTES.map((route, idx) => (
-                        <div
-                            key={
-                                route.path === location.pathname
-                                    ? `${route.path}-${baseChangeCounter}`
-                                    : route.path
-                            }
-                            className="route-panel"
-                            ref={(el) => setVerticalRef(idx, el)}
-                        >
-                            {PANELS[route.path]?.() ?? null}
+        <RouteDepthProvider getDepthForRouteIdx={getDepthForRouteIdx}>
+            <RespawnProvider
+                scrollToTop={scrollToTop}
+                logoClick={handleLogoClick}
+            >
+                <div className="app app-navigator">
+                    <Navbar />
+                    <div className="app-floating-controller">
+                        <div className="app-floating-controller__scroll-top">
+                            <ScrollToTopButton sectionIds={sectionIds} />
                         </div>
-                    ))}
+                        <div className="app-floating-controller__gauge">
+                            <PositionGauge
+                                lateralIndex={currentRouteIdx}
+                                verticalScrollRef={{
+                                    current: currentVerticalRef,
+                                }}
+                                sectionIds={sectionIds}
+                                shake={indicatorShake}
+                                attemptDirection={attemptDirection}
+                                invertVertical={invertVertical}
+                                onAttemptAtBoundary={(dir) => {
+                                    setAttemptDirection(dir);
+                                    setIndicatorShake(true);
+                                    setTimeout(() => {
+                                        setIndicatorShake(false);
+                                        setAttemptDirection(null);
+                                    }, 400);
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <div
+                        className="lateral-strip"
+                        ref={lateralRef}
+                        onTouchStart={handleTouchStart}
+                        onTouchEnd={handleTouchEnd}
+                    >
+                        {LATERAL_ROUTES.map((route, idx) => (
+                            <div
+                                key={route.path}
+                                className="route-panel"
+                                ref={(el) => setVerticalRef(idx, el)}
+                            >
+                                {PANELS[route.path]?.() ?? null}
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
-        </RespawnProvider>
+            </RespawnProvider>
+        </RouteDepthProvider>
     );
 }
