@@ -229,7 +229,13 @@ export function AppNavigator(): JSX.Element {
             scrollEl.removeEventListener("scroll", syncDepthToUrl);
             window.removeEventListener("resize", syncDepthToUrl);
         };
-    }, [currentVerticalRef, sectionIds, isMobile, updateDepthParam]);
+    }, [
+        currentVerticalRef,
+        sectionIds,
+        isMobile,
+        updateDepthParam,
+        currentRouteIdx,
+    ]);
 
     // Invalidate orb cache when pathname changes (fresh orbs on that route)
     useEffect(() => {
