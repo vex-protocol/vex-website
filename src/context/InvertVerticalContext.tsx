@@ -13,8 +13,9 @@ const DEFAULT_INVERTED = true;
 
 type InvertVerticalContextValue = [boolean, (value: boolean) => void];
 
-const InvertVerticalContext =
-    createContext<InvertVerticalContextValue | null>(null);
+const InvertVerticalContext = createContext<InvertVerticalContextValue | null>(
+    null
+);
 
 export function InvertVerticalProvider({
     children,

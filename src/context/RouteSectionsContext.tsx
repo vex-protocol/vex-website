@@ -17,7 +17,9 @@ export function RouteSectionsProvider({
     const [sectionIdsByPath, setState] = useState<Record<string, string[]>>({});
 
     const setSectionIds = useCallback((path: string, ids: string[]) => {
-        setState((prev) => (prev[path] === ids ? prev : { ...prev, [path]: ids }));
+        setState((prev) =>
+            prev[path] === ids ? prev : { ...prev, [path]: ids }
+        );
     }, []);
 
     const value: RouteSectionsContextValue = {
@@ -42,10 +44,7 @@ export function useRouteSections(
     return custom && custom.length > 0 ? custom : [...fallbackIds];
 }
 
-export function useSetRouteSections(): (
-    path: string,
-    ids: string[]
-) => void {
+export function useSetRouteSections(): (path: string, ids: string[]) => void {
     const ctx = useContext(RouteSectionsContext);
     return ctx?.setSectionIds ?? (() => {});
 }

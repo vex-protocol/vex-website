@@ -1,9 +1,4 @@
-import React, {
-    useState,
-    useEffect,
-    useCallback,
-    useRef,
-} from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useHistory } from "react-router-dom";
 import { LATERAL_ROUTES, pathForIndex } from "../navigation/routeConfig";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -44,8 +39,7 @@ export function PositionGauge({
         if (sections.length === 0) return;
 
         const scrollEl =
-            (isMobile && panelEl.querySelector(".mobile-cards")) ||
-            panelEl;
+            (isMobile && panelEl.querySelector(".mobile-cards")) || panelEl;
         const scrollPos = scrollEl.scrollTop;
         const viewSize = scrollEl.clientHeight;
         let index = 0;

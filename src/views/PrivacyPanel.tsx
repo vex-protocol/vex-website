@@ -94,9 +94,7 @@ function splitSectionIntoPages(sec: {
     title: string;
     content: string;
 }): { id: string; title: string; content: string }[] {
-    const paras = sec.content
-        .split(/\n\n+/)
-        .filter((p) => p.trim());
+    const paras = sec.content.split(/\n\n+/).filter((p) => p.trim());
     if (paras.length <= PARAGRAPHS_PER_PAGE) {
         return [sec];
     }

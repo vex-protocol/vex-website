@@ -1,9 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faTwitter,
-    faGithub,
-} from "@fortawesome/free-brands-svg-icons";
+import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
 import logo from "../assets/vex_icon.svg";
 import haloRed from "../assets/halo-red.jpeg";
 import girlRed from "../assets/girl-red.jpg";

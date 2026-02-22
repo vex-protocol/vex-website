@@ -41,8 +41,7 @@ export function AppNavigator(): JSX.Element {
     const isMobile = useIsMobile();
     const [invertVertical] = useInvertVertical();
     const currentRouteIdx = routeIndex(location.pathname);
-    const configSectionIds =
-        LATERAL_ROUTES[currentRouteIdx]?.sectionIds ?? [];
+    const configSectionIds = LATERAL_ROUTES[currentRouteIdx]?.sectionIds ?? [];
     const sectionIds = useRouteSections(location.pathname, configSectionIds);
 
     const currentVerticalRef =
@@ -163,7 +162,7 @@ export function AppNavigator(): JSX.Element {
             } else if (e.key === "ArrowRight") {
                 e.preventDefault();
                 goRoute(1);
-            } else             if (e.key === "ArrowUp") {
+            } else if (e.key === "ArrowUp") {
                 e.preventDefault();
                 goSection(invertVertical ? 1 : -1);
             } else if (e.key === "ArrowDown") {

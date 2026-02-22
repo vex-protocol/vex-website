@@ -31,31 +31,31 @@ export function Router(): JSX.Element {
     return (
         <BrowserRouter>
             <RouteSectionsProvider>
-            <InvertVerticalProvider>
-            <Switch>
-                <Route
-                    exact
-                    path={"/download"}
-                    render={() =>
-                        DOWNLOAD_ENABLED ? (
-                            <AppNavigator />
-                        ) : (
-                            <Redirect to="/" />
-                        )
-                    }
-                />
-                <Route
-                    exact
-                    path={["/", "/privacy-policy"]}
-                    render={() => <AppNavigator />}
-                />
-                <Route exact path={"/team"} render={() => <Team />} />
-                <Route
-                    path={"/invite/:id"}
-                    render={({ match }) => <Invites match={match} />}
-                />
-            </Switch>
-            </InvertVerticalProvider>
+                <InvertVerticalProvider>
+                    <Switch>
+                        <Route
+                            exact
+                            path={"/download"}
+                            render={() =>
+                                DOWNLOAD_ENABLED ? (
+                                    <AppNavigator />
+                                ) : (
+                                    <Redirect to="/" />
+                                )
+                            }
+                        />
+                        <Route
+                            exact
+                            path={["/", "/privacy-policy"]}
+                            render={() => <AppNavigator />}
+                        />
+                        <Route exact path={"/team"} render={() => <Team />} />
+                        <Route
+                            path={"/invite/:id"}
+                            render={({ match }) => <Invites match={match} />}
+                        />
+                    </Switch>
+                </InvertVerticalProvider>
             </RouteSectionsProvider>
         </BrowserRouter>
     );
