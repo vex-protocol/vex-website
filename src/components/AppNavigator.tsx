@@ -418,9 +418,12 @@ export function AppNavigator(): JSX.Element {
         <RespawnProvider scrollToTop={scrollToTop}>
             <div className="app app-navigator">
                 <Navbar />
-                <div className="app-control-panel">
-                    <ScrollToTopButton sectionIds={sectionIds} />
-                    <PositionGauge
+                <div className="app-floating-controller">
+                    <div className="app-floating-controller__scroll-top">
+                        <ScrollToTopButton sectionIds={sectionIds} />
+                    </div>
+                    <div className="app-floating-controller__gauge">
+                        <PositionGauge
                         lateralIndex={currentRouteIdx}
                         verticalScrollRef={{ current: currentVerticalRef }}
                         sectionIds={sectionIds}
@@ -435,7 +438,8 @@ export function AppNavigator(): JSX.Element {
                                 setAttemptDirection(null);
                             }, 400);
                         }}
-                    />
+                        />
+                    </div>
                 </div>
                 <div
                     className="lateral-strip"
