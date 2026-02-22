@@ -110,65 +110,68 @@ export function Home() {
                             <WitchyHero roomPath="/" />
                         </div>
                         <div className="column is-12 section-content">
-                                <div
-                                    className="content-frame content-frame--crt content-frame--procedural content"
-                                    style={{
-                                        ["--card-accent-color" as string]:
-                                            cardHero.color,
-                                        ["--card-accent-bg" as string]:
-                                            cardHero.colorBg,
+                            <div
+                                className="content-frame content-frame--crt content-frame--procedural content"
+                                style={
+                                    {
+                                        ["--card-accent-color" as string]: cardHero.color,
+                                        ["--card-accent-bg" as string]: cardHero.colorBg,
                                         ["--card-accent-glow" as string]:
                                             cardHero.color + "60",
                                         ["--card-accent-glow-strong" as string]:
                                             cardHero.color + "99",
-                                    } as React.CSSProperties}
-                                >
-                                    <span className="card-header">
-                                        <span className="card-header__img-wrap">
-                                            <img
-                                                src={cardHero.image}
-                                                alt=""
-                                                className="card-header__img"
-                                            />
-                                        </span>
-                                        <span className="card-header__title card-title--aviation">
-                                            {HERO_CARD_TAGLINE}
-                                        </span>
+                                    } as React.CSSProperties
+                                }
+                            >
+                                <span className="card-header">
+                                    <span className="card-header__img-wrap">
+                                        <img
+                                            src={cardHero.image}
+                                            alt=""
+                                            className="card-header__img"
+                                        />
                                     </span>
-                                    <p className="subtitle is-4">
-                                        Simple privacy and powerful end to end
-                                        encryption technology for communication.
-                                        Real-time messaging with large groups of
-                                        people or chatting with your friends
-                                        without compromising your privacy.
-                                    </p>
-                                    {DOWNLOAD_ENABLED ? (
-                                        <button
-                                            onClick={() => {
-                                                history.push({ pathname: "/download", search: "?depth=1" });
-                                            }}
-                                            className="button is-medium is-primary"
-                                        >
-                                            Download Now
-                                        </button>
-                                    ) : (
-                                        <a
-                                            href={TWITTER_URL}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="button is-medium is-primary"
-                                            aria-label={`Follow @${TWITTER_HANDLE} on X for updates`}
-                                        >
-                                            Follow us{" "}
-                                            <FontAwesomeIcon
-                                                icon={faTwitter}
-                                                className="icon-right"
-                                            />
-                                        </a>
-                                    )}
-                                </div>
+                                    <span className="card-header__title card-title--aviation">
+                                        {HERO_CARD_TAGLINE}
+                                    </span>
+                                </span>
+                                <p className="subtitle is-4">
+                                    Simple privacy and powerful end to end
+                                    encryption technology for communication.
+                                    Real-time messaging with large groups of
+                                    people or chatting with your friends without
+                                    compromising your privacy.
+                                </p>
+                                {DOWNLOAD_ENABLED ? (
+                                    <button
+                                        onClick={() => {
+                                            history.push({
+                                                pathname: "/download",
+                                                search: "?depth=1",
+                                            });
+                                        }}
+                                        className="button is-medium is-primary"
+                                    >
+                                        Download Now
+                                    </button>
+                                ) : (
+                                    <a
+                                        href={TWITTER_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="button is-medium is-primary"
+                                        aria-label={`Follow @${TWITTER_HANDLE} on X for updates`}
+                                    >
+                                        Follow us{" "}
+                                        <FontAwesomeIcon
+                                            icon={faTwitter}
+                                            className="icon-right"
+                                        />
+                                    </a>
+                                )}
                             </div>
                         </div>
+                    </div>
                 </section>
 
                 <section className="section mobile-card" id="about">
@@ -183,29 +186,29 @@ export function Home() {
                         <div className="column is-12 section-content">
                             <div
                                 className="content-frame content-frame--crt content-frame--procedural content"
-                                style={{
-                                    ["--card-accent-color" as string]:
-                                        card.color,
-                                    ["--card-accent-bg" as string]:
-                                        card.colorBg,
-                                    ["--card-accent-glow" as string]:
-                                        card.color + "60",
-                                    ["--card-accent-glow-strong" as string]:
-                                        card.color + "99",
-                                } as React.CSSProperties}
+                                style={
+                                    {
+                                        ["--card-accent-color" as string]: card.color,
+                                        ["--card-accent-bg" as string]: card.colorBg,
+                                        ["--card-accent-glow" as string]:
+                                            card.color + "60",
+                                        ["--card-accent-glow-strong" as string]:
+                                            card.color + "99",
+                                    } as React.CSSProperties
+                                }
                             >
-                            <span className="card-header">
-                                <span className="card-header__img-wrap">
-                                    <img
-                                        src={card.image}
-                                        alt=""
-                                        className="card-header__img"
-                                    />
+                                <span className="card-header">
+                                    <span className="card-header__img-wrap">
+                                        <img
+                                            src={card.image}
+                                            alt=""
+                                            className="card-header__img"
+                                        />
+                                    </span>
+                                    <span className="card-header__title card-title--aviation">
+                                        PRIVACY IS NOT A CRIME
+                                    </span>
                                 </span>
-                                <span className="card-header__title card-title--aviation">
-                                    PRIVACY IS NOT A CRIME
-                                </span>
-                            </span>
                                 <p className="subtitle">
                                     Vex Chat is a secure instant messaging
                                     platform for social and commercial use. A
@@ -215,7 +218,10 @@ export function Home() {
                                 {DOWNLOAD_ENABLED ? (
                                     <button
                                         onClick={() => {
-                                            history.push({ pathname: "/download", search: "?depth=1" });
+                                            history.push({
+                                                pathname: "/download",
+                                                search: "?depth=1",
+                                            });
                                         }}
                                         className="button is-medium is-primary"
                                     >
@@ -253,29 +259,29 @@ export function Home() {
                         <div className="column is-12 section-content">
                             <div
                                 className="content-frame content-frame--crt content-frame--procedural content"
-                                style={{
-                                    ["--card-accent-color" as string]:
-                                        card2.color,
-                                    ["--card-accent-bg" as string]:
-                                        card2.colorBg,
-                                    ["--card-accent-glow" as string]:
-                                        card2.color + "60",
-                                    ["--card-accent-glow-strong" as string]:
-                                        card2.color + "99",
-                                } as React.CSSProperties}
+                                style={
+                                    {
+                                        ["--card-accent-color" as string]: card2.color,
+                                        ["--card-accent-bg" as string]: card2.colorBg,
+                                        ["--card-accent-glow" as string]:
+                                            card2.color + "60",
+                                        ["--card-accent-glow-strong" as string]:
+                                            card2.color + "99",
+                                    } as React.CSSProperties
+                                }
                             >
-                            <span className="card-header">
-                                <span className="card-header__img-wrap">
-                                    <img
-                                        src={card2.image}
-                                        alt=""
-                                        className="card-header__img"
-                                    />
+                                <span className="card-header">
+                                    <span className="card-header__img-wrap">
+                                        <img
+                                            src={card2.image}
+                                            alt=""
+                                            className="card-header__img"
+                                        />
+                                    </span>
+                                    <span className="card-header__title card-title--aviation">
+                                        ENCRYPTED BY DEFAULT
+                                    </span>
                                 </span>
-                                <span className="card-header__title card-title--aviation">
-                                    ENCRYPTED BY DEFAULT
-                                </span>
-                            </span>
                                 <h2 className="title">Your conversation</h2>
                                 <p className="subtitle">
                                     Vex is open-source, encrypted and free. It

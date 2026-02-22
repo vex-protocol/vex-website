@@ -389,7 +389,7 @@ export function AppNavigator(): JSX.Element {
             const axis = isHorizontal ? "x" : "y";
 
             e.preventDefault();
-            if ((wheelAccum.current[axis] > 0) !== (sign > 0))
+            if (wheelAccum.current[axis] > 0 !== sign > 0)
                 wheelAccum.current[axis] = 0;
             wheelAccum.current[axis] += delta;
 
@@ -463,20 +463,20 @@ export function AppNavigator(): JSX.Element {
                     </div>
                     <div className="app-floating-controller__gauge">
                         <PositionGauge
-                        lateralIndex={currentRouteIdx}
-                        verticalScrollRef={{ current: currentVerticalRef }}
-                        sectionIds={sectionIds}
-                        shake={indicatorShake}
-                        attemptDirection={attemptDirection}
-                        invertVertical={invertVertical}
-                        onAttemptAtBoundary={(dir) => {
-                            setAttemptDirection(dir);
-                            setIndicatorShake(true);
-                            setTimeout(() => {
-                                setIndicatorShake(false);
-                                setAttemptDirection(null);
-                            }, 400);
-                        }}
+                            lateralIndex={currentRouteIdx}
+                            verticalScrollRef={{ current: currentVerticalRef }}
+                            sectionIds={sectionIds}
+                            shake={indicatorShake}
+                            attemptDirection={attemptDirection}
+                            invertVertical={invertVertical}
+                            onAttemptAtBoundary={(dir) => {
+                                setAttemptDirection(dir);
+                                setIndicatorShake(true);
+                                setTimeout(() => {
+                                    setIndicatorShake(false);
+                                    setAttemptDirection(null);
+                                }, 400);
+                            }}
                         />
                     </div>
                 </div>

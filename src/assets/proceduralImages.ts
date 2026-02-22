@@ -4,11 +4,7 @@
  */
 
 import type { OrbColor } from "./orbImages";
-import {
-    isImageUsed,
-    markImagesUsed,
-    ORB_IMAGES_BY_COLOR,
-} from "./orbImages";
+import { isImageUsed, markImagesUsed, ORB_IMAGES_BY_COLOR } from "./orbImages";
 import haloRed from "./halo-red.jpeg";
 import blackHole from "./ROYALPURPLE/BLACKHOLE.jpg";
 

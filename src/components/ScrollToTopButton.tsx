@@ -12,7 +12,9 @@ export function ScrollToTopButton({ sectionIds }: Props): JSX.Element | null {
 
     if (sectionIds.length === 0) return null;
 
-    const isMac = typeof navigator !== "undefined" && navigator.platform?.toLowerCase().includes("mac");
+    const isMac =
+        typeof navigator !== "undefined" &&
+        navigator.platform?.toLowerCase().includes("mac");
     const shortcut = isMac ? "⌘+↑" : "Ctrl+↑";
 
     return (

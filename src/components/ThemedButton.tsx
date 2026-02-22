@@ -21,7 +21,11 @@ export function ThemedButton({
         "button",
         "is-primary",
         variant === "outlined" ? "is-outlined" : "",
-        size === "small" ? "is-small" : size === "large" ? "is-large" : "is-medium",
+        size === "small"
+            ? "is-small"
+            : size === "large"
+            ? "is-large"
+            : "is-medium",
         "themed-button",
     ]
         .filter(Boolean)

@@ -24,19 +24,18 @@ export function DownloadPanel(): JSX.Element {
                         />
                     </div>
                     <div className="column section-content">
-                            <div className="content-frame content">
-                                <span className="card-header">
-                                    <span className="card-header__title card-title--aviation">
-                                        DOWNLOAD
-                                    </span>
+                        <div className="content-frame content">
+                            <span className="card-header">
+                                <span className="card-header__title card-title--aviation">
+                                    DOWNLOAD
                                 </span>
-                                <p className="subtitle">
-                                    Get Vex for your platform. Free and open
-                                    source.
-                                </p>
-                            </div>
+                            </span>
+                            <p className="subtitle">
+                                Get Vex for your platform. Free and open source.
+                            </p>
                         </div>
                     </div>
+                </div>
             </section>
 
             <section className="section mobile-card" id="download-releases">

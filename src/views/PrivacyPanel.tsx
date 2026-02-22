@@ -154,10 +154,13 @@ export function PrivacyPanel(): JSX.Element {
     };
 
     const lastUpdated = commitHistory[0]?.commit?.author?.date
-        ? new Date(commitHistory[0].commit.author.date).toLocaleDateString(
-              undefined,
-              { year: "numeric", month: "long", day: "numeric" }
-          )
+        ? new Date(
+              commitHistory[0].commit.author.date
+          ).toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+          })
         : null;
 
     return (
@@ -182,16 +185,16 @@ export function PrivacyPanel(): JSX.Element {
                     <div className="column is-12 section-content">
                         <div
                             className="content-frame content-frame--crt content-frame--procedural content"
-                            style={{
-                                ["--card-accent-color" as string]:
-                                    card.color,
-                                ["--card-accent-bg" as string]:
-                                    card.colorBg,
-                                ["--card-accent-glow" as string]:
-                                    card.color + "60",
-                                ["--card-accent-glow-strong" as string]:
-                                    card.color + "99",
-                            } as React.CSSProperties}
+                            style={
+                                {
+                                    ["--card-accent-color" as string]: card.color,
+                                    ["--card-accent-bg" as string]: card.colorBg,
+                                    ["--card-accent-glow" as string]:
+                                        card.color + "60",
+                                    ["--card-accent-glow-strong" as string]:
+                                        card.color + "99",
+                                } as React.CSSProperties
+                            }
                         >
                             <span className="card-header">
                                 <span className="card-header__img-wrap">

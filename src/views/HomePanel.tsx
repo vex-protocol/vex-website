@@ -33,65 +33,68 @@ export function HomePanel() {
                         <WitchyHero roomPath="/" />
                     </div>
                     <div className="column is-12 section-content">
-                            <div
-                                className="content-frame content-frame--crt content-frame--procedural content"
-style={{
-                                        ["--card-accent-color" as string]:
-                                            cardHero.color,
-                                        ["--card-accent-bg" as string]:
-                                            cardHero.colorBg,
-                                        ["--card-accent-glow" as string]:
-                                            cardHero.color + "60",
-                                        ["--card-accent-glow-strong" as string]:
-                                            cardHero.color + "99",
-                                    } as React.CSSProperties}
-                            >
-                                <span className="card-header">
-                                    <span className="card-header__img-wrap">
-                                        <img
-                                            src={cardHero.image}
-                                            alt=""
-                                            className="card-header__img"
-                                        />
-                                    </span>
-                                    <span className="card-header__title card-title--aviation">
-                                        {HERO_CARD_TAGLINE}
-                                    </span>
+                        <div
+                            className="content-frame content-frame--crt content-frame--procedural content"
+                            style={
+                                {
+                                    ["--card-accent-color" as string]: cardHero.color,
+                                    ["--card-accent-bg" as string]: cardHero.colorBg,
+                                    ["--card-accent-glow" as string]:
+                                        cardHero.color + "60",
+                                    ["--card-accent-glow-strong" as string]:
+                                        cardHero.color + "99",
+                                } as React.CSSProperties
+                            }
+                        >
+                            <span className="card-header">
+                                <span className="card-header__img-wrap">
+                                    <img
+                                        src={cardHero.image}
+                                        alt=""
+                                        className="card-header__img"
+                                    />
                                 </span>
-                                <p className="subtitle is-4">
-                                    Simple privacy and powerful end to end
-                                    encryption technology for communication.
-                                    Real-time messaging with large groups of
-                                    people or chatting with your friends without
-                                    compromising your privacy.
-                                </p>
-                                {DOWNLOAD_ENABLED ? (
-                                    <button
-                                        onClick={() =>
-                                            history.push({ pathname: "/download", search: "?depth=1" })
-                                        }
-                                        className="button is-medium is-primary"
-                                    >
-                                        Download Now
-                                    </button>
-                                ) : (
-                                    <a
-                                        href={TWITTER_URL}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="button is-medium is-primary"
-                                        aria-label={`Follow @${TWITTER_HANDLE} on X for updates`}
-                                    >
-                                        Follow us{" "}
-                                        <FontAwesomeIcon
-                                            icon={faTwitter}
-                                            className="icon-right"
-                                        />
-                                    </a>
-                                )}
-                            </div>
+                                <span className="card-header__title card-title--aviation">
+                                    {HERO_CARD_TAGLINE}
+                                </span>
+                            </span>
+                            <p className="subtitle is-4">
+                                Simple privacy and powerful end to end
+                                encryption technology for communication.
+                                Real-time messaging with large groups of people
+                                or chatting with your friends without
+                                compromising your privacy.
+                            </p>
+                            {DOWNLOAD_ENABLED ? (
+                                <button
+                                    onClick={() =>
+                                        history.push({
+                                            pathname: "/download",
+                                            search: "?depth=1",
+                                        })
+                                    }
+                                    className="button is-medium is-primary"
+                                >
+                                    Download Now
+                                </button>
+                            ) : (
+                                <a
+                                    href={TWITTER_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="button is-medium is-primary"
+                                    aria-label={`Follow @${TWITTER_HANDLE} on X for updates`}
+                                >
+                                    Follow us{" "}
+                                    <FontAwesomeIcon
+                                        icon={faTwitter}
+                                        className="icon-right"
+                                    />
+                                </a>
+                            )}
                         </div>
                     </div>
+                </div>
             </section>
 
             <section className="section mobile-card" id="about">
@@ -105,18 +108,18 @@ style={{
                     </div>
                     <div className="column is-12 section-content">
                         <div
-                                className="content-frame content-frame--crt content-frame--procedural content"
-                                style={{
-                                    ["--card-accent-color" as string]:
-                                        card.color,
-                                    ["--card-accent-bg" as string]:
-                                        card.colorBg,
+                            className="content-frame content-frame--crt content-frame--procedural content"
+                            style={
+                                {
+                                    ["--card-accent-color" as string]: card.color,
+                                    ["--card-accent-bg" as string]: card.colorBg,
                                     ["--card-accent-glow" as string]:
                                         card.color + "60",
                                     ["--card-accent-glow-strong" as string]:
                                         card.color + "99",
-                                } as React.CSSProperties}
-                            >
+                                } as React.CSSProperties
+                            }
+                        >
                             <span className="card-header">
                                 <span className="card-header__img-wrap">
                                     <img
@@ -137,7 +140,12 @@ style={{
                             </p>
                             {DOWNLOAD_ENABLED ? (
                                 <button
-                                    onClick={() => history.push({ pathname: "/download", search: "?depth=1" })}
+                                    onClick={() =>
+                                        history.push({
+                                            pathname: "/download",
+                                            search: "?depth=1",
+                                        })
+                                    }
                                     className="button is-medium is-primary"
                                 >
                                     Download Now
@@ -173,18 +181,18 @@ style={{
                     </div>
                     <div className="column is-12 section-content">
                         <div
-                                className="content-frame content-frame--crt content-frame--procedural content"
-                                style={{
-                                    ["--card-accent-color" as string]:
-                                        card2.color,
-                                    ["--card-accent-bg" as string]:
-                                        card2.colorBg,
+                            className="content-frame content-frame--crt content-frame--procedural content"
+                            style={
+                                {
+                                    ["--card-accent-color" as string]: card2.color,
+                                    ["--card-accent-bg" as string]: card2.colorBg,
                                     ["--card-accent-glow" as string]:
                                         card2.color + "60",
                                     ["--card-accent-glow-strong" as string]:
                                         card2.color + "99",
-                                } as React.CSSProperties}
-                            >
+                                } as React.CSSProperties
+                            }
+                        >
                             <span className="card-header">
                                 <span className="card-header__img-wrap">
                                     <img
@@ -253,65 +261,65 @@ style={{
                         />
                     </div>
                     <div className="column is-12 section-content">
-                            <div
-                                className="content-frame content-frame--crt content-frame--procedural content"
-style={{
-                                        ["--card-accent-color" as string]:
-                                            cardContact.color,
-                                        ["--card-accent-bg" as string]:
-                                            cardContact.colorBg,
-                                        ["--card-accent-glow" as string]:
-                                            cardContact.color + "60",
-                                        ["--card-accent-glow-strong" as string]:
-                                            cardContact.color + "99",
-                                    } as React.CSSProperties}
-                            >
-                                <span className="card-header">
-                                    <span className="card-header__img-wrap">
-                                        <img
-                                            src={cardContact.image}
-                                            alt=""
-                                            className="card-header__img"
-                                        />
-                                    </span>
-                                    <span className="card-header__title card-title--aviation">
-                                        CONTACT
-                                    </span>
+                        <div
+                            className="content-frame content-frame--crt content-frame--procedural content"
+                            style={
+                                {
+                                    ["--card-accent-color" as string]: cardContact.color,
+                                    ["--card-accent-bg" as string]: cardContact.colorBg,
+                                    ["--card-accent-glow" as string]:
+                                        cardContact.color + "60",
+                                    ["--card-accent-glow-strong" as string]:
+                                        cardContact.color + "99",
+                                } as React.CSSProperties
+                            }
+                        >
+                            <span className="card-header">
+                                <span className="card-header__img-wrap">
+                                    <img
+                                        src={cardContact.image}
+                                        alt=""
+                                        className="card-header__img"
+                                    />
                                 </span>
-                                <p className="subtitle">
-                                    Connect with us on social.
-                                </p>
-                                <div className="contact-links">
-                                    <a
-                                        href={TWITTER_URL}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="button is-medium is-primary"
-                                        aria-label={`Follow @${TWITTER_HANDLE} on X`}
-                                    >
-                                        <FontAwesomeIcon
-                                            icon={faTwitter}
-                                            className="icon-left"
-                                        />
-                                        X (Twitter)
-                                    </a>
-                                    <a
-                                        href={GITHUB_WEB_URLS.VEX_CHAT_ORG}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="button is-medium is-primary"
-                                        aria-label="Vex on GitHub"
-                                    >
-                                        <FontAwesomeIcon
-                                            icon={faGithub}
-                                            className="icon-left"
-                                        />
-                                        GitHub
-                                    </a>
-                                </div>
+                                <span className="card-header__title card-title--aviation">
+                                    CONTACT
+                                </span>
+                            </span>
+                            <p className="subtitle">
+                                Connect with us on social.
+                            </p>
+                            <div className="contact-links">
+                                <a
+                                    href={TWITTER_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="button is-medium is-primary"
+                                    aria-label={`Follow @${TWITTER_HANDLE} on X`}
+                                >
+                                    <FontAwesomeIcon
+                                        icon={faTwitter}
+                                        className="icon-left"
+                                    />
+                                    X (Twitter)
+                                </a>
+                                <a
+                                    href={GITHUB_WEB_URLS.VEX_CHAT_ORG}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="button is-medium is-primary"
+                                    aria-label="Vex on GitHub"
+                                >
+                                    <FontAwesomeIcon
+                                        icon={faGithub}
+                                        className="icon-left"
+                                    />
+                                    GitHub
+                                </a>
                             </div>
                         </div>
                     </div>
+                </div>
             </section>
         </div>
     );

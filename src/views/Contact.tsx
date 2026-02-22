@@ -79,44 +79,44 @@ export function Contact(): JSX.Element {
                         aria-hidden
                     />
                     <div className="columns container has-text-left is-vcentered about-columns">
-                            <div className="column section-bg" aria-hidden>
-                                <WitchyOrbs
-                                    roomPath="/contact"
-                                    slotId="contact"
-                                    section="about"
-                                />
-                            </div>
-                            <div className="column is-12 section-content">
-                                <div className="content-frame content">
-                                    <span className="card-header">
-                                        <span className="card-header__title card-title--aviation">
-                                            CONTACT
-                                        </span>
+                        <div className="column section-bg" aria-hidden>
+                            <WitchyOrbs
+                                roomPath="/contact"
+                                slotId="contact"
+                                section="about"
+                            />
+                        </div>
+                        <div className="column is-12 section-content">
+                            <div className="content-frame content">
+                                <span className="card-header">
+                                    <span className="card-header__title card-title--aviation">
+                                        CONTACT
                                     </span>
-                                    <p className="subtitle">
-                                        Connect with us on social.
-                                    </p>
-                                    <div className="contact-links">
-                                        {SOCIAL_LINKS.map((link) => (
-                                            <a
-                                                key={link.id}
-                                                href={link.href}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="button is-medium is-primary"
-                                                aria-label={link.ariaLabel}
-                                            >
-                                                <FontAwesomeIcon
-                                                    icon={link.icon}
-                                                    className="icon-left"
-                                                />
-                                                {link.label}
-                                            </a>
-                                        ))}
-                                    </div>
+                                </span>
+                                <p className="subtitle">
+                                    Connect with us on social.
+                                </p>
+                                <div className="contact-links">
+                                    {SOCIAL_LINKS.map((link) => (
+                                        <a
+                                            key={link.id}
+                                            href={link.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="button is-medium is-primary"
+                                            aria-label={link.ariaLabel}
+                                        >
+                                            <FontAwesomeIcon
+                                                icon={link.icon}
+                                                className="icon-left"
+                                            />
+                                            {link.label}
+                                        </a>
+                                    ))}
                                 </div>
                             </div>
                         </div>
+                    </div>
                 </section>
             </div>
         </div>
