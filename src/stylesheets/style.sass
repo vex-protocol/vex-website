@@ -531,7 +531,7 @@ $position-gauge-cell: 36px
 .position-gauge__round--available:hover .position-gauge__round-inner
   box-shadow: 0 0 10px rgba(145, 230, 67, 0.8), 0 0 20px rgba(145, 230, 67, 0.5)
 
-// Mobile: bottom center, X horizontal, Y vertical (stacked)
+// Mobile: bottom center
 @media (max-width: 768px)
   .position-gauge
     bottom: 1.25rem
@@ -540,11 +540,100 @@ $position-gauge-cell: 36px
   .position-gauge__axis--x .position-gauge__rounds
     flex-direction: row
 
-// Desktop: bottom-right corner, X horizontal, Y vertical (L-shape)
+// Desktop: bottom-right corner
 @media (min-width: 769px)
   .position-gauge
     right: 1.25rem
     bottom: 1.25rem
+
+////////////////////////////////////////////////////////////////
+// Scroll-to-top mode: disable all scroll-snap so we can jump directly to top
+////////////////////////////////////////////////////////////////
+body.scroll-to-top-active
+  .route-panel,
+  .route-panel .mobile-cards,
+  .route-panel .home-panel-cards,
+  .route-panel .contact-panel-cards,
+  .route-panel .privacy-panel-cards,
+  .route-panel .download-panel-cards
+    scroll-snap-type: none !important
+    scroll-behavior: auto !important
+  .route-panel .mobile-card
+    scroll-snap-align: none !important
+    scroll-snap-stop: normal !important
+
+////////////////////////////////////////////////////////////////
+// App control panel – scroll-to-top above D-pad (both mobile and desktop)
+////////////////////////////////////////////////////////////////
+.app-control-panel
+  position: fixed
+  bottom: 1.25rem
+  right: 1.25rem
+  z-index: 900
+  display: flex
+  flex-direction: column
+  align-items: flex-end
+  gap: 0.5rem
+
+.app-control-panel .scroll-to-top-button
+  flex-shrink: 0
+  width: 28px
+  height: 28px
+  padding: 0
+  color: $fire-red
+  border-color: rgba(231, 0, 0, 0.5)
+  background: rgba(8, 10, 12, 0.6)
+  box-shadow: 0 0 8px rgba(231, 0, 0, 0.3)
+  svg
+    width: 12px
+    height: 12px
+  &:hover
+    color: $fire-red
+    border-color: rgba(231, 0, 0, 0.8)
+    box-shadow: 0 0 12px rgba(231, 0, 0, 0.5)
+
+////////////////////////////////////////////////////////////////
+// Lateral route menu – desktop horizontal menu, current page in red
+////////////////////////////////////////////////////////////////
+.lateral-route-menu
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.5rem
+  padding: 0.5rem 0.75rem
+  background: rgba(8, 10, 12, 0.6)
+  border: 1px solid rgba(80, 82, 90, 0.4)
+  border-radius: 8px
+
+.lateral-route-menu__item
+  padding: 0.35rem 0.75rem
+  font-size: 0.8rem
+  font-weight: 600
+  color: rgba(255, 255, 255, 0.5)
+  background: transparent
+  border: none
+  border-radius: 4px
+  cursor: pointer
+  transition: color 0.2s, background 0.2s
+  &:hover
+    color: rgba(255, 255, 255, 0.9)
+    background: rgba(255, 255, 255, 0.06)
+  &:focus
+    outline: 2px solid rgba(231, 0, 0, 0.5)
+    outline-offset: 2px
+
+.lateral-route-menu__item--active
+  color: $fire-red
+  text-shadow: 0 0 8px rgba(231, 0, 0, 0.6)
+  &:hover
+    color: $fire-red
+    background: rgba(231, 0, 0, 0.08)
+
+// In navbar: minimal styling, no panel background
+.navbar-route-menu .lateral-route-menu
+  padding: 0
+  background: transparent
+  border: none
 
 @keyframes position-gauge-shake
   0%, 100%
@@ -817,6 +906,22 @@ $position-gauge-cell: 36px
   padding-right: 0.5rem
   box-sizing: border-box
 
+.navbar__container
+  display: flex
+  align-items: center
+  justify-content: space-between
+  gap: 1rem
+
+.navbar-route-menu
+  display: none
+
+@media (min-width: 769px)
+  .navbar-route-menu
+    display: flex
+    align-items: center
+    gap: 0.5rem
+    flex-shrink: 0
+
 .navbar-sticky-wrapper .navbar-brand
   min-width: 0
   flex: 1
@@ -828,6 +933,12 @@ $position-gauge-cell: 36px
   overflow: hidden
   flex: 1
   max-width: 100%
+  // When used as button (respawn)
+  background: none
+  border: none
+  cursor: pointer
+  font: inherit
+  padding: 0.5rem 0.75rem
 
 .navbar .logo-text
   overflow: hidden

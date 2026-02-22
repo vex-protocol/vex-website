@@ -31,27 +31,27 @@ export function Router(): JSX.Element {
         <BrowserRouter>
             <RouteSectionsProvider>
                 <Switch>
-                        <Route
-                            exact
-                            path={"/download"}
-                            render={() =>
-                                DOWNLOAD_ENABLED ? (
-                                    <AppNavigator />
-                                ) : (
-                                    <Redirect to="/" />
-                                )
-                            }
-                        />
-                        <Route
-                            exact
-                            path={["/", "/privacy-policy"]}
-                            render={() => <AppNavigator />}
-                        />
-                        <Route exact path={"/team"} render={() => <Team />} />
-                        <Route
-                            path={"/invite/:id"}
-                            render={({ match }) => <Invites match={match} />}
-                        />
+                    <Route
+                        exact
+                        path={"/download"}
+                        render={() =>
+                            DOWNLOAD_ENABLED ? (
+                                <AppNavigator />
+                            ) : (
+                                <Redirect to="/" />
+                            )
+                        }
+                    />
+                    <Route
+                        exact
+                        path={["/", "/privacy-policy"]}
+                        render={() => <AppNavigator />}
+                    />
+                    <Route exact path={"/team"} render={() => <Team />} />
+                    <Route
+                        path={"/invite/:id"}
+                        render={({ match }) => <Invites match={match} />}
+                    />
                 </Switch>
             </RouteSectionsProvider>
         </BrowserRouter>

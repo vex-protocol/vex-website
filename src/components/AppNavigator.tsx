@@ -17,6 +17,7 @@ import { useRouteSections } from "../context/RouteSectionsContext";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { ScrollToTopButton } from "./ScrollToTopButton";
 import { HomePanel, PrivacyPanel, DownloadPanel } from "../views";
+import { RespawnProvider } from "../context/RespawnContext";
 
 const PANELS: Record<string, () => JSX.Element> = {
     "/": () => <HomePanel />,
@@ -35,6 +36,9 @@ export function AppNavigator(): JSX.Element {
     >(null);
     const touchStart = useRef<{ x: number; y: number } | null>(null);
     const programmaticScrollRef = useRef(false);
+    const wheelAccum = useRef({ x: 0, y: 0 });
+    const lastWheelTime = useRef(0);
+    const wheelLockoutUntil = useRef(0);
 
     const isMobile = useIsMobile();
     /** Down/right = next section, Up/left = prev (natural direction mapping) */
@@ -45,6 +49,95 @@ export function AppNavigator(): JSX.Element {
 
     const currentVerticalRef =
         verticalRefs.current.get(currentRouteIdx) ?? null;
+
+    const depthParam = (() => {
+        const d = new URLSearchParams(location.search).get("depth");
+        const n = d ? parseInt(d, 10) : NaN;
+        return Number.isFinite(n) && n >= 1 ? n : null;
+    })();
+
+    const updateDepthParam = useCallback(
+        (depth: number) => {
+            const params = new URLSearchParams(location.search);
+            if (depth <= 1) {
+                params.delete("depth");
+            } else {
+                params.set("depth", String(depth));
+            }
+            const search = params.toString();
+            const newSearch = search ? `?${search}` : "";
+            const currentSearch = location.search || "";
+            if (currentSearch !== newSearch) {
+                history.replace({
+                    pathname: location.pathname,
+                    search: newSearch,
+                });
+            }
+        },
+        [history, location.pathname, location.search]
+    );
+
+    // Scroll to depth param on load (e.g. shared link to specific section)
+    useLayoutEffect(() => {
+        if (!depthParam || !currentVerticalRef || sectionIds.length === 0)
+            return;
+        const targetIndex = Math.min(depthParam - 1, sectionIds.length - 1);
+        if (targetIndex < 0) return;
+
+        const el = currentVerticalRef;
+        const sections = sectionIds
+            .map((id) => el.querySelector(`#${id}`))
+            .filter((s): s is HTMLElement => s !== null);
+        const section = sections[targetIndex];
+        if (section) {
+            section.scrollIntoView({ behavior: "auto", block: "start" });
+        }
+    }, [depthParam, currentVerticalRef, sectionIds, isMobile]);
+
+    const scrollPanelToTopInstant = useCallback((el: HTMLDivElement) => {
+        const mobileCards = el.querySelector(".mobile-cards");
+        const scrollEl = (mobileCards || el) as HTMLElement;
+        document.body.classList.add("scroll-to-top-active");
+        scrollEl.scrollTop = 0;
+        el.scrollTop = 0;
+        setTimeout(() => {
+            document.body.classList.remove("scroll-to-top-active");
+        }, 150);
+    }, []);
+
+    // Update URL depth param when user scrolls vertically
+    useEffect(() => {
+        const el = currentVerticalRef;
+        if (!el || sectionIds.length === 0) return;
+        const scrollEl = (isMobile && el.querySelector(".mobile-cards")) || el;
+
+        const syncDepthToUrl = () => {
+            const sections = sectionIds
+                .map((id) => el.querySelector(`#${id}`))
+                .filter((s): s is HTMLElement => s !== null);
+            if (sections.length === 0) return;
+            const scrollPos = scrollEl.scrollTop;
+            const viewSize = scrollEl.clientHeight;
+            let index = 0;
+            for (let i = 0; i < sections.length; i++) {
+                const pos = sections[i].offsetTop;
+                if (scrollPos < pos + viewSize / 2) {
+                    index = i;
+                    break;
+                }
+                index = i;
+            }
+            updateDepthParam(index + 1);
+        };
+
+        syncDepthToUrl();
+        scrollEl.addEventListener("scroll", syncDepthToUrl);
+        window.addEventListener("resize", syncDepthToUrl);
+        return () => {
+            scrollEl.removeEventListener("scroll", syncDepthToUrl);
+            window.removeEventListener("resize", syncDepthToUrl);
+        };
+    }, [currentVerticalRef, sectionIds, isMobile, updateDepthParam]);
 
     // Scroll lateral strip when pathname changes (e.g. from nav links, keyboard)
     useLayoutEffect(() => {
@@ -187,6 +280,10 @@ export function AppNavigator(): JSX.Element {
     }, [navigate]);
 
     useEffect(() => {
+        const THRESHOLD = 120;
+        const LOCKOUT_MS = 700;
+        const IDLE_RESET_MS = 150;
+
         const onWheel = (e: WheelEvent) => {
             const target = e.target as HTMLElement;
             if (
@@ -196,14 +293,43 @@ export function AppNavigator(): JSX.Element {
             ) {
                 return;
             }
-            const absX = Math.abs(e.deltaX);
-            const absY = Math.abs(e.deltaY);
-            if (absX > absY) {
+            const now = Date.now();
+            if (now < wheelLockoutUntil.current) {
                 e.preventDefault();
-                navigate(e.deltaX > 0 ? "right" : "left");
-            } else if (absY > absX) {
-                e.preventDefault();
-                navigate(e.deltaY > 0 ? "down" : "up");
+                return;
+            }
+            if (now - lastWheelTime.current > IDLE_RESET_MS) {
+                wheelAccum.current = { x: 0, y: 0 };
+            }
+            lastWheelTime.current = now;
+
+            const scale = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 80 : 1;
+            const dx = e.deltaX * scale;
+            const dy = e.deltaY * scale;
+            const absX = Math.abs(dx);
+            const absY = Math.abs(dy);
+            const isHorizontal = absX > absY;
+            const delta = isHorizontal ? dx : dy;
+            const sign = delta > 0 ? 1 : -1;
+            const axis = isHorizontal ? "x" : "y";
+
+            e.preventDefault();
+            if ((wheelAccum.current[axis] > 0) !== (sign > 0))
+                wheelAccum.current[axis] = 0;
+            wheelAccum.current[axis] += delta;
+
+            if (Math.abs(wheelAccum.current[axis]) >= THRESHOLD) {
+                wheelAccum.current[axis] = 0;
+                wheelLockoutUntil.current = now + LOCKOUT_MS;
+                navigate(
+                    isHorizontal
+                        ? sign > 0
+                            ? "right"
+                            : "left"
+                        : sign > 0
+                          ? "down"
+                          : "up"
+                );
             }
         };
         window.addEventListener("wheel", onWheel, { passive: false });
@@ -252,49 +378,52 @@ export function AppNavigator(): JSX.Element {
         []
     );
 
+    const scrollToTop = useCallback(() => {
+        const el = verticalRefs.current.get(currentRouteIdx);
+        if (!el) return;
+        scrollPanelToTopInstant(el);
+    }, [currentRouteIdx, scrollPanelToTopInstant]);
+
     return (
-        <div className="app app-navigator">
-            <Navbar />
-            <div className="app-control-panel">
-                <div className="app-control-panel__actions">
-                    <ScrollToTopButton
+        <RespawnProvider scrollToTop={scrollToTop}>
+            <div className="app app-navigator">
+                <Navbar />
+                <div className="app-control-panel">
+                    <ScrollToTopButton sectionIds={sectionIds} />
+                    <PositionGauge
+                        lateralIndex={currentRouteIdx}
                         verticalScrollRef={{ current: currentVerticalRef }}
                         sectionIds={sectionIds}
+                        shake={indicatorShake}
+                        attemptDirection={attemptDirection}
+                        invertVertical={invertVertical}
+                        onAttemptAtBoundary={(dir) => {
+                            setAttemptDirection(dir);
+                            setIndicatorShake(true);
+                            setTimeout(() => {
+                                setIndicatorShake(false);
+                                setAttemptDirection(null);
+                            }, 400);
+                        }}
                     />
                 </div>
-                <PositionGauge
-                    lateralIndex={currentRouteIdx}
-                    verticalScrollRef={{ current: currentVerticalRef }}
-                    sectionIds={sectionIds}
-                    shake={indicatorShake}
-                    attemptDirection={attemptDirection}
-                    invertVertical={invertVertical}
-                    onAttemptAtBoundary={(dir) => {
-                        setAttemptDirection(dir);
-                        setIndicatorShake(true);
-                        setTimeout(() => {
-                            setIndicatorShake(false);
-                            setAttemptDirection(null);
-                        }, 400);
-                    }}
-                />
+                <div
+                    className="lateral-strip"
+                    ref={lateralRef}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                >
+                    {LATERAL_ROUTES.map((route, idx) => (
+                        <div
+                            key={route.path}
+                            className="route-panel"
+                            ref={(el) => setVerticalRef(idx, el)}
+                        >
+                            {PANELS[route.path]?.() ?? null}
+                        </div>
+                    ))}
+                </div>
             </div>
-            <div
-                className="lateral-strip"
-                ref={lateralRef}
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-            >
-                {LATERAL_ROUTES.map((route, idx) => (
-                    <div
-                        key={route.path}
-                        className="route-panel"
-                        ref={(el) => setVerticalRef(idx, el)}
-                    >
-                        {PANELS[route.path]?.() ?? null}
-                    </div>
-                ))}
-            </div>
-        </div>
+        </RespawnProvider>
     );
 }

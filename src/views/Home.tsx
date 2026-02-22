@@ -2,10 +2,8 @@ import React, { useRef, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter } from "@fortawesome/free-brands-svg-icons";
 import logo from "../assets/vex_icon.svg";
-import haloRed from "../assets/halo-red.jpeg";
-import girlRed from "../assets/girl-red.jpg";
-import basedmilio from "../assets/FIRERED/basedmilio4.jpeg";
 import { WitchyHero } from "../components/WitchyHero";
+import { useProceduralImages } from "../hooks/useProceduralImages";
 import { WitchyOrbs } from "../components/WitchyOrbs";
 import { Navbar } from "../components/Hero";
 import { PageIndicator } from "../components/PageIndicator";
@@ -22,6 +20,7 @@ const SECTION_IDS = ["hero", "about", "features"];
 
 export function Home() {
     const history = useHistory();
+    const { halo, card, card2 } = useProceduralImages();
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const [indicatorShake, setIndicatorShake] = useState(false);
 
@@ -104,7 +103,7 @@ export function Home() {
                 >
                     <div
                         className="hero-halo-bg"
-                        style={{ backgroundImage: `url(${haloRed})` }}
+                        style={{ backgroundImage: `url(${halo})` }}
                         aria-hidden
                     />
                     <div className="hero-body">
@@ -180,7 +179,7 @@ export function Home() {
                                 <span className="card-header">
                                     <span className="card-header__img-wrap">
                                         <img
-                                            src={girlRed}
+                                            src={card}
                                             alt=""
                                             className="card-header__img"
                                         />
@@ -238,7 +237,7 @@ export function Home() {
                                 <span className="card-header">
                                     <span className="card-header__img-wrap">
                                         <img
-                                            src={basedmilio}
+                                            src={card2}
                                             alt=""
                                             className="card-header__img"
                                         />

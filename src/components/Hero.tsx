@@ -1,8 +1,10 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/vex_icon.svg";
 import { DOWNLOAD_ENABLED, LOGO_TEXT } from "./constants";
+import { LateralRouteMenu } from "./LateralRouteMenu";
+import { useRespawn } from "../context/RespawnContext";
 
 export function Hero(props: { content: JSX.Element }): JSX.Element {
     return (
@@ -19,25 +21,17 @@ export function Hero(props: { content: JSX.Element }): JSX.Element {
     );
 }
 
-const NAVBAR_MENU_CONTENT = (
-    <>
-        <Link className="navbar-item navbar-menu-item" to="/">
-            Home
-        </Link>
-        {DOWNLOAD_ENABLED && (
-            <Link className="navbar-item navbar-menu-item" to="/download">
-                Download
-            </Link>
-        )}
-        <Link className="navbar-item navbar-menu-item" to="/privacy-policy">
-            Privacy Policy
-        </Link>
-    </>
-);
+const NAVBAR_MENU_ROUTES = [
+    { path: "/", label: "Home" },
+    ...(DOWNLOAD_ENABLED ? [{ path: "/download", label: "Download" }] : []),
+    { path: "/privacy-policy", label: "Privacy Policy" },
+];
 
 export function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
+    const { respawn, scrollToTop } = useRespawn();
+    const location = useLocation();
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -76,7 +70,24 @@ export function Navbar() {
                   role="menu"
                   onClick={() => setMenuOpen(false)}
               >
-                  <div className="navbar-end">{NAVBAR_MENU_CONTENT}</div>
+                  <div className="navbar-end">
+                      {NAVBAR_MENU_ROUTES.map(({ path, label }) => (
+                          <Link
+                              key={path}
+                              className="navbar-item navbar-menu-item"
+                              to={{ pathname: path, search: "" }}
+                              replace={path === location.pathname}
+                              onClick={(e) => {
+                                  if (path === location.pathname) {
+                                      e.preventDefault();
+                                      scrollToTop();
+                                  }
+                              }}
+                          >
+                              {label}
+                          </Link>
+                      ))}
+                  </div>
               </div>,
               document.body
           )
@@ -87,12 +98,13 @@ export function Navbar() {
             <div className="navbar-sticky-wrapper" ref={wrapperRef}>
                 <div className="navbar-halo navbar-halo--tint" />
                 <header className="navbar navbar-over-halo">
-                    <div className="container">
+                    <div className="container navbar__container">
                         <div className="navbar-brand">
-                            <Link
-                                to={"/"}
+                            <button
+                                type="button"
                                 className="logo-link navbar-item"
-                                aria-label="Vex"
+                                aria-label="Respawn at home"
+                                onClick={respawn}
                             >
                                 <span className="logo-glitch">
                                     <img
@@ -102,7 +114,7 @@ export function Navbar() {
                                     />
                                 </span>
                                 <span className="logo-text">{LOGO_TEXT}</span>
-                            </Link>
+                            </button>
                             <span
                                 className={`navbar-reticle ${
                                     menuOpen ? "is-active" : ""
@@ -125,6 +137,9 @@ export function Navbar() {
                                 <span className="reticle-dot" />
                                 <span className="reticle-ring" />
                             </span>
+                        </div>
+                        <div className="navbar-route-menu">
+                            <LateralRouteMenu />
                         </div>
                     </div>
                 </header>

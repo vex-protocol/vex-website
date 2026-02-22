@@ -196,6 +196,18 @@ function generateRoomOrbs(
 
 export const ENERGY_ROTATE_THRESHOLD = 0.35;
 
+/** Clear orb cache so next generateOrbs uses a new random seed. Call before respawn. */
+export function invalidateRoomCache(roomPath?: string): void {
+    if (roomPath != null) {
+        delete roomCache[roomPath];
+        if (lastRoomId === roomPath) lastRoomId = null;
+    } else {
+        for (const k of Object.keys(roomCache)) delete roomCache[k];
+        lastRoomId = null;
+        lastRoomImages.clear();
+    }
+}
+
 /** Get orbs for a slot. Lazily generates when cache is empty (new room). */
 export function generateOrbs(
     count: number,

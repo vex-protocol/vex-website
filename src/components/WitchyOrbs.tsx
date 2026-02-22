@@ -1,6 +1,7 @@
 import React, { useRef, useMemo } from "react";
 import { generateOrbs, OrbColor } from "../assets/orbImages";
 import { useIsMobile } from "../hooks/useIsMobile";
+import { useRespawn } from "../context/RespawnContext";
 
 let networkId = 0;
 
@@ -160,10 +161,12 @@ export function WitchyOrbs({
         : SPACECRAFT_ROUTES;
     const starCount = isMobile ? STAR_COUNT_MOBILE : STAR_COUNT;
 
+    const { respawnTrigger } = useRespawn();
     const orbs = useMemo(() => generateOrbs(orbCount, slotId, roomPath), [
         orbCount,
         slotId,
         roomPath,
+        respawnTrigger,
     ]);
 
     const stars = Array.from({ length: starCount }, (_, i) => ({

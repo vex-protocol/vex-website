@@ -2,10 +2,8 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
 import logo from "../assets/vex_icon.svg";
-import haloRed from "../assets/halo-red.jpeg";
-import girlRed from "../assets/girl-red.jpg";
-import basedmilio from "../assets/FIRERED/basedmilio4.jpeg";
 import { WitchyHero } from "../components/WitchyHero";
+import { useProceduralImages } from "../hooks/useProceduralImages";
 import { WitchyOrbs } from "../components/WitchyOrbs";
 import { Link, useHistory } from "react-router-dom";
 import {
@@ -18,6 +16,7 @@ import {
 
 export function HomePanel() {
     const history = useHistory();
+    const { halo, card, card2 } = useProceduralImages();
 
     return (
         <div className="mobile-cards home-panel-cards">
@@ -27,7 +26,7 @@ export function HomePanel() {
             >
                 <div
                     className="hero-halo-bg"
-                    style={{ backgroundImage: `url(${haloRed})` }}
+                    style={{ backgroundImage: `url(${halo})` }}
                     aria-hidden
                 />
                 <div className="hero-body">
@@ -100,7 +99,7 @@ export function HomePanel() {
                             <span className="card-header">
                                 <span className="card-header__img-wrap">
                                     <img
-                                        src={girlRed}
+                                        src={card}
                                         alt=""
                                         className="card-header__img"
                                     />
@@ -156,7 +155,7 @@ export function HomePanel() {
                             <span className="card-header">
                                 <span className="card-header__img-wrap">
                                     <img
-                                        src={basedmilio}
+                                        src={card2}
                                         alt=""
                                         className="card-header__img"
                                     />
@@ -209,7 +208,7 @@ export function HomePanel() {
             >
                 <div
                     className="hero-halo-bg"
-                    style={{ backgroundImage: `url(${haloRed})` }}
+                    style={{ backgroundImage: `url(${halo})` }}
                     aria-hidden
                 />
                 <div className="hero-body">

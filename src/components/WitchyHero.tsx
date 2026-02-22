@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 import "../stylesheets/style.sass";
-import girlRed from "../assets/girl-red.jpg";
 import { generateOrbs, OrbColor } from "../assets/orbImages";
 import { useIsMobile } from "../hooks/useIsMobile";
+import { useRespawn } from "../context/RespawnContext";
+import { useProceduralImages } from "../hooks/useProceduralImages";
 
 const STAR_COUNT = 24;
 const STAR_COUNT_MOBILE = 10;
@@ -51,9 +52,12 @@ export function WitchyHero({
     const sizes = isMobile ? ORB_SIZES_MOBILE : ORB_SIZES;
     const starCount = isMobile ? STAR_COUNT_MOBILE : STAR_COUNT;
 
+    const { respawnTrigger } = useRespawn();
+    const { mascot } = useProceduralImages();
     const orbs = useMemo(() => generateOrbs(orbCount, "home-hero", roomPath), [
         orbCount,
         roomPath,
+        respawnTrigger,
     ]);
 
     const stars = Array.from({ length: starCount }, (_, i) => ({
@@ -103,7 +107,7 @@ export function WitchyHero({
             >
                 <div className="mascot-witchy-orb__orb" aria-hidden />
                 <div className="mascot-witchy-orb__inner">
-                    <img src={girlRed} alt="" className="hero-mascot" />
+                    <img src={mascot} alt="" className="hero-mascot" />
                 </div>
                 <div className="mascot-witchy-orb__particles" aria-hidden>
                     <span className="mascot-witchy-orb__particle" />
