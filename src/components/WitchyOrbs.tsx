@@ -1,4 +1,5 @@
 import React, { useRef, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { generateOrbs, OrbColor } from "../assets/orbImages";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { useRespawn } from "../context/RespawnContext";
@@ -161,13 +162,19 @@ export function WitchyOrbs({
         : SPACECRAFT_ROUTES;
     const starCount = isMobile ? STAR_COUNT_MOBILE : STAR_COUNT;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- respawnTrigger used in useMemo deps to trigger regeneration
+    const { pathname } = useLocation();
     const { respawnTrigger } = useRespawn();
     const orbs = useMemo(
         () => generateOrbs(orbCount, slotId, roomPath),
-        // respawnTrigger intentionally triggers regeneration when it changes
+        // pathname + respawnTrigger trigger redraw when navigating or respawning
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [orbCount, slotId, roomPath, respawnTrigger]
+        [orbCount, slotId, roomPath, respawnTrigger, pathname]
+    );
+    const orbsWithImages = orbs
+        .map((orb, i) => ({ ...orb, originalIndex: i }))
+        .filter((o) => o.image);
+    const validRoutes = spacecraftRoutes.filter(
+        ([a, b]) => orbs[a]?.image && orbs[b]?.image
     );
 
     const stars = Array.from({ length: starCount }, (_, i) => ({
@@ -214,7 +221,7 @@ export function WitchyOrbs({
                         </feMerge>
                     </filter>
                 </defs>
-                {spacecraftRoutes.map(([a, b], idx) => {
+                {validRoutes.map(([a, b], idx) => {
                     const [x1, y1] = orbCoords[a];
                     const [x2, y2] = orbCoords[b];
                     const pathD = `M ${x1} ${y1} L ${x2} ${y2}`;
@@ -275,37 +282,33 @@ export function WitchyOrbs({
                 })}
             </svg>
             <div className="witchy-mist" aria-hidden />
-            {orbs.map((orb, i) => {
-                const [left, top] = positions[i];
+            {orbsWithImages.map((orb, i) => {
+                const [left, top] = positions[orb.originalIndex];
                 const modifier = COLOR_TO_MODIFIER[orb.color];
-                const sizeClass = sizes[i] ?? "witchy-orb--sm";
+                const sizeClass = sizes[orb.originalIndex] ?? "witchy-orb--sm";
                 return (
                     <div
-                        key={`${orb.color}-${i}-${orb.image || "empty"}`}
-                        className={`witchy-orb ${
-                            orb.image ? "witchy-orb--with-image" : ""
-                        } ${sizeClass} ${modifier}`}
+                        key={`${orb.color}-${i}-${orb.image}`}
+                        className={`witchy-orb witchy-orb--with-image ${sizeClass} ${modifier}`}
                         style={{ top, left }}
                         aria-hidden
                     >
-                        {orb.image ? (
-                            <div className="witchy-orb__inner">
-                                <img
-                                    src={orb.image}
-                                    alt=""
-                                    className="witchy-orb__img"
-                                    loading="eager"
-                                    decoding="async"
-                                    onError={(e) => {
-                                        const img = e.currentTarget;
-                                        if (!img.dataset.retried) {
-                                            img.dataset.retried = "1";
-                                            img.src = orb.image;
-                                        }
-                                    }}
-                                />
-                            </div>
-                        ) : null}
+                        <div className="witchy-orb__inner">
+                            <img
+                                src={orb.image}
+                                alt=""
+                                className="witchy-orb__img"
+                                loading="eager"
+                                decoding="async"
+                                onError={(e) => {
+                                    const img = e.currentTarget;
+                                    if (!img.dataset.retried) {
+                                        img.dataset.retried = "1";
+                                        img.src = orb.image;
+                                    }
+                                }}
+                            />
+                        </div>
                         <div className="witchy-orb__particles" aria-hidden>
                             <span className="witchy-orb__particle" />
                             <span className="witchy-orb__particle" />

@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import "../stylesheets/style.sass";
 import { generateOrbs, OrbColor } from "../assets/orbImages";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -52,14 +53,18 @@ export function WitchyHero({
     const sizes = isMobile ? ORB_SIZES_MOBILE : ORB_SIZES;
     const starCount = isMobile ? STAR_COUNT_MOBILE : STAR_COUNT;
 
+    const { pathname } = useLocation();
     const { respawnTrigger } = useRespawn();
     const { mascot } = useProceduralImages();
     const orbs = useMemo(
         () => generateOrbs(orbCount, "home-hero", roomPath),
-        // respawnTrigger intentionally triggers regeneration when it changes
+        // pathname + respawnTrigger trigger redraw when navigating or respawning
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [orbCount, roomPath, respawnTrigger]
+        [orbCount, roomPath, respawnTrigger, pathname]
     );
+    const orbsWithImages = orbs
+        .map((orb, i) => ({ ...orb, originalIndex: i }))
+        .filter((o) => o.image);
 
     const stars = Array.from({ length: starCount }, (_, i) => ({
         id: i,
@@ -72,27 +77,25 @@ export function WitchyHero({
     return (
         <div className="witchy-container">
             <div className="witchy-mist" aria-hidden />
-            {orbs.map((orb, i) => {
-                const [left, top] = positions[i];
+            {orbsWithImages.map((orb, i) => {
+                const [left, top] = positions[orb.originalIndex];
                 const modifier = COLOR_TO_MODIFIER[orb.color];
                 return (
                     <div
-                        key={`${orb.color}-${i}-${orb.image || "empty"}`}
-                        className={`witchy-orb ${
-                            orb.image ? "witchy-orb--with-image" : ""
-                        } ${sizes[i]} ${modifier}`}
+                        key={`${orb.color}-${i}-${orb.image}`}
+                        className={`witchy-orb witchy-orb--with-image ${
+                            sizes[orb.originalIndex]
+                        } ${modifier}`}
                         style={{ top, left }}
                         aria-hidden
                     >
-                        {orb.image ? (
-                            <div className="witchy-orb__inner">
-                                <img
-                                    src={orb.image}
-                                    alt=""
-                                    className="witchy-orb__img"
-                                />
-                            </div>
-                        ) : null}
+                        <div className="witchy-orb__inner">
+                            <img
+                                src={orb.image}
+                                alt=""
+                                className="witchy-orb__img"
+                            />
+                        </div>
                         <div className="witchy-orb__particles" aria-hidden>
                             <span className="witchy-orb__particle" />
                             <span className="witchy-orb__particle" />

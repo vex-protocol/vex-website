@@ -102,13 +102,14 @@ function pickDistinctIndices(
     return indices;
 }
 
-/** Pick distinct items from pool (image+color), avoiding used images. */
+/** Pick distinct items from pool (image+color), avoiding used images for this route. */
 function pickCardIcons(
+    roomPath: string,
     pool: Array<{ image: string; color: OrbColor }>,
     count: number,
     rng: () => number
 ): CardWithColor[] {
-    const available = pool.filter(({ image }) => !isImageUsed(image));
+    const available = pool.filter(({ image }) => !isImageUsed(image, roomPath));
     const indices = pickDistinctIndices(
         available.length,
         Math.min(count, available.length),
@@ -116,7 +117,7 @@ function pickCardIcons(
     );
     const picked = indices.map((i) => available[i]!);
     const images = picked.map((p) => p.image);
-    markImagesUsed(images);
+    markImagesUsed(images, roomPath);
     return picked.map(({ image, color }) => {
         const hex = COLOR_HEX[color] ?? COLOR_HEX.red;
         return {
@@ -127,20 +128,21 @@ function pickCardIcons(
     });
 }
 
-/** Get procedural mascot for hero orb. Same for whole run. */
-export function getProceduralMascot(runKey: number): string {
-    if (cache[String(runKey)]) return cache[String(runKey)].mascot;
+/** Get procedural mascot for hero orb. Same for whole run. roomPath = route for image pool. */
+export function getProceduralMascot(runKey: number, roomPath: string): string {
+    const cacheKey = `${runKey}:${roomPath}`;
+    if (cache[cacheKey]) return cache[cacheKey].mascot;
     const key = String(runKey);
     seedCache[key] ??= getSeed(runKey);
     const rng = mulberry32(seedCache[key]!);
-    const halosAvailable = HALO_IMAGES.filter((p) => !isImageUsed(p));
+    const halosAvailable = HALO_IMAGES.filter((p) => !isImageUsed(p, roomPath));
     const halo =
         halosAvailable.length > 0
             ? halosAvailable[Math.floor(rng() * halosAvailable.length)]!
             : HALO_IMAGES[0]!;
-    markImagesUsed([halo]);
+    markImagesUsed([halo], roomPath);
 
-    const cards = pickCardIcons(IMAGES_WITH_COLORS, 5, rng);
+    const cards = pickCardIcons(roomPath, IMAGES_WITH_COLORS, 5, rng);
     const mascot = cards[0]?.image ?? IMAGES_WITH_COLORS[0]?.image ?? "";
     const fallback = {
         image: mascot,
@@ -152,7 +154,7 @@ export function getProceduralMascot(runKey: number): string {
     const cardHero = cards[3] ?? card;
     const cardContact = cards[4] ?? card2;
 
-    cache[String(runKey)] = {
+    cache[cacheKey] = {
         mascot,
         halo,
         card,
@@ -164,36 +166,53 @@ export function getProceduralMascot(runKey: number): string {
 }
 
 /** Get procedural halo/background. Same for whole run. */
-export function getProceduralHalo(runKey: number): string {
-    if (cache[String(runKey)]) return cache[String(runKey)].halo;
-    getProceduralMascot(runKey); // populate cache
-    return cache[String(runKey)].halo;
+export function getProceduralHalo(runKey: number, roomPath: string): string {
+    const cacheKey = `${runKey}:${roomPath}`;
+    if (cache[cacheKey]) return cache[cacheKey].halo;
+    getProceduralMascot(runKey, roomPath); // populate cache
+    return cache[cacheKey].halo;
 }
 
 /** Get procedural card for about section. Same for whole run. */
-export function getProceduralCard(runKey: number): CardWithColor {
-    if (cache[String(runKey)]) return cache[String(runKey)].card;
-    getProceduralMascot(runKey); // populate cache
-    return cache[String(runKey)].card;
+export function getProceduralCard(
+    runKey: number,
+    roomPath: string
+): CardWithColor {
+    const cacheKey = `${runKey}:${roomPath}`;
+    if (cache[cacheKey]) return cache[cacheKey].card;
+    getProceduralMascot(runKey, roomPath); // populate cache
+    return cache[cacheKey].card;
 }
 
 /** Get procedural card for features section. Same for whole run. */
-export function getProceduralCard2(runKey: number): CardWithColor {
-    if (cache[String(runKey)]) return cache[String(runKey)].card2;
-    getProceduralMascot(runKey); // populate cache
-    return cache[String(runKey)].card2;
+export function getProceduralCard2(
+    runKey: number,
+    roomPath: string
+): CardWithColor {
+    const cacheKey = `${runKey}:${roomPath}`;
+    if (cache[cacheKey]) return cache[cacheKey].card2;
+    getProceduralMascot(runKey, roomPath); // populate cache
+    return cache[cacheKey].card2;
 }
 
 /** Get procedural card for hero card icon. Same for whole run. */
-export function getProceduralCardHero(runKey: number): CardWithColor {
-    if (cache[String(runKey)]) return cache[String(runKey)].cardHero;
-    getProceduralMascot(runKey); // populate cache
-    return cache[String(runKey)].cardHero;
+export function getProceduralCardHero(
+    runKey: number,
+    roomPath: string
+): CardWithColor {
+    const cacheKey = `${runKey}:${roomPath}`;
+    if (cache[cacheKey]) return cache[cacheKey].cardHero;
+    getProceduralMascot(runKey, roomPath); // populate cache
+    return cache[cacheKey].cardHero;
 }
 
 /** Get procedural card for contact card icon. Same for whole run. */
-export function getProceduralCardContact(runKey: number): CardWithColor {
-    if (cache[String(runKey)]) return cache[String(runKey)].cardContact;
-    getProceduralMascot(runKey); // populate cache
-    return cache[String(runKey)].cardContact;
+export function getProceduralCardContact(
+    runKey: number,
+    roomPath: string
+): CardWithColor {
+    const cacheKey = `${runKey}:${roomPath}`;
+    if (cache[cacheKey]) return cache[cacheKey].cardContact;
+    getProceduralMascot(runKey, roomPath); // populate cache
+    return cache[cacheKey].cardContact;
 }

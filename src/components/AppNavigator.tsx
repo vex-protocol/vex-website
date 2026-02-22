@@ -117,6 +117,17 @@ export function AppNavigator(): JSX.Element {
         return () => clearTimeout(t);
     }, [location.pathname, isMobile]);
 
+    // Invalidate orb cache when pathname changes so orbs redraw with fresh images on that route.
+    // Must run during render (before children) so useMemo in WitchyOrbs sees empty cache.
+    const path = location.pathname;
+    if (
+        LATERAL_ROUTES.some((r) => r.path === path) &&
+        prevPathnameRef.current !== path
+    ) {
+        prevPathnameRef.current = path;
+        invalidateRoomCache(path);
+    }
+
     // On route enter: scroll to depth param if explicit, otherwise scroll to top
     useLayoutEffect(() => {
         const el = currentVerticalRef;

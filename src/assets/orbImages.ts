@@ -53,7 +53,11 @@ function loadOrbImagesByColor(): Record<OrbColor, string[]> {
         if (!color) continue;
         try {
             const mod = ctx(key);
-            const url = mod && (typeof mod === "string" ? mod : (mod as { default?: string }).default);
+            const url =
+                mod &&
+                (typeof mod === "string"
+                    ? mod
+                    : (mod as { default?: string }).default);
             if (url && typeof url === "string") {
                 result[color].push(url);
             }
@@ -160,53 +164,63 @@ const roomCache: Record<
     Array<{ color: OrbColor; image: string; energy: number }>
 > = {};
 
-/** Every image ever used this session – never reuse. Shared with procedural images. */
-const allUsedImages = new Set<string>();
+/** Per-route used images – each route gets its own pool so /download has images when / exhausted them. */
+const allUsedImagesByRoute: Record<string, Set<string>> = {};
 
-export function isImageUsed(path: string): boolean {
-    return allUsedImages.has(path);
+function getUsedSetForRoute(roomPath: string): Set<string> {
+    if (!allUsedImagesByRoute[roomPath])
+        allUsedImagesByRoute[roomPath] = new Set();
+    return allUsedImagesByRoute[roomPath]!;
 }
-export function markImagesUsed(paths: string[]): void {
-    paths.forEach((p) => allUsedImages.add(p));
+
+export function isImageUsed(path: string, roomPath: string): boolean {
+    return getUsedSetForRoute(roomPath).has(path);
+}
+export function markImagesUsed(paths: string[], roomPath: string): void {
+    const set = getUsedSetForRoute(roomPath);
+    paths.forEach((p) => set.add(p));
 }
 
 /** Pick any unused image from all pools (for rainbow fallback) */
 function pickAnyUnusedImage(
+    roomPath: string,
     usedThisRoom: Set<string>,
     rng: () => number
 ): string {
+    const routeUsed = getUsedSetForRoute(roomPath);
     const all: string[] = [];
     for (const images of Object.values(ORB_IMAGES_BY_COLOR)) {
         for (const p of images ?? []) {
-            if (!allUsedImages.has(p) && !usedThisRoom.has(p)) all.push(p);
+            if (!routeUsed.has(p) && !usedThisRoom.has(p)) all.push(p);
         }
     }
     if (all.length === 0) return "";
     const pick = all[Math.floor(rng() * all.length)]!;
     usedThisRoom.add(pick);
-    allUsedImages.add(pick);
+    routeUsed.add(pick);
     return pick;
 }
 
-/** Pick image for a color. ONLY from that color's folder. No duplicates. Rainbow never empty. */
+/** Pick image for a color. ONLY from that color's folder. Per-route pool. */
 function pickImageForColor(
+    roomPath: string,
     color: OrbColor,
     usedThisRoom: Set<string>,
     rng: () => number
 ): string {
+    const routeUsed = getUsedSetForRoute(roomPath);
     const pool = ORB_IMAGES_BY_COLOR[color] ?? [];
     const prefer = pool.filter(
-        (path) => !allUsedImages.has(path) && !usedThisRoom.has(path)
+        (path) => !routeUsed.has(path) && !usedThisRoom.has(path)
     );
     if (prefer.length > 0) {
         const pick = prefer[Math.floor(rng() * prefer.length)]!;
         usedThisRoom.add(pick);
-        allUsedImages.add(pick);
+        routeUsed.add(pick);
         return pick;
     }
-    // Rainbow must never be empty – fallback to any unused image
     if (color === "rainbow") {
-        return pickAnyUnusedImage(usedThisRoom, rng);
+        return pickAnyUnusedImage(roomPath, usedThisRoom, rng);
     }
     return "";
 }
@@ -248,7 +262,7 @@ function generateRoomOrbs(
     for (let i = 0; i < total; i++) {
         const color = colorSlots[i]!;
         const energy = getEnergyForColor(color, rng);
-        const image = pickImageForColor(color, usedThisRoom, rng);
+        const image = pickImageForColor(roomPath, color, usedThisRoom, rng);
         result.push({ color, image, energy });
     }
 
@@ -261,9 +275,11 @@ export const ENERGY_ROTATE_THRESHOLD = 0.35;
 export function invalidateRoomCache(roomPath?: string): void {
     if (roomPath != null) {
         delete roomCache[roomPath];
+        delete allUsedImagesByRoute[roomPath];
     } else {
         for (const k of Object.keys(roomCache)) delete roomCache[k];
-        allUsedImages.clear();
+        for (const k of Object.keys(allUsedImagesByRoute))
+            delete allUsedImagesByRoute[k];
     }
 }
 
