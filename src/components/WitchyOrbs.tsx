@@ -293,6 +293,15 @@ export function WitchyOrbs({
                                     src={orb.image}
                                     alt=""
                                     className="witchy-orb__img"
+                                    loading="eager"
+                                    decoding="async"
+                                    onError={(e) => {
+                                        const img = e.currentTarget;
+                                        if (!img.dataset.retried) {
+                                            img.dataset.retried = "1";
+                                            img.src = orb.image;
+                                        }
+                                    }}
                                 />
                             </div>
                         ) : null}

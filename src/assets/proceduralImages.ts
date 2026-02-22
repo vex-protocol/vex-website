@@ -1,8 +1,8 @@
 /**
- * Procedural image selection per playthrough. Each respawn generates a new run;
- * mascot, halo, and card images are picked from pools.
+ * Procedural image selection per playthrough. Shares "used once" with orb images.
  */
 
+import { isImageUsed, markImagesUsed } from "./orbImages";
 import girlRed from "./girl-red.jpg";
 import haloRed from "./halo-red.jpeg";
 import basedmilio from "./FIRERED/basedmilio4.jpeg";
@@ -12,7 +12,6 @@ import blackHole from "./ROYALPURPLE/BLACKHOLE.jpg";
 
 const MASCOT_IMAGES = [girlRed, basedmilio, redGirl, plane];
 const HALO_IMAGES = [haloRed, blackHole];
-const CARD_IMAGES = [girlRed, basedmilio, redGirl, plane];
 
 const cache: Record<
     string,
@@ -40,21 +39,43 @@ function getSeed(runKey: number): number {
     return ((ts >>> 0) ^ r) + runKey * 0x9e3779b9;
 }
 
-/** Get procedural mascot for hero. Same for whole run (runKey = respawnTrigger). */
+/** Pick distinct indices from pool, no duplicates. */
+function pickDistinctIndices(
+    poolSize: number,
+    count: number,
+    rng: () => number
+): number[] {
+    const indices: number[] = [];
+    const available = Array.from({ length: poolSize }, (_, i) => i);
+    for (let i = 0; i < count && available.length > 0; i++) {
+        const idx = Math.floor(rng() * available.length);
+        indices.push(available[idx]!);
+        available.splice(idx, 1);
+    }
+    return indices;
+}
+
+/** Get procedural mascot for hero. Same for whole run. Never reuses images used by orbs or prior picks. */
 export function getProceduralMascot(runKey: number): string {
     if (cache[String(runKey)]) return cache[String(runKey)].mascot;
     const key = String(runKey);
     seedCache[key] ??= getSeed(runKey);
     const rng = mulberry32(seedCache[key]!);
-    const idx = Math.floor(rng() * MASCOT_IMAGES.length);
-    const mascot = MASCOT_IMAGES[idx]!;
-    const halo = HALO_IMAGES[Math.floor(rng() * HALO_IMAGES.length)]!;
-    const cardIdx = Math.floor(rng() * CARD_IMAGES.length);
-    let card2Idx = Math.floor(rng() * CARD_IMAGES.length);
-    while (card2Idx === cardIdx && CARD_IMAGES.length > 1)
-        card2Idx = Math.floor(rng() * CARD_IMAGES.length);
-    const card = CARD_IMAGES[cardIdx]!;
-    const card2 = CARD_IMAGES[card2Idx]!;
+    const halosAvailable = HALO_IMAGES.filter((p) => !isImageUsed(p));
+    const halo =
+        halosAvailable.length > 0
+            ? halosAvailable[Math.floor(rng() * halosAvailable.length)]!
+            : HALO_IMAGES[0]!;
+    const mascotsAvailable = MASCOT_IMAGES.filter((p) => !isImageUsed(p));
+    const avatarIndices = pickDistinctIndices(
+        mascotsAvailable.length,
+        Math.min(3, mascotsAvailable.length),
+        rng
+    );
+    const mascot = mascotsAvailable[avatarIndices[0] ?? 0] ?? MASCOT_IMAGES[0]!;
+    const card = mascotsAvailable[avatarIndices[1] ?? 0] ?? mascot;
+    const card2 = mascotsAvailable[avatarIndices[2] ?? 0] ?? card;
+    markImagesUsed([halo, mascot, card, card2].filter(Boolean));
     cache[String(runKey)] = { mascot, halo, card, card2 };
     return mascot;
 }

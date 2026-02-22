@@ -18,6 +18,7 @@ import { useIsMobile } from "../hooks/useIsMobile";
 import { ScrollToTopButton } from "./ScrollToTopButton";
 import { HomePanel, PrivacyPanel, DownloadPanel } from "../views";
 import { RespawnProvider } from "../context/RespawnContext";
+import { invalidateRoomCache } from "../assets/orbImages";
 
 const PANELS: Record<string, () => JSX.Element> = {
     "/": () => <HomePanel />,
@@ -46,6 +47,9 @@ export function AppNavigator(): JSX.Element {
     const currentRouteIdx = routeIndex(location.pathname);
     const configSectionIds = LATERAL_ROUTES[currentRouteIdx]?.sectionIds ?? [];
     const sectionIds = useRouteSections(location.pathname, configSectionIds);
+
+    const [baseChangeCounter, setBaseChangeCounter] = useState(0);
+    const prevPathnameRef = useRef(location.pathname);
 
     const currentVerticalRef =
         verticalRefs.current.get(currentRouteIdx) ?? null;
@@ -77,23 +81,6 @@ export function AppNavigator(): JSX.Element {
         [history, location.pathname, location.search]
     );
 
-    // Scroll to depth param on load (e.g. shared link to specific section)
-    useLayoutEffect(() => {
-        if (!depthParam || !currentVerticalRef || sectionIds.length === 0)
-            return;
-        const targetIndex = Math.min(depthParam - 1, sectionIds.length - 1);
-        if (targetIndex < 0) return;
-
-        const el = currentVerticalRef;
-        const sections = sectionIds
-            .map((id) => el.querySelector(`#${id}`))
-            .filter((s): s is HTMLElement => s !== null);
-        const section = sections[targetIndex];
-        if (section) {
-            section.scrollIntoView({ behavior: "auto", block: "start" });
-        }
-    }, [depthParam, currentVerticalRef, sectionIds, isMobile]);
-
     const scrollPanelToTopInstant = useCallback((el: HTMLDivElement) => {
         const mobileCards = el.querySelector(".mobile-cards");
         const scrollEl = (mobileCards || el) as HTMLElement;
@@ -104,6 +91,37 @@ export function AppNavigator(): JSX.Element {
             document.body.classList.remove("scroll-to-top-active");
         }, 150);
     }, []);
+
+    // On route enter: scroll to depth param if explicit, otherwise scroll to top
+    useLayoutEffect(() => {
+        const el = currentVerticalRef;
+        if (!el || sectionIds.length === 0) return;
+
+        if (depthParam != null) {
+            const targetIndex = Math.min(depthParam - 1, sectionIds.length - 1);
+            if (targetIndex >= 0) {
+                const sections = sectionIds
+                    .map((id) => el.querySelector(`#${id}`))
+                    .filter((s): s is HTMLElement => s !== null);
+                const section = sections[targetIndex];
+                if (section) {
+                    section.scrollIntoView({
+                        behavior: "auto",
+                        block: "start",
+                    });
+                }
+                return;
+            }
+        }
+
+        scrollPanelToTopInstant(el);
+    }, [
+        location.pathname,
+        depthParam,
+        currentVerticalRef,
+        sectionIds,
+        scrollPanelToTopInstant,
+    ]);
 
     // Update URL depth param when user scrolls vertically
     useEffect(() => {
@@ -138,6 +156,15 @@ export function AppNavigator(): JSX.Element {
             window.removeEventListener("resize", syncDepthToUrl);
         };
     }, [currentVerticalRef, sectionIds, isMobile, updateDepthParam]);
+
+    // Base change = new playthrough: invalidate orb cache and bump counter so panels regenerate
+    useEffect(() => {
+        if (prevPathnameRef.current !== location.pathname) {
+            prevPathnameRef.current = location.pathname;
+            invalidateRoomCache(location.pathname);
+            setBaseChangeCounter((c) => c + 1);
+        }
+    }, [location.pathname]);
 
     // Scroll lateral strip when pathname changes (e.g. from nav links, keyboard)
     useLayoutEffect(() => {
@@ -251,6 +278,12 @@ export function AppNavigator(): JSX.Element {
         [goRoute, goSection]
     );
 
+    const scrollToTop = useCallback(() => {
+        const el = verticalRefs.current.get(currentRouteIdx);
+        if (!el) return;
+        scrollPanelToTopInstant(el);
+    }, [currentRouteIdx, scrollPanelToTopInstant]);
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             const target = e.target as HTMLElement;
@@ -261,7 +294,10 @@ export function AppNavigator(): JSX.Element {
             ) {
                 return;
             }
-            if (e.key === "ArrowLeft") {
+            if ((e.ctrlKey || e.metaKey) && e.key === "ArrowUp") {
+                e.preventDefault();
+                scrollToTop();
+            } else if (e.key === "ArrowLeft") {
                 e.preventDefault();
                 navigate("left");
             } else if (e.key === "ArrowRight") {
@@ -277,7 +313,7 @@ export function AppNavigator(): JSX.Element {
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [navigate]);
+    }, [navigate, scrollToTop]);
 
     useEffect(() => {
         const THRESHOLD = 120;
@@ -314,7 +350,7 @@ export function AppNavigator(): JSX.Element {
             const axis = isHorizontal ? "x" : "y";
 
             e.preventDefault();
-            if ((wheelAccum.current[axis] > 0) !== (sign > 0))
+            if (wheelAccum.current[axis] > 0 !== sign > 0)
                 wheelAccum.current[axis] = 0;
             wheelAccum.current[axis] += delta;
 
@@ -327,8 +363,8 @@ export function AppNavigator(): JSX.Element {
                             ? "right"
                             : "left"
                         : sign > 0
-                          ? "down"
-                          : "up"
+                        ? "down"
+                        : "up"
                 );
             }
         };
@@ -378,12 +414,6 @@ export function AppNavigator(): JSX.Element {
         []
     );
 
-    const scrollToTop = useCallback(() => {
-        const el = verticalRefs.current.get(currentRouteIdx);
-        if (!el) return;
-        scrollPanelToTopInstant(el);
-    }, [currentRouteIdx, scrollPanelToTopInstant]);
-
     return (
         <RespawnProvider scrollToTop={scrollToTop}>
             <div className="app app-navigator">
@@ -415,7 +445,11 @@ export function AppNavigator(): JSX.Element {
                 >
                     {LATERAL_ROUTES.map((route, idx) => (
                         <div
-                            key={route.path}
+                            key={
+                                route.path === location.pathname
+                                    ? `${route.path}-${baseChangeCounter}`
+                                    : route.path
+                            }
                             className="route-panel"
                             ref={(el) => setVerticalRef(idx, el)}
                         >

@@ -1,6 +1,6 @@
 /**
- * Procedural orb generation per room. Seed = unix timestamp + 4 crypto bytes.
- * No image duplicates from the previous room; pad with empty orbs if needed.
+ * Procedural orb generation. Each image is used at most once – ever (session-wide).
+ * Base change = invalidate route cache; respawn = clear all.
  */
 
 const COLOR_FOLDERS: Record<string, string> = {
@@ -39,6 +39,14 @@ function loadAllImagesByColor(): Record<OrbColor, string[]> {
 }
 
 export const ORB_IMAGES_BY_COLOR = loadAllImagesByColor();
+
+const ALL_ORB_IMAGES = (() => {
+    const seen = new Set<string>();
+    for (const arr of Object.values(ORB_IMAGES_BY_COLOR)) {
+        for (const p of arr) seen.add(p);
+    }
+    return Array.from(seen);
+})();
 
 const COLOR_CHANCES: [OrbColor, number][] = [
     ["red", 0.5],
@@ -123,27 +131,43 @@ function getEnergyForColor(color: OrbColor, rng: () => number): number {
     return Math.max(0.05, Math.min(0.98, base + jitter));
 }
 
-let lastRoomId: string | null = null;
-let lastRoomImages: Set<string> = new Set();
 const roomCache: Record<
     string,
     Array<{ color: OrbColor; image: string; energy: number }>
 > = {};
 
-/** Pick image for a color – only from that color's folder, exclude last room. Empty if none. */
+/** Every image ever used this session – never reuse. Shared with procedural images. */
+const allUsedImages = new Set<string>();
+
+export function isImageUsed(path: string): boolean {
+    return allUsedImages.has(path);
+}
+export function markImagesUsed(paths: string[]): void {
+    paths.forEach((p) => allUsedImages.add(p));
+}
+
+/** Pick image for a color. Prefer color folder; if exhausted, use any unused image. Empty only if none left. */
 function pickImageForColor(
     color: OrbColor,
-    lastRoomImages: Set<string>,
     usedThisRoom: Set<string>,
     rng: () => number
 ): string {
-    const images = ORB_IMAGES_BY_COLOR[color] ?? [];
-    const available = images.filter(
-        (path) => !lastRoomImages.has(path) && !usedThisRoom.has(path)
+    const prefer = (ORB_IMAGES_BY_COLOR[color] ?? []).filter(
+        (path) => !allUsedImages.has(path) && !usedThisRoom.has(path)
     );
-    if (available.length === 0) return "";
-    const pick = available[Math.floor(rng() * available.length)]!;
+    if (prefer.length > 0) {
+        const pick = prefer[Math.floor(rng() * prefer.length)]!;
+        usedThisRoom.add(pick);
+        allUsedImages.add(pick);
+        return pick;
+    }
+    const fallback = ALL_ORB_IMAGES.filter(
+        (path) => !allUsedImages.has(path) && !usedThisRoom.has(path)
+    );
+    if (fallback.length === 0) return "";
+    const pick = fallback[Math.floor(rng() * fallback.length)]!;
     usedThisRoom.add(pick);
+    allUsedImages.add(pick);
     return pick;
 }
 
@@ -170,6 +194,11 @@ function generateRoomOrbs(
     while (colorSlots.length > remaining) colorSlots.pop();
     colorSlots.splice(rainbowSlot, 0, "rainbow");
 
+    for (let i = colorSlots.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [colorSlots[i], colorSlots[j]] = [colorSlots[j]!, colorSlots[i]!];
+    }
+
     const result: Array<{
         color: OrbColor;
         image: string;
@@ -179,32 +208,22 @@ function generateRoomOrbs(
     for (let i = 0; i < total; i++) {
         const color = colorSlots[i]!;
         const energy = getEnergyForColor(color, rng);
-        const image = pickImageForColor(
-            color,
-            lastRoomImages,
-            usedThisRoom,
-            rng
-        );
+        const image = pickImageForColor(color, usedThisRoom, rng);
         result.push({ color, image, energy });
     }
 
-    lastRoomImages = new Set(usedThisRoom);
-    if (lastRoomId) delete roomCache[lastRoomId];
-    lastRoomId = roomPath;
     return result;
 }
 
 export const ENERGY_ROTATE_THRESHOLD = 0.35;
 
-/** Clear orb cache so next generateOrbs uses a new random seed. Call before respawn. */
+/** Clear orb cache. Base change: invalidate(path). Respawn: invalidate() clears all + resets used images. */
 export function invalidateRoomCache(roomPath?: string): void {
     if (roomPath != null) {
         delete roomCache[roomPath];
-        if (lastRoomId === roomPath) lastRoomId = null;
     } else {
         for (const k of Object.keys(roomCache)) delete roomCache[k];
-        lastRoomId = null;
-        lastRoomImages.clear();
+        allUsedImages.clear();
     }
 }
 

@@ -7,9 +7,7 @@ type Props = {
     sectionIds: readonly string[];
 };
 
-export function ScrollToTopButton({
-    sectionIds,
-}: Props): JSX.Element | null {
+export function ScrollToTopButton({ sectionIds }: Props): JSX.Element | null {
     const { scrollToTop } = useRespawn();
 
     if (sectionIds.length === 0) return null;

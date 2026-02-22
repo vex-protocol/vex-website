@@ -107,7 +107,13 @@ export function WitchyHero({
             >
                 <div className="mascot-witchy-orb__orb" aria-hidden />
                 <div className="mascot-witchy-orb__inner">
-                    <img src={mascot} alt="" className="hero-mascot" />
+                    <img
+                        src={mascot}
+                        alt=""
+                        className="hero-mascot"
+                        loading="eager"
+                        decoding="async"
+                    />
                 </div>
                 <div className="mascot-witchy-orb__particles" aria-hidden>
                     <span className="mascot-witchy-orb__particle" />
