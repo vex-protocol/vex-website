@@ -10,10 +10,11 @@ import blackHole from "./ROYALPURPLE/BLACKHOLE.jpg";
 
 const HALO_IMAGES = [haloRed, blackHole];
 
-/** Build flat list of { image, color } from all orb images */
+/** Build flat list of { image, color } from all orb images – exclude rainbow (for card icons; rainbow text wouldn't read well) */
 const IMAGES_WITH_COLORS: Array<{ image: string; color: OrbColor }> = (() => {
     const result: Array<{ image: string; color: OrbColor }> = [];
     for (const [color, images] of Object.entries(ORB_IMAGES_BY_COLOR)) {
+        if (color === "rainbow") continue;
         for (const img of images ?? []) {
             result.push({ image: img, color: color as OrbColor });
         }

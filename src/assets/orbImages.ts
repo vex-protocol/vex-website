@@ -1,7 +1,9 @@
 /**
- * Procedural orb generation. Prefer each image at most once per playthrough (until respawn).
- * When pool exhausted (e.g. / uses 22, /privacy-policy needs 48), allow reuse to avoid empty orbs.
- * Base change = invalidate route cache; respawn = clear all + reset used images.
+ * Procedural orb generation. Images must match orb color (FIRERED folder → red orb only).
+ * Each image used at most once per playthrough (no duplicates anywhere).
+ * Rainbow orbs never empty (fallback to any unused image if rainbow pool exhausted).
+ * Color→image mapping derived from require.context keys (folder prefix → color).
+ * Base change = invalidate(path). Respawn = invalidate() clears all + resets used images.
  */
 
 const COLOR_FOLDERS: Record<string, string> = {
@@ -16,38 +18,57 @@ const COLOR_FOLDERS: Record<string, string> = {
 
 export type OrbColor = keyof typeof COLOR_FOLDERS;
 
-function loadAllImagesByColor(): Record<OrbColor, string[]> {
+/** Map folder name to orb color – must match generate-orb-images.js */
+const FOLDER_TO_COLOR: Record<string, OrbColor> = {
+    FIRERED: "red",
+    ROYALPURPLE: "purple",
+    INCINERATORGREEN: "green",
+    ICEBLUE: "blue",
+    PEACHPINK: "pink",
+    CREAM: "cream",
+    RAINBOW: "rainbow",
+};
+
+/** Resolve images via require.context – use webpack's actual keys to avoid path mismatch. */
+function loadOrbImagesByColor(): Record<OrbColor, string[]> {
     const ctx = (require as any).context(
         ".",
         true,
         /\.(jpg|jpeg|png|gif|webp)$/i
     );
-    const entries = ctx.keys().map((key: string) => ({
-        key,
-        value: ctx(key) as string,
-    }));
-
-    const result: Record<string, string[]> = {};
-    for (const [color, folder] of Object.entries(COLOR_FOLDERS)) {
-        const prefix = `./${folder}/`;
-        result[color] = entries
-            .filter((e: { key: string; value: string }) =>
-                e.key.startsWith(prefix)
-            )
-            .map((e: { key: string; value: string }) => e.value);
+    const result: Record<string, string[]> = {
+        red: [],
+        purple: [],
+        green: [],
+        blue: [],
+        pink: [],
+        cream: [],
+        rainbow: [],
+    };
+    const keys = ctx.keys();
+    for (const key of keys) {
+        const match = key.match(/^\.\/([A-Za-z]+)\//);
+        const folder = match?.[1];
+        const color = folder ? FOLDER_TO_COLOR[folder] : undefined;
+        if (!color) continue;
+        try {
+            const mod = ctx(key);
+            const url = mod && (typeof mod === "string" ? mod : (mod as { default?: string }).default);
+            if (url && typeof url === "string") {
+                result[color].push(url);
+            }
+        } catch {
+            // skip
+        }
+    }
+    // Deterministic sort per color (match generate script order)
+    for (const c of Object.keys(result) as OrbColor[]) {
+        result[c]!.sort((a, b) => a.localeCompare(b));
     }
     return result as Record<OrbColor, string[]>;
 }
 
-export const ORB_IMAGES_BY_COLOR = loadAllImagesByColor();
-
-const ALL_ORB_IMAGES = (() => {
-    const seen = new Set<string>();
-    for (const arr of Object.values(ORB_IMAGES_BY_COLOR)) {
-        for (const p of arr) seen.add(p);
-    }
-    return Array.from(seen);
-})();
+export const ORB_IMAGES_BY_COLOR = loadOrbImagesByColor();
 
 const COLOR_CHANCES: [OrbColor, number][] = [
     ["red", 0.5],
@@ -149,14 +170,32 @@ export function markImagesUsed(paths: string[]): void {
     paths.forEach((p) => allUsedImages.add(p));
 }
 
-/** Pick image for a color. Prefer unused; when global pool exhausted, allow reuse (avoid same-room repeats). Empty only if no images exist. */
+/** Pick any unused image from all pools (for rainbow fallback) */
+function pickAnyUnusedImage(
+    usedThisRoom: Set<string>,
+    rng: () => number
+): string {
+    const all: string[] = [];
+    for (const images of Object.values(ORB_IMAGES_BY_COLOR)) {
+        for (const p of images ?? []) {
+            if (!allUsedImages.has(p) && !usedThisRoom.has(p)) all.push(p);
+        }
+    }
+    if (all.length === 0) return "";
+    const pick = all[Math.floor(rng() * all.length)]!;
+    usedThisRoom.add(pick);
+    allUsedImages.add(pick);
+    return pick;
+}
+
+/** Pick image for a color. ONLY from that color's folder. No duplicates. Rainbow never empty. */
 function pickImageForColor(
     color: OrbColor,
     usedThisRoom: Set<string>,
     rng: () => number
 ): string {
-    // 1. Color-specific, unused globally
-    const prefer = (ORB_IMAGES_BY_COLOR[color] ?? []).filter(
+    const pool = ORB_IMAGES_BY_COLOR[color] ?? [];
+    const prefer = pool.filter(
         (path) => !allUsedImages.has(path) && !usedThisRoom.has(path)
     );
     if (prefer.length > 0) {
@@ -165,28 +204,11 @@ function pickImageForColor(
         allUsedImages.add(pick);
         return pick;
     }
-    // 2. Any image, unused globally
-    const fallback = ALL_ORB_IMAGES.filter(
-        (path) => !allUsedImages.has(path) && !usedThisRoom.has(path)
-    );
-    if (fallback.length > 0) {
-        const pick = fallback[Math.floor(rng() * fallback.length)]!;
-        usedThisRoom.add(pick);
-        allUsedImages.add(pick);
-        return pick;
+    // Rainbow must never be empty – fallback to any unused image
+    if (color === "rainbow") {
+        return pickAnyUnusedImage(usedThisRoom, rng);
     }
-    // 3. Pool exhausted (e.g. / used 22, /privacy-policy needs 48): allow reuse, but avoid same-room repeats
-    const allowReuse = ALL_ORB_IMAGES.filter((path) => !usedThisRoom.has(path));
-    if (allowReuse.length > 0) {
-        const pick = allowReuse[Math.floor(rng() * allowReuse.length)]!;
-        usedThisRoom.add(pick);
-        return pick;
-    }
-    // 4. Room has more orbs than total images: allow same-room reuse
-    if (ALL_ORB_IMAGES.length === 0) return "";
-    const pick =
-        ALL_ORB_IMAGES[Math.floor(rng() * ALL_ORB_IMAGES.length)] ?? "";
-    return pick;
+    return "";
 }
 
 function generateRoomOrbs(

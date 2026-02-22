@@ -212,8 +212,8 @@ $glass-blur: 24px
 $glass-blur-mobile: 12px
 $glass-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.04) 0%, transparent 40%, rgba(231, 0, 0, 0.03) 100%)
 
-$navbar-height: 120px
-$navbar-height-mobile: 56px
+$navbar-height: 48px
+$navbar-height-mobile: 40px
 $panel-face: linear-gradient(180deg, $vex-black-soft 0%, $panel-dark 100%)
 $instrument-glow: rgba(231, 0, 0, 0.06)
 
@@ -916,8 +916,8 @@ body.scroll-to-top-active
   width: 100% !important
   max-width: 100% !important
   min-width: 0
-  padding-left: 0.5rem
-  padding-right: 0.5rem
+  padding-left: 0.75rem
+  padding-right: 0.75rem
   box-sizing: border-box
 
 .navbar__container
@@ -925,6 +925,7 @@ body.scroll-to-top-active
   align-items: center
   justify-content: space-between
   gap: 1rem
+  width: 100%
 
 .navbar-route-menu
   display: none
@@ -937,22 +938,28 @@ body.scroll-to-top-active
     flex-shrink: 0
 
 .navbar-sticky-wrapper .navbar-brand
+  display: flex
+  align-items: center
+  justify-content: space-between
   min-width: 0
   flex: 1
   overflow: hidden
   max-width: 100%
 
 .navbar .logo-link
+  display: flex
+  align-items: center
+  gap: 0.5rem
   min-width: 0
   overflow: hidden
-  flex: 1
+  flex-shrink: 0
   max-width: 100%
   // When used as button (respawn)
   background: none
   border: none
   cursor: pointer
   font: inherit
-  padding: 0.5rem 0.75rem
+  padding: 0.25rem 0
 
 .navbar .logo-text
   overflow: hidden
@@ -1725,13 +1732,13 @@ $orb-rainbow: conic-gradient(#e70000, #c5698b, #2a075b, #a8c8df, #91e643, #d9c2a
   41%, 81%
     opacity: 1.08
 .logo--square
-  width: 48px
-  height: 48px
+  width: 28px
+  height: 28px
   object-fit: contain
   display: block
 .logo-text
   font-family: $font-aeronautical
-  font-size: 1.25rem
+  font-size: 1rem
   font-weight: 400
   color: rgba(231, 0, 0, 0.75)
   line-height: 1
@@ -2272,13 +2279,13 @@ $tablet-up: 769px
     padding-left: 1rem
     padding-right: 1rem
   .navbar .logo-text
-    font-size: 1.5rem
+    font-size: 1.1rem
   .navbar .logo--square
-    width: 28px
-    height: 28px
+    width: 24px
+    height: 24px
   .navbar .logo-glitch
-    width: 28px
-    height: 28px
+    width: 24px
+    height: 24px
   .app
     padding-top: $navbar-height
     height: 100%
@@ -2376,6 +2383,11 @@ $tablet-up: 769px
   .home-panel-cards .section-content .content-frame
     flex: 0 1 auto
     align-self: flex-start
+  // Privacy header: content-frame fits content so orbs remain visible
+  #privacy-header .section-content .content-frame
+    flex: 0 1 auto
+    align-self: flex-start
+    max-width: 42rem
 
 ////////////////////////////////////////////////////////////////
 // Mobile: swipeable cards – minimal gap, cards fill viewport
@@ -2393,14 +2405,21 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
   .navbar-sticky-wrapper
     min-height: $navbar-height-mobile
     max-width: 100%
-  // Put reticle on LEFT so it's always visible
+  // Logo left, menu (reticle) right
   .navbar-sticky-wrapper .navbar-brand
-    flex-direction: row-reverse
     justify-content: space-between
-  .navbar-sticky-wrapper .navbar-brand .navbar-reticle
-    order: -1
-    margin-left: 0
-    margin-right: auto
+  .navbar-reticle
+    min-width: 36px
+    min-height: 36px
+  .navbar-reticle .reticle-cross--h
+    width: 14px
+    height: 2px
+  .navbar-reticle .reticle-cross--v
+    width: 2px
+    height: 14px
+  .navbar-reticle .reticle-ring
+    width: 18px
+    height: 18px
   .navbar-sticky-wrapper .container,
   .navbar-over-halo .container
     padding-left: 0.5rem
@@ -2493,6 +2512,13 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     flex: 0 1 auto
     min-height: 0
   .home-panel-cards .section.mobile-card .content-frame
+    flex: 0 1 auto
+    min-height: 0
+  // Privacy header: content-frame fits content so orbs remain visible
+  .privacy-panel-cards #privacy-header.mobile-card .section-content
+    flex: 0 1 auto
+    min-height: 0
+  .privacy-panel-cards #privacy-header.mobile-card .content-frame
     flex: 0 1 auto
     min-height: 0
   .section.mobile-card .content-frame p,
@@ -2623,13 +2649,13 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     max-width: 100%
     overflow: hidden
   .navbar .logo-text
-    font-size: 0.55rem
+    font-size: 0.95rem
     white-space: nowrap
     overflow: hidden
     text-overflow: ellipsis
   .navbar .logo--square
-    width: 32px
-    height: 32px
+    width: 24px
+    height: 24px
     flex-shrink: 0
   .card-header__img-wrap
     width: 44px
