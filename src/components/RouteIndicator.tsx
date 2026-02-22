@@ -30,7 +30,12 @@ export function RouteIndicator(): JSX.Element {
                     className={`route-indicator__dot ${
                         i === currentIdx ? "route-indicator__dot--active" : ""
                     }`}
-                    onClick={() => history.push(pathForIndex(i))}
+                    onClick={() =>
+                        history.push({
+                            pathname: pathForIndex(i),
+                            search: "?depth=1",
+                        })
+                    }
                 />
             ))}
         </div>

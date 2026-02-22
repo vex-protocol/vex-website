@@ -661,6 +661,7 @@ body.scroll-to-top-active
   background: transparent
   border: none
 
+// Shake same for mobile and desktop – gauge is in floating controller (right-aligned), no centering transform
 @keyframes position-gauge-shake
   0%, 100%
     transform: translate(0, 0)
@@ -669,21 +670,8 @@ body.scroll-to-top-active
   25%, 45%, 65%, 85%
     transform: translate(3px, 3px)
 
-@keyframes position-gauge-shake-mobile
-  0%, 100%
-    transform: translateX(-50%)
-  15%, 35%, 55%, 75%
-    transform: translateX(calc(-50% - 3px))
-  25%, 45%, 65%, 85%
-    transform: translateX(calc(-50% + 3px))
-
-@media (max-width: 768px)
-  .position-gauge--shake
-    animation: position-gauge-shake-mobile 0.4s ease-in-out
-
-@media (min-width: 769px)
-  .position-gauge--shake
-    animation: position-gauge-shake 0.4s ease-in-out
+.position-gauge--shake
+  animation: position-gauge-shake 0.4s ease-in-out
 
 ////////////////////////////////////////////////////////////////
 // Floating actions – scroll to top above settings cog, bottom right
@@ -947,8 +935,6 @@ body.scroll-to-top-active
     align-items: center
     gap: 0.5rem
     flex-shrink: 0
-  .navbar-reticle
-    display: none
 
 .navbar-sticky-wrapper .navbar-brand
   min-width: 0
@@ -1032,6 +1018,11 @@ body.scroll-to-top-active
   animation: reticle-acquire 0.5s ease-out, reticle-pulse 1s ease-in-out 0.5s infinite
 .navbar-reticle.is-active .reticle-cross
   box-shadow: 0 0 8px $vex-red-bright, 0 0 20px rgba(231, 0, 0, 0.5)
+
+// Desktop: hide menu trigger when horizontal route menu is shown (must come after .navbar-reticle base)
+@media (min-width: 769px)
+  .navbar-reticle
+    display: none !important
 
 @keyframes reticle-pulse
   0%, 100%
@@ -1141,6 +1132,13 @@ $menu-padding: 1.25rem
     background: rgba(231, 0, 0, 0.04)
   .navbar-menu-item:nth-child(even)
     background: rgba(231, 0, 0, 0.02)
+  .navbar-menu-item--active
+    color: $fire-red !important
+    text-shadow: 0 0 8px rgba(231, 0, 0, 0.6)
+    font-weight: 600
+    &:hover
+      color: $fire-red !important
+      background: rgba(231, 0, 0, 0.12)
   .navbar-menu-item:hover,
   .navbar-menu-item:active
     color: $vex-red-bright !important
@@ -2168,6 +2166,16 @@ a:visited
   padding-top: 2rem
   border-top: none
 
+// Privacy policy: black CRT scanline frame behind text
+.content-frame--crt
+  background: #0a0a0c
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 0 120px 40px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(231, 0, 0, 0.06), 0 1px 0 rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(0, 0, 0, 0.8)
+  &::before
+    background: radial-gradient(ellipse 90% 90% at 50% 50%, transparent 30%, rgba(0, 0, 0, 0.15) 80%, rgba(0, 0, 0, 0.3) 100%), linear-gradient(180deg, rgba(231, 0, 0, 0.02) 0%, transparent 50%, rgba(0, 0, 0, 0.05) 100%)
+  &::after
+    background: repeating-linear-gradient(0deg, transparent 0px, transparent 1px, rgba(0, 0, 0, 0.35) 1px, rgba(0, 0, 0, 0.35) 2px)
+    opacity: 0.9
+
 // Privacy policy: scrollable paragraphs when viewport is short
 .privacy-section-scroll
   flex: 1
@@ -2304,6 +2312,10 @@ $tablet-up: 769px
     max-width: 100%
   #hero .section-content .content-frame
     max-width: 42rem
+  // Home route: content-frame fits content so orbs/background remain visible
+  .home-panel-cards .section-content .content-frame
+    flex: 0 1 auto
+    align-self: flex-start
 
 ////////////////////////////////////////////////////////////////
 // Mobile: swipeable cards – minimal gap, cards fill viewport
@@ -2416,6 +2428,13 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     overflow: hidden
     overflow-wrap: break-word
     word-wrap: break-word
+  // Home route: content-frame fits content so orbs/background are visible
+  .home-panel-cards .section.mobile-card .section-content
+    flex: 0 1 auto
+    min-height: 0
+  .home-panel-cards .section.mobile-card .content-frame
+    flex: 0 1 auto
+    min-height: 0
   .section.mobile-card .content-frame p,
   .section.mobile-card .content-frame .subtitle,
   .section.mobile-card .content-frame .title,
@@ -2449,7 +2468,13 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     background-position: center 20%
     opacity: 0.55
     filter: brightness(0.5) contrast(1.05)
-  #hero .hero-columns,
+  #hero .hero-columns
+    display: flex
+    flex-direction: column
+    position: static
+    min-width: 0
+    width: 100%
+    max-width: 100%
   #about .about-columns,
   #features .features-columns,
   #contact .hero-columns,
@@ -2477,8 +2502,9 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     .witchy-container
       width: 100%
       height: 100%
-      min-height: 0
-      transform: scale(0.7)
+      min-height: 100%
+      min-width: 100%
+      transform: scale(1.15)
       transform-origin: center center
     .witchy-orb--lg
       width: 140px

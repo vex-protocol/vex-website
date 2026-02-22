@@ -138,7 +138,7 @@ export function Home() {
                                     {DOWNLOAD_ENABLED ? (
                                         <button
                                             onClick={() => {
-                                                history.push("/download");
+                                                history.push({ pathname: "/download", search: "?depth=1" });
                                             }}
                                             className="button is-medium is-primary"
                                         >
@@ -197,7 +197,7 @@ export function Home() {
                                 {DOWNLOAD_ENABLED ? (
                                     <button
                                         onClick={() => {
-                                            history.push("/download");
+                                            history.push({ pathname: "/download", search: "?depth=1" });
                                         }}
                                         className="button is-medium is-primary"
                                     >

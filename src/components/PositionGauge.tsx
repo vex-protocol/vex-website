@@ -70,7 +70,10 @@ export function PositionGauge({
 
     const goToLateral = useCallback(
         (index: number) => {
-            history.push(pathForIndex(index));
+            history.push({
+                pathname: pathForIndex(index),
+                search: "?depth=1",
+            });
         },
         [history]
     );
@@ -153,10 +156,12 @@ export function PositionGauge({
     const ArmTile = ({
         available,
         label,
+        shortcut,
         onClick,
     }: {
         available: boolean;
         label: string;
+        shortcut: string;
         onClick?: () => void;
     }) => {
         const baseClass = "position-gauge__round";
@@ -164,11 +169,13 @@ export function PositionGauge({
             ? "position-gauge__round--available"
             : "position-gauge__round--unavailable";
         const content = <span className="position-gauge__round-inner" />;
+        const tooltip = `${label} (${shortcut})`;
         if (available && onClick) {
             return (
                 <button
                     type="button"
                     aria-label={label}
+                    title={tooltip}
                     className={`${baseClass} ${stateClass}`}
                     onClick={onClick}
                 >
@@ -205,6 +212,7 @@ export function PositionGauge({
                     <ArmTile
                         available={hasNorth}
                         label="Previous section"
+                        shortcut="↑"
                         onClick={
                             hasNorth
                                 ? () => goToVertical(verticalIndex - 1)
@@ -239,6 +247,7 @@ export function PositionGauge({
                     <ArmTile
                         available={hasSouth}
                         label="Next section"
+                        shortcut="↓"
                         onClick={
                             hasSouth
                                 ? () => goToVertical(verticalIndex + 1)
@@ -257,6 +266,7 @@ export function PositionGauge({
                     <ArmTile
                         available={hasWest}
                         label="Previous route"
+                        shortcut="←"
                         onClick={
                             hasWest
                                 ? () => goToLateral(lateralIndex - 1)
@@ -275,6 +285,7 @@ export function PositionGauge({
                     <ArmTile
                         available={hasEast}
                         label="Next route"
+                        shortcut="→"
                         onClick={
                             hasEast
                                 ? () => goToLateral(lateralIndex + 1)

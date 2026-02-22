@@ -21,7 +21,7 @@ export function LateralRouteMenu(): JSX.Element {
 
     const goTo = (i: number) => {
         const path = pathForIndex(i);
-        const target = { pathname: path, search: "" };
+        const target = { pathname: path, search: "?depth=1" };
         const isSameRoute = i === currentIdx;
         if (isSameRoute) {
             scrollToTop();

@@ -50,6 +50,7 @@ export function AppNavigator(): JSX.Element {
 
     const [baseChangeCounter, setBaseChangeCounter] = useState(0);
     const prevPathnameRef = useRef(location.pathname);
+    const pathnameChangeTimeRef = useRef(0);
 
     const currentVerticalRef =
         verticalRefs.current.get(currentRouteIdx) ?? null;
@@ -63,34 +64,52 @@ export function AppNavigator(): JSX.Element {
     const updateDepthParam = useCallback(
         (depth: number) => {
             const params = new URLSearchParams(location.search);
-            if (depth <= 1) {
-                params.delete("depth");
-            } else {
-                params.set("depth", String(depth));
-            }
-            const search = params.toString();
-            const newSearch = search ? `?${search}` : "";
-            const currentSearch = location.search || "";
-            if (currentSearch !== newSearch) {
-                history.replace({
-                    pathname: location.pathname,
-                    search: newSearch,
-                });
-            }
+            const newDepth = String(Math.max(1, depth));
+            if (params.get("depth") === newDepth) return;
+            params.set("depth", newDepth);
+            const newSearch = `?${params.toString()}`;
+            history.replace({
+                pathname: location.pathname,
+                search: newSearch,
+            });
         },
         [history, location.pathname, location.search]
     );
 
+    // Ensure URL always has depth param when on a known route – add ?depth=1 if missing
+    useLayoutEffect(() => {
+        const path = location.pathname;
+        const isKnownRoute = LATERAL_ROUTES.some((r) => r.path === path);
+        if (!isKnownRoute) return;
+        const hasDepth = new URLSearchParams(location.search).has("depth");
+        if (!hasDepth) {
+            history.replace({ pathname: path, search: "?depth=1" });
+        }
+    }, [location.pathname, location.search, history]);
+
     const scrollPanelToTopInstant = useCallback((el: HTMLDivElement) => {
-        const mobileCards = el.querySelector(".mobile-cards");
-        const scrollEl = (mobileCards || el) as HTMLElement;
         document.body.classList.add("scroll-to-top-active");
-        scrollEl.scrollTop = 0;
         el.scrollTop = 0;
+        const mobileCards = el.querySelector(".mobile-cards");
+        if (mobileCards) (mobileCards as HTMLElement).scrollTop = 0;
         setTimeout(() => {
             document.body.classList.remove("scroll-to-top-active");
         }, 150);
     }, []);
+
+    // Scroll lateral strip FIRST when pathname changes – must run before scroll-to-top so target panel is visible
+    useLayoutEffect(() => {
+        const el = lateralRef.current;
+        if (!el) return;
+        pathnameChangeTimeRef.current = Date.now();
+        const idx = routeIndex(location.pathname);
+        programmaticScrollRef.current = true;
+        el.scrollTo({ left: idx * el.clientWidth, behavior: "auto" });
+        const t = setTimeout(() => {
+            programmaticScrollRef.current = false;
+        }, 400);
+        return () => clearTimeout(t);
+    }, [location.pathname]);
 
     // On route enter: scroll to depth param if explicit, otherwise scroll to top
     useLayoutEffect(() => {
@@ -115,6 +134,20 @@ export function AppNavigator(): JSX.Element {
         }
 
         scrollPanelToTopInstant(el);
+        // Belt-and-suspenders: scroll first section into view (handles any nested scroll container)
+        const firstId = sectionIds[0];
+        if (firstId) {
+            const first = el.querySelector(`#${firstId}`);
+            if (first)
+                (first as HTMLElement).scrollIntoView({
+                    block: "start",
+                    behavior: "auto",
+                });
+        }
+        // Retry after layout – panel may have been off-screen when we first scrolled
+        requestAnimationFrame(() => {
+            scrollPanelToTopInstant(el);
+        });
     }, [
         location.pathname,
         depthParam,
@@ -130,6 +163,7 @@ export function AppNavigator(): JSX.Element {
         const scrollEl = (isMobile && el.querySelector(".mobile-cards")) || el;
 
         const syncDepthToUrl = () => {
+            if (Date.now() - pathnameChangeTimeRef.current < 600) return;
             const sections = sectionIds
                 .map((id) => el.querySelector(`#${id}`))
                 .filter((s): s is HTMLElement => s !== null);
@@ -148,10 +182,12 @@ export function AppNavigator(): JSX.Element {
             updateDepthParam(index + 1);
         };
 
-        syncDepthToUrl();
+        // Don't sync immediately – we just navigated; scroll-to-top hasn't been applied to DOM yet
+        const t = setTimeout(syncDepthToUrl, 100);
         scrollEl.addEventListener("scroll", syncDepthToUrl);
         window.addEventListener("resize", syncDepthToUrl);
         return () => {
+            clearTimeout(t);
             scrollEl.removeEventListener("scroll", syncDepthToUrl);
             window.removeEventListener("resize", syncDepthToUrl);
         };
@@ -166,19 +202,6 @@ export function AppNavigator(): JSX.Element {
         }
     }, [location.pathname]);
 
-    // Scroll lateral strip when pathname changes (e.g. from nav links, keyboard)
-    useLayoutEffect(() => {
-        const el = lateralRef.current;
-        if (!el) return;
-        const idx = routeIndex(location.pathname);
-        programmaticScrollRef.current = true;
-        el.scrollTo({ left: idx * el.clientWidth, behavior: "smooth" });
-        const t = setTimeout(() => {
-            programmaticScrollRef.current = false;
-        }, 400);
-        return () => clearTimeout(t);
-    }, [location.pathname]);
-
     // Update URL when user swipes lateral strip to a new panel
     useEffect(() => {
         const el = lateralRef.current;
@@ -188,6 +211,8 @@ export function AppNavigator(): JSX.Element {
             if (raf) cancelAnimationFrame(raf);
             raf = requestAnimationFrame(() => {
                 if (programmaticScrollRef.current) return;
+                // Don't override programmatic navigation – scroll can fire late from scroll-snap etc
+                if (Date.now() - pathnameChangeTimeRef.current < 500) return;
                 const panelWidth = el.clientWidth;
                 if (panelWidth <= 0) return;
                 const idx = Math.round(el.scrollLeft / panelWidth);
@@ -195,7 +220,7 @@ export function AppNavigator(): JSX.Element {
                     Math.max(0, Math.min(idx, LATERAL_ROUTES.length - 1))
                 );
                 if (path !== location.pathname) {
-                    history.replace(path);
+                    history.replace({ pathname: path, search: "?depth=1" });
                 }
                 raf = 0;
             });
@@ -219,7 +244,10 @@ export function AppNavigator(): JSX.Element {
                 }, 400);
                 return;
             }
-            history.push(pathForIndex(next));
+            history.push({
+                pathname: pathForIndex(next),
+                search: "?depth=1",
+            });
         },
         [currentRouteIdx, history]
     );
@@ -283,6 +311,17 @@ export function AppNavigator(): JSX.Element {
         if (!el) return;
         scrollPanelToTopInstant(el);
     }, [currentRouteIdx, scrollPanelToTopInstant]);
+
+    /** Respawn (fresh orbs) + scroll to top of current route, or go to (1,1) if already at depth 1 on another route */
+    const handleLogoClick = useCallback(() => {
+        const isAtDepth1 = depthParam == null || depthParam === 1;
+        const isOnAnotherRoute = location.pathname !== "/";
+        if (isOnAnotherRoute && isAtDepth1) {
+            history.push({ pathname: "/", search: "?depth=1" });
+        } else {
+            scrollToTop();
+        }
+    }, [location.pathname, depthParam, history, scrollToTop]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -415,7 +454,7 @@ export function AppNavigator(): JSX.Element {
     );
 
     return (
-        <RespawnProvider scrollToTop={scrollToTop}>
+        <RespawnProvider scrollToTop={scrollToTop} logoClick={handleLogoClick}>
             <div className="app app-navigator">
                 <Navbar />
                 <div className="app-floating-controller">

@@ -58,7 +58,7 @@ export function HomePanel() {
                                 {DOWNLOAD_ENABLED ? (
                                     <button
                                         onClick={() =>
-                                            history.push("/download")
+                                            history.push({ pathname: "/download", search: "?depth=1" })
                                         }
                                         className="button is-medium is-primary"
                                     >
@@ -116,7 +116,7 @@ export function HomePanel() {
                             </p>
                             {DOWNLOAD_ENABLED ? (
                                 <button
-                                    onClick={() => history.push("/download")}
+                                    onClick={() => history.push({ pathname: "/download", search: "?depth=1" })}
                                     className="button is-medium is-primary"
                                 >
                                     Download Now

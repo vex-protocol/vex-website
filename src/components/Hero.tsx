@@ -30,7 +30,7 @@ const NAVBAR_MENU_ROUTES = [
 export function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
-    const { respawn, scrollToTop } = useRespawn();
+    const { logoClick, scrollToTop } = useRespawn();
     const location = useLocation();
 
     useEffect(() => {
@@ -74,8 +74,12 @@ export function Navbar() {
                       {NAVBAR_MENU_ROUTES.map(({ path, label }) => (
                           <Link
                               key={path}
-                              className="navbar-item navbar-menu-item"
-                              to={{ pathname: path, search: "" }}
+                              className={`navbar-item navbar-menu-item ${
+                                  path === location.pathname
+                                      ? "navbar-menu-item--active"
+                                      : ""
+                              }`}
+                              to={{ pathname: path, search: "?depth=1" }}
                               replace={path === location.pathname}
                               onClick={(e) => {
                                   if (path === location.pathname) {
@@ -103,8 +107,8 @@ export function Navbar() {
                             <button
                                 type="button"
                                 className="logo-link navbar-item"
-                                aria-label="Respawn at home"
-                                onClick={respawn}
+                                aria-label="Respawn"
+                                onClick={logoClick}
                             >
                                 <span className="logo-glitch">
                                     <img

@@ -1,6 +1,7 @@
 /**
- * Procedural orb generation. Each image is used at most once – ever (session-wide).
- * Base change = invalidate route cache; respawn = clear all.
+ * Procedural orb generation. Prefer each image at most once per playthrough (until respawn).
+ * When pool exhausted (e.g. / uses 22, /privacy-policy needs 48), allow reuse to avoid empty orbs.
+ * Base change = invalidate route cache; respawn = clear all + reset used images.
  */
 
 const COLOR_FOLDERS: Record<string, string> = {
@@ -146,12 +147,13 @@ export function markImagesUsed(paths: string[]): void {
     paths.forEach((p) => allUsedImages.add(p));
 }
 
-/** Pick image for a color. Prefer color folder; if exhausted, use any unused image. Empty only if none left. */
+/** Pick image for a color. Prefer unused; when global pool exhausted, allow reuse (avoid same-room repeats). Empty only if no images exist. */
 function pickImageForColor(
     color: OrbColor,
     usedThisRoom: Set<string>,
     rng: () => number
 ): string {
+    // 1. Color-specific, unused globally
     const prefer = (ORB_IMAGES_BY_COLOR[color] ?? []).filter(
         (path) => !allUsedImages.has(path) && !usedThisRoom.has(path)
     );
@@ -161,13 +163,27 @@ function pickImageForColor(
         allUsedImages.add(pick);
         return pick;
     }
+    // 2. Any image, unused globally
     const fallback = ALL_ORB_IMAGES.filter(
         (path) => !allUsedImages.has(path) && !usedThisRoom.has(path)
     );
-    if (fallback.length === 0) return "";
-    const pick = fallback[Math.floor(rng() * fallback.length)]!;
-    usedThisRoom.add(pick);
-    allUsedImages.add(pick);
+    if (fallback.length > 0) {
+        const pick = fallback[Math.floor(rng() * fallback.length)]!;
+        usedThisRoom.add(pick);
+        allUsedImages.add(pick);
+        return pick;
+    }
+    // 3. Pool exhausted (e.g. / used 22, /privacy-policy needs 48): allow reuse, but avoid same-room repeats
+    const allowReuse = ALL_ORB_IMAGES.filter((path) => !usedThisRoom.has(path));
+    if (allowReuse.length > 0) {
+        const pick = allowReuse[Math.floor(rng() * allowReuse.length)]!;
+        usedThisRoom.add(pick);
+        return pick;
+    }
+    // 4. Room has more orbs than total images: allow same-room reuse
+    if (ALL_ORB_IMAGES.length === 0) return "";
+    const pick =
+        ALL_ORB_IMAGES[Math.floor(rng() * ALL_ORB_IMAGES.length)] ?? "";
     return pick;
 }
 

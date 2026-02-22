@@ -180,7 +180,7 @@ export function PrivacyPanel(): JSX.Element {
                             />
                         </div>
                         <div className="column is-half section-content">
-                            <div className="content-frame content is-large is-family-monospace">
+                            <div className="content-frame content-frame--crt content is-large is-family-monospace">
                                 <h1 className="title">privacy policy</h1>
                                 <h2 className="subtitle is-size-5">
                                     we care about your privacy
@@ -206,7 +206,7 @@ export function PrivacyPanel(): JSX.Element {
                             />
                         </div>
                         <div className="column section-content">
-                            <div className="content-frame content has-text-justified">
+                            <div className="content-frame content-frame--crt content has-text-justified">
                                 <h2 className="title is-4">{page.title}</h2>
                                 <div className="privacy-section-scroll">
                                     {page.content
@@ -243,7 +243,7 @@ export function PrivacyPanel(): JSX.Element {
                             />
                         </div>
                         <div className="column section-content">
-                            <div className="content-frame content has-text-justified">
+                            <div className="content-frame content-frame--crt content has-text-justified">
                                 <h2 className="title is-4">Update History</h2>
                                 <div className="privacy-section-scroll">
                                     {commitHistory[0] && (
