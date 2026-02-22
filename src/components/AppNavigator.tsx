@@ -15,7 +15,6 @@ import {
 } from "../navigation/routeConfig";
 import { useRouteSections } from "../context/RouteSectionsContext";
 import { useIsMobile } from "../hooks/useIsMobile";
-import { SettingsMenu } from "./SettingsMenu";
 import { ScrollToTopButton } from "./ScrollToTopButton";
 import { HomePanel, PrivacyPanel, DownloadPanel } from "../views";
 
@@ -146,6 +145,19 @@ export function AppNavigator(): JSX.Element {
         [currentVerticalRef, sectionIds, isMobile]
     );
 
+    /** Single navigation handler – used by keyboard, wheel, and touch */
+    type NavDir = "up" | "down" | "left" | "right";
+    const navigate = useCallback(
+        (dir: NavDir) => {
+            if (dir === "left" || dir === "right") {
+                goRoute(dir === "left" ? -1 : 1);
+            } else {
+                goSection(dir === "down" ? 1 : -1);
+            }
+        },
+        [goRoute, goSection]
+    );
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             const target = e.target as HTMLElement;
@@ -158,21 +170,55 @@ export function AppNavigator(): JSX.Element {
             }
             if (e.key === "ArrowLeft") {
                 e.preventDefault();
-                goRoute(-1);
+                navigate("left");
             } else if (e.key === "ArrowRight") {
                 e.preventDefault();
-                goRoute(1);
+                navigate("right");
             } else if (e.key === "ArrowUp") {
                 e.preventDefault();
-                goSection(invertVertical ? 1 : -1);
+                navigate("up");
             } else if (e.key === "ArrowDown") {
                 e.preventDefault();
-                goSection(invertVertical ? -1 : 1);
+                navigate("down");
             }
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [goRoute, goSection]);
+    }, [navigate]);
+
+    useEffect(() => {
+        const onWheel = (e: WheelEvent) => {
+            const target = e.target as HTMLElement;
+            if (
+                target.tagName === "INPUT" ||
+                target.tagName === "TEXTAREA" ||
+                target.isContentEditable
+            ) {
+                return;
+            }
+            const absX = Math.abs(e.deltaX);
+            const absY = Math.abs(e.deltaY);
+            if (absX > absY) {
+                e.preventDefault();
+                navigate(e.deltaX > 0 ? "right" : "left");
+            } else if (absY > absX) {
+                e.preventDefault();
+                navigate(e.deltaY > 0 ? "down" : "up");
+            }
+        };
+        window.addEventListener("wheel", onWheel, { passive: false });
+        return () => window.removeEventListener("wheel", onWheel);
+    }, [navigate]);
+
+    useEffect(() => {
+        const el = lateralRef.current;
+        if (!el) return;
+        const onTouchMove = (e: TouchEvent) => {
+            e.preventDefault();
+        };
+        el.addEventListener("touchmove", onTouchMove, { passive: false });
+        return () => el.removeEventListener("touchmove", onTouchMove);
+    }, []);
 
     const handleTouchStart = (e: React.TouchEvent) => {
         touchStart.current = {
@@ -190,34 +236,12 @@ export function AppNavigator(): JSX.Element {
         const absDx = Math.abs(dx);
         const absDy = Math.abs(dy);
 
-        // Horizontal: lateral route change
         if (absDx > absDy && absDx > threshold) {
-            if (dx > 0) goRoute(-1);
-            else goRoute(1);
+            navigate(dx > 0 ? "left" : "right");
             return;
         }
-        // Vertical: section change
-        if (absDy > absDx && absDy > threshold) {
-            if (sectionIds.length > 0) {
-                const deltaUp = invertVertical ? 1 : -1;
-                const deltaDown = invertVertical ? -1 : 1;
-                if (isMobile) {
-                    // Mobile: each section = full page, no scroll – always allow
-                    if (dy < 0) goSection(deltaUp);
-                    else goSection(deltaDown);
-                } else {
-                    // Desktop: only at scroll boundaries to avoid fighting native scroll
-                    const el = currentVerticalRef;
-                    if (el) {
-                        const { scrollTop, scrollHeight, clientHeight } = el;
-                        const atTop = scrollTop <= 15;
-                        const atBottom =
-                            scrollTop >= scrollHeight - clientHeight - 15;
-                        if (dy < 0 && atTop) goSection(deltaUp);
-                        else if (dy > 0 && atBottom) goSection(deltaDown);
-                    }
-                }
-            }
+        if (absDy > absDx && absDy > threshold && sectionIds.length > 0) {
+            navigate(dy < 0 ? "up" : "down");
         }
     };
 
@@ -237,7 +261,6 @@ export function AppNavigator(): JSX.Element {
                         verticalScrollRef={{ current: currentVerticalRef }}
                         sectionIds={sectionIds}
                     />
-                    <SettingsMenu />
                 </div>
                 <PositionGauge
                     lateralIndex={currentRouteIdx}

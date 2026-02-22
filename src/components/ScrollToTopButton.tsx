@@ -24,11 +24,11 @@ export function ScrollToTopButton({
 
         if (firstSection) {
             (firstSection as HTMLElement).scrollIntoView({
-                behavior: "smooth",
+                behavior: "auto",
                 block: "start",
             });
         } else {
-            scrollEl.scrollTo({ top: 0, behavior: "smooth" });
+            scrollEl.scrollTo({ top: 0, behavior: "auto" });
         }
     }, [verticalScrollRef, sectionIds, isMobile]);
 
