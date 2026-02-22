@@ -98,18 +98,24 @@ export function AppNavigator(): JSX.Element {
     }, []);
 
     // Scroll lateral strip FIRST when pathname changes – must run before scroll-to-top so target panel is visible
+    // On mobile, defer by one frame so layout has settled (avoids blank panel during transition)
     useLayoutEffect(() => {
         const el = lateralRef.current;
         if (!el) return;
         pathnameChangeTimeRef.current = Date.now();
-        const idx = routeIndex(location.pathname);
         programmaticScrollRef.current = true;
-        el.scrollTo({ left: idx * el.clientWidth, behavior: "auto" });
+        const idx = routeIndex(location.pathname);
+        const scrollLateral = () => {
+            const w = el.clientWidth;
+            if (w > 0) el.scrollTo({ left: idx * w, behavior: "auto" });
+        };
+        scrollLateral();
+        if (isMobile) requestAnimationFrame(scrollLateral);
         const t = setTimeout(() => {
             programmaticScrollRef.current = false;
-        }, 400);
+        }, 600);
         return () => clearTimeout(t);
-    }, [location.pathname]);
+    }, [location.pathname, isMobile]);
 
     // On route enter: scroll to depth param if explicit, otherwise scroll to top
     useLayoutEffect(() => {
@@ -144,9 +150,15 @@ export function AppNavigator(): JSX.Element {
                     behavior: "auto",
                 });
         }
-        // Retry after layout – panel may have been off-screen when we first scrolled
+        // Retry after layout – panel may have been off-screen when we first scrolled (helps on mobile)
         requestAnimationFrame(() => {
             scrollPanelToTopInstant(el);
+            const first = firstId ? el.querySelector(`#${firstId}`) : null;
+            if (first)
+                (first as HTMLElement).scrollIntoView({
+                    block: "start",
+                    behavior: "auto",
+                });
         });
     }, [
         location.pathname,
@@ -212,7 +224,7 @@ export function AppNavigator(): JSX.Element {
             raf = requestAnimationFrame(() => {
                 if (programmaticScrollRef.current) return;
                 // Don't override programmatic navigation – scroll can fire late from scroll-snap etc
-                if (Date.now() - pathnameChangeTimeRef.current < 500) return;
+                if (Date.now() - pathnameChangeTimeRef.current < 600) return;
                 const panelWidth = el.clientWidth;
                 if (panelWidth <= 0) return;
                 const idx = Math.round(el.scrollLeft / panelWidth);
@@ -442,13 +454,15 @@ export function AppNavigator(): JSX.Element {
             return;
         }
         if (absDy > absDx && absDy > threshold && sectionIds.length > 0) {
-            navigate(dy < 0 ? "up" : "down");
+            // Inverted for touch: swipe up = next section, swipe down = prev (matches mobile scroll metaphor)
+            navigate(dy < 0 ? "down" : "up");
         }
     };
 
     const setVerticalRef = useCallback(
         (idx: number, el: HTMLDivElement | null) => {
             if (el) verticalRefs.current.set(idx, el);
+            else verticalRefs.current.delete(idx);
         },
         []
     );

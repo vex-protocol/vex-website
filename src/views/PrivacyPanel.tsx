@@ -154,13 +154,14 @@ export function PrivacyPanel(): JSX.Element {
     };
 
     const lastUpdated = commitHistory[0]?.commit?.author?.date
-        ? new Date(
-              commitHistory[0].commit.author.date
-          ).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-          })
+        ? new Date(commitHistory[0].commit.author.date).toLocaleDateString(
+              undefined,
+              {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+              }
+          )
         : null;
 
     return (
