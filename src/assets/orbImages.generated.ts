@@ -3,8 +3,8 @@
  * Run: node scripts/generate-orb-images.js (or npm run generate-orb-images)
  * Prebuild runs this before every build.
  * Deterministic: sorted by filename; contentHash verifies folder contents.
- * Generated: 2026-02-22T18:22:32.010Z
- * ContentHash: 0b714a27f12d6db6
+ * Generated: 2026-02-22T19:35:25.566Z
+ * ContentHash: 96d53f51085a8210
  */
 
 export const ORB_IMAGE_KEYS_BY_COLOR: Record<string, string[]> = {
@@ -25,18 +25,16 @@ export const ORB_IMAGE_KEYS_BY_COLOR: Record<string, string[]> = {
     purple: [
         "./ROYALPURPLE/BLACKHOLE.jpg",
         "./ROYALPURPLE/Destroyed Cassette.jpg",
-        "./ROYALPURPLE/Destroyed Tape 2.png",
         "./ROYALPURPLE/Pseudonyms.jpg",
         "./ROYALPURPLE/Shadow Tape Woman.png",
         "./ROYALPURPLE/Shadow Woman.png",
         "./ROYALPURPLE/Shadow-Tape-Woman.png",
         "./ROYALPURPLE/Shadow.jpg",
         "./ROYALPURPLE/ShadowWoman.png",
-        "./ROYALPURPLE/Zippo.png",
         "./ROYALPURPLE/royal-purple.jpg",
-        "./ROYALPURPLE/supercycle.png",
     ],
     green: [
+        "./INCINERATORGREEN/Destroyed Tape 2.png",
         "./INCINERATORGREEN/Poetry.jpg",
         "./INCINERATORGREEN/Zippo.png",
         "./INCINERATORGREEN/sword.png",
