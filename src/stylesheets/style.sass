@@ -575,8 +575,24 @@ body.scroll-to-top-active
   align-items: flex-end
   gap: 0.5rem
 
+.app-control-panel .position-gauge
+  position: relative
+  right: auto
+  bottom: auto
+  left: auto
+  transform: none
+
+@media (max-width: 768px)
+  .app-control-panel
+    left: 50%
+    right: auto
+    transform: translateX(-50%)
+    align-items: center
+
 .app-control-panel .scroll-to-top-button
   flex-shrink: 0
+  position: relative
+  z-index: 1
   width: 28px
   height: 28px
   padding: 0
@@ -921,6 +937,8 @@ body.scroll-to-top-active
     align-items: center
     gap: 0.5rem
     flex-shrink: 0
+  .navbar-reticle
+    display: none
 
 .navbar-sticky-wrapper .navbar-brand
   min-width: 0
