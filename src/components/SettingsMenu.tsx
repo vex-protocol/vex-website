@@ -1,12 +1,9 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faTimes } from "@fortawesome/free-solid-svg-icons";
-import { useInvertVertical } from "../context/InvertVerticalContext";
 
 export function SettingsMenu(): JSX.Element {
     const [open, setOpen] = useState(false);
-    const [invertVertical, setInvertVertical] = useInvertVertical();
-
     const close = useCallback(() => setOpen(false), []);
 
     useEffect(() => {
@@ -58,41 +55,7 @@ export function SettingsMenu(): JSX.Element {
                         </button>
                     </div>
                     <div className="settings-menu__body">
-                        <div
-                            className="settings-menu__row"
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => setInvertVertical(!invertVertical)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") {
-                                    e.preventDefault();
-                                    setInvertVertical(!invertVertical);
-                                }
-                            }}
-                            aria-label="Invert Y axis"
-                            aria-pressed={invertVertical}
-                        >
-                            <span className="settings-menu__label">
-                                Invert Y axis
-                            </span>
-                            <span className="settings-menu__hint">
-                                {invertVertical
-                                    ? "Swipe up = next section"
-                                    : "Swipe up = previous section"}
-                            </span>
-                            <span
-                                className={`settings-menu__toggle ${
-                                    invertVertical
-                                        ? "settings-menu__toggle--on"
-                                        : ""
-                                }`}
-                                aria-hidden
-                            >
-                                <span className="settings-menu__toggle-track">
-                                    <span className="settings-menu__toggle-knob" />
-                                </span>
-                            </span>
-                        </div>
+                        {/* Placeholder for future settings */}
                     </div>
                 </div>
             )}

@@ -4,7 +4,6 @@ import { Invites, Team } from "./views";
 import { AppNavigator } from "./components/AppNavigator";
 import { DOWNLOAD_ENABLED } from "./components/constants";
 import { RouteSectionsProvider } from "./context/RouteSectionsContext";
-import { InvertVerticalProvider } from "./context/InvertVerticalContext";
 
 export interface IServer {
     serverID: string;
@@ -31,8 +30,7 @@ export function Router(): JSX.Element {
     return (
         <BrowserRouter>
             <RouteSectionsProvider>
-                <InvertVerticalProvider>
-                    <Switch>
+                <Switch>
                         <Route
                             exact
                             path={"/download"}
@@ -54,8 +52,7 @@ export function Router(): JSX.Element {
                             path={"/invite/:id"}
                             render={({ match }) => <Invites match={match} />}
                         />
-                    </Switch>
-                </InvertVerticalProvider>
+                </Switch>
             </RouteSectionsProvider>
         </BrowserRouter>
     );

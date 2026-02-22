@@ -14,7 +14,6 @@ import {
     pathForIndex,
 } from "../navigation/routeConfig";
 import { useRouteSections } from "../context/RouteSectionsContext";
-import { useInvertVertical } from "../context/InvertVerticalContext";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { SettingsMenu } from "./SettingsMenu";
 import { ScrollToTopButton } from "./ScrollToTopButton";
@@ -39,7 +38,8 @@ export function AppNavigator(): JSX.Element {
     const programmaticScrollRef = useRef(false);
 
     const isMobile = useIsMobile();
-    const [invertVertical] = useInvertVertical();
+    /** Down/right = next section, Up/left = prev (natural direction mapping) */
+    const invertVertical = false;
     const currentRouteIdx = routeIndex(location.pathname);
     const configSectionIds = LATERAL_ROUTES[currentRouteIdx]?.sectionIds ?? [];
     const sectionIds = useRouteSections(location.pathname, configSectionIds);
@@ -172,7 +172,7 @@ export function AppNavigator(): JSX.Element {
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [goRoute, goSection, invertVertical]);
+    }, [goRoute, goSection]);
 
     const handleTouchStart = (e: React.TouchEvent) => {
         touchStart.current = {
@@ -231,28 +231,30 @@ export function AppNavigator(): JSX.Element {
     return (
         <div className="app app-navigator">
             <Navbar />
-            <PositionGauge
-                lateralIndex={currentRouteIdx}
-                verticalScrollRef={{ current: currentVerticalRef }}
-                sectionIds={sectionIds}
-                shake={indicatorShake}
-                attemptDirection={attemptDirection}
-                invertVertical={invertVertical}
-                onAttemptAtBoundary={(dir) => {
-                    setAttemptDirection(dir);
-                    setIndicatorShake(true);
-                    setTimeout(() => {
-                        setIndicatorShake(false);
-                        setAttemptDirection(null);
-                    }, 400);
-                }}
-            />
-            <div className="app-floating-actions">
-                <ScrollToTopButton
+            <div className="app-control-panel">
+                <div className="app-control-panel__actions">
+                    <ScrollToTopButton
+                        verticalScrollRef={{ current: currentVerticalRef }}
+                        sectionIds={sectionIds}
+                    />
+                    <SettingsMenu />
+                </div>
+                <PositionGauge
+                    lateralIndex={currentRouteIdx}
                     verticalScrollRef={{ current: currentVerticalRef }}
                     sectionIds={sectionIds}
+                    shake={indicatorShake}
+                    attemptDirection={attemptDirection}
+                    invertVertical={invertVertical}
+                    onAttemptAtBoundary={(dir) => {
+                        setAttemptDirection(dir);
+                        setIndicatorShake(true);
+                        setTimeout(() => {
+                            setIndicatorShake(false);
+                            setAttemptDirection(null);
+                        }, 400);
+                    }}
                 />
-                <SettingsMenu />
             </div>
             <div
                 className="lateral-strip"

@@ -225,12 +225,6 @@ export function PositionGauge({
                             <span className="position-gauge__reticle-cross position-gauge__reticle-cross--v" />
                             <span className="position-gauge__reticle-dot" />
                             <span className="position-gauge__reticle-ring" />
-                            <span
-                                className="position-gauge__coords"
-                                aria-hidden
-                            >
-                                {lateralIndex + 1},{verticalIndex + 1}
-                            </span>
                         </div>
                     </div>
                 </div>
@@ -288,6 +282,9 @@ export function PositionGauge({
                         }
                     />
                 </div>
+            </div>
+            <div className="position-gauge__coords-bar" aria-hidden>
+                ({lateralIndex + 1}, {verticalIndex + 1})
             </div>
         </div>
     );

@@ -465,16 +465,21 @@ $position-gauge-cell: 36px
   border-radius: 50%
   box-shadow: 0 0 4px rgba(231, 0, 0, 0.4), inset 0 0 4px rgba(231, 0, 0, 0.2)
 
-.position-gauge__coords
-  position: absolute
-  bottom: -5px
-  left: 50%
-  transform: translateX(-50%)
-  font-size: 7px
-  font-family: monospace
-  font-weight: 600
+// Coordinate readout – (1, 2) math style, weapons HUD at bottom
+.position-gauge__coords-bar
+  display: flex
+  justify-content: center
+  align-items: center
+  width: 100%
+  margin-top: 0.5rem
+  padding: 0.3rem 0.2rem 0
+  border-top: 1px solid rgba(231, 0, 0, 0.25)
+  font-family: "Share Tech Mono", "Consolas", "Monaco", monospace
+  font-size: 13px
+  font-weight: 700
+  letter-spacing: 0.06em
   color: $fire-red
-  text-shadow: 0 0 3px rgba(231, 0, 0, 0.9), 0 0 6px rgba(231, 0, 0, 0.6)
+  text-shadow: 0 0 6px rgba(231, 0, 0, 0.9), 0 0 12px rgba(231, 0, 0, 0.5)
   white-space: nowrap
   line-height: 1
 
