@@ -4,7 +4,6 @@ import React, {
     useState,
     useCallback,
     useLayoutEffect,
-    useMemo,
 } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { Navbar } from "./Hero";
@@ -14,12 +13,16 @@ import {
     routeIndex,
     pathForIndex,
 } from "../navigation/routeConfig";
-import { HomePanel, ContactPanel, PrivacyPanel, DownloadPanel } from "../views";
+import { useRouteSections } from "../context/RouteSectionsContext";
+import { useInvertVertical } from "../context/InvertVerticalContext";
+import { useIsMobile } from "../hooks/useIsMobile";
+import { SettingsMenu } from "./SettingsMenu";
+import { ScrollToTopButton } from "./ScrollToTopButton";
+import { HomePanel, PrivacyPanel, DownloadPanel } from "../views";
 
 const PANELS: Record<string, () => JSX.Element> = {
     "/": () => <HomePanel />,
     "/privacy-policy": () => <PrivacyPanel />,
-    "/contact": () => <ContactPanel />,
     "/download": () => <DownloadPanel />,
 };
 
@@ -35,11 +38,12 @@ export function AppNavigator(): JSX.Element {
     const touchStart = useRef<{ x: number; y: number } | null>(null);
     const programmaticScrollRef = useRef(false);
 
+    const isMobile = useIsMobile();
+    const [invertVertical] = useInvertVertical();
     const currentRouteIdx = routeIndex(location.pathname);
-    const sectionIds = useMemo(
-        () => LATERAL_ROUTES[currentRouteIdx]?.sectionIds ?? [],
-        [currentRouteIdx]
-    );
+    const configSectionIds =
+        LATERAL_ROUTES[currentRouteIdx]?.sectionIds ?? [];
+    const sectionIds = useRouteSections(location.pathname, configSectionIds);
 
     const currentVerticalRef =
         verticalRefs.current.get(currentRouteIdx) ?? null;
@@ -111,8 +115,10 @@ export function AppNavigator(): JSX.Element {
                 .filter((s): s is HTMLElement => s !== null);
             if (sections.length === 0) return;
 
-            const scrollPos = el.scrollTop;
-            const viewSize = el.clientHeight;
+            const scrollEl =
+                (isMobile && el.querySelector(".mobile-cards")) || el;
+            const scrollPos = scrollEl.scrollTop;
+            const viewSize = scrollEl.clientHeight;
             let currentIndex = 0;
             for (let i = 0; i < sections.length; i++) {
                 const pos = sections[i].offsetTop;
@@ -138,7 +144,7 @@ export function AppNavigator(): JSX.Element {
                 block: "start",
             });
         },
-        [currentVerticalRef, sectionIds]
+        [currentVerticalRef, sectionIds, isMobile]
     );
 
     useEffect(() => {
@@ -157,17 +163,17 @@ export function AppNavigator(): JSX.Element {
             } else if (e.key === "ArrowRight") {
                 e.preventDefault();
                 goRoute(1);
-            } else if (e.key === "ArrowUp") {
+            } else             if (e.key === "ArrowUp") {
                 e.preventDefault();
-                goSection(-1);
+                goSection(invertVertical ? 1 : -1);
             } else if (e.key === "ArrowDown") {
                 e.preventDefault();
-                goSection(1);
+                goSection(invertVertical ? -1 : 1);
             }
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [goRoute, goSection]);
+    }, [goRoute, goSection, invertVertical]);
 
     const handleTouchStart = (e: React.TouchEvent) => {
         touchStart.current = {
@@ -182,9 +188,37 @@ export function AppNavigator(): JSX.Element {
         const dy = e.changedTouches[0].clientY - touchStart.current.y;
         touchStart.current = null;
         const threshold = 50;
-        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+
+        // Horizontal: lateral route change
+        if (absDx > absDy && absDx > threshold) {
             if (dx > 0) goRoute(-1);
             else goRoute(1);
+            return;
+        }
+        // Vertical: section change
+        if (absDy > absDx && absDy > threshold) {
+            if (sectionIds.length > 0) {
+                const deltaUp = invertVertical ? 1 : -1;
+                const deltaDown = invertVertical ? -1 : 1;
+                if (isMobile) {
+                    // Mobile: each section = full page, no scroll – always allow
+                    if (dy < 0) goSection(deltaUp);
+                    else goSection(deltaDown);
+                } else {
+                    // Desktop: only at scroll boundaries to avoid fighting native scroll
+                    const el = currentVerticalRef;
+                    if (el) {
+                        const { scrollTop, scrollHeight, clientHeight } = el;
+                        const atTop = scrollTop <= 15;
+                        const atBottom =
+                            scrollTop >= scrollHeight - clientHeight - 15;
+                        if (dy < 0 && atTop) goSection(deltaUp);
+                        else if (dy > 0 && atBottom) goSection(deltaDown);
+                    }
+                }
+            }
         }
     };
 
@@ -204,7 +238,23 @@ export function AppNavigator(): JSX.Element {
                 sectionIds={sectionIds}
                 shake={indicatorShake}
                 attemptDirection={attemptDirection}
+                invertVertical={invertVertical}
+                onAttemptAtBoundary={(dir) => {
+                    setAttemptDirection(dir);
+                    setIndicatorShake(true);
+                    setTimeout(() => {
+                        setIndicatorShake(false);
+                        setAttemptDirection(null);
+                    }, 400);
+                }}
             />
+            <div className="app-floating-actions">
+                <ScrollToTopButton
+                    verticalScrollRef={{ current: currentVerticalRef }}
+                    sectionIds={sectionIds}
+                />
+                <SettingsMenu />
+            </div>
             <div
                 className="lateral-strip"
                 ref={lateralRef}

@@ -1,6 +1,9 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTwitter } from "@fortawesome/free-brands-svg-icons";
+import {
+    faTwitter,
+    faGithub,
+} from "@fortawesome/free-brands-svg-icons";
 import logo from "../assets/vex_icon.svg";
 import haloRed from "../assets/halo-red.jpeg";
 import girlRed from "../assets/girl-red.jpg";
@@ -197,6 +200,68 @@ export function HomePanel() {
                                 >
                                     Read the code
                                 </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section
+                className="section hero is-fullheight hero--with-halo mobile-card"
+                id="contact"
+            >
+                <div
+                    className="hero-halo-bg"
+                    style={{ backgroundImage: `url(${haloRed})` }}
+                    aria-hidden
+                />
+                <div className="hero-body">
+                    <div className="columns container has-text-left hero-columns">
+                        <div className="column is-half section-bg" aria-hidden>
+                            <WitchyOrbs
+                                roomPath="/"
+                                slotId="contact"
+                                section="about"
+                            />
+                        </div>
+                        <div className="column is-half section-content">
+                            <div className="content-frame content">
+                                <span className="card-header">
+                                    <span className="card-header__title card-title--aviation">
+                                        CONTACT
+                                    </span>
+                                </span>
+                                <p className="subtitle">
+                                    Connect with us on social.
+                                </p>
+                                <div className="contact-links">
+                                    <a
+                                        href={TWITTER_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="button is-medium is-primary"
+                                        aria-label={`Follow @${TWITTER_HANDLE} on X`}
+                                    >
+                                        <FontAwesomeIcon
+                                            icon={faTwitter}
+                                            className="icon-left"
+                                        />
+                                        X (Twitter)
+                                    </a>
+                                    <a
+                                        href={GITHUB_WEB_URLS.VEX_CHAT_ORG}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="button is-medium is-primary"
+                                        aria-label="Vex on GitHub"
+                                    >
+                                        <FontAwesomeIcon
+                                            icon={faGithub}
+                                            className="icon-left"
+                                        />
+                                        GitHub
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

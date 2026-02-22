@@ -3,8 +3,6 @@
  * No image duplicates from the previous room; pad with empty orbs if needed.
  */
 
-import { DOWNLOAD_ENABLED } from "../components/constants";
-
 const COLOR_FOLDERS: Record<string, string> = {
     red: "FIRERED",
     purple: "ROYALPURPLE",
@@ -67,16 +65,13 @@ const ROOM_CONFIG: Record<
     { total: number; slots: { id: string; start: number; count: number }[] }
 > = {
     "/": {
-        total: 16,
+        total: 22,
         slots: [
             { id: "home-hero", start: 0, count: 4 },
             { id: "home-about", start: 4, count: 6 },
             { id: "home-features", start: 10, count: 6 },
+            { id: "contact", start: 16, count: 6 },
         ],
-    },
-    "/contact": {
-        total: 6,
-        slots: [{ id: "contact", start: 0, count: 6 }],
     },
     "/download": {
         total: 12,
@@ -218,7 +213,11 @@ export function generateOrbs(
 
     const pool = roomCache[roomPath]!;
 
-    const slot = cfg.slots.find((s) => s.id === slotId);
+    let slot = cfg.slots.find((s) => s.id === slotId);
+    if (!slot && slotId.includes("-")) {
+        const baseId = slotId.replace(/-\d+$/, "");
+        slot = cfg.slots.find((s) => s.id === baseId);
+    }
     if (!slot) return pool.slice(0, count);
 
     const take = Math.min(count, slot.count);

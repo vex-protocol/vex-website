@@ -3,6 +3,8 @@ import { Switch, Route, Redirect, BrowserRouter } from "react-router-dom";
 import { Invites, Team } from "./views";
 import { AppNavigator } from "./components/AppNavigator";
 import { DOWNLOAD_ENABLED } from "./components/constants";
+import { RouteSectionsProvider } from "./context/RouteSectionsContext";
+import { InvertVerticalProvider } from "./context/InvertVerticalContext";
 
 export interface IServer {
     serverID: string;
@@ -28,6 +30,8 @@ export interface IUser {
 export function Router(): JSX.Element {
     return (
         <BrowserRouter>
+            <RouteSectionsProvider>
+            <InvertVerticalProvider>
             <Switch>
                 <Route
                     exact
@@ -42,7 +46,7 @@ export function Router(): JSX.Element {
                 />
                 <Route
                     exact
-                    path={["/", "/privacy-policy", "/contact"]}
+                    path={["/", "/privacy-policy"]}
                     render={() => <AppNavigator />}
                 />
                 <Route exact path={"/team"} render={() => <Team />} />
@@ -51,6 +55,8 @@ export function Router(): JSX.Element {
                     render={({ match }) => <Invites match={match} />}
                 />
             </Switch>
+            </InvertVerticalProvider>
+            </RouteSectionsProvider>
         </BrowserRouter>
     );
 }

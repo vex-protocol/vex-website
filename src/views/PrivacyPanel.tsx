@@ -9,6 +9,10 @@ import {
     GITHUB_REPOS,
     GITHUB_WEB_URLS,
 } from "../components/constants";
+import { useSetRouteSections } from "../context/RouteSectionsContext";
+
+/** Max paragraphs per mobile page – keeps each card readable without scroll */
+const PARAGRAPHS_PER_PAGE = 2;
 
 function Commit(props: { commit: any; showLastUpdated: boolean }): JSX.Element {
     return (
@@ -84,9 +88,35 @@ function splitPolicyBySections(
     return sections;
 }
 
+/** Split a section into multiple pages for mobile (one page per N paragraphs) */
+function splitSectionIntoPages(sec: {
+    id: string;
+    title: string;
+    content: string;
+}): { id: string; title: string; content: string }[] {
+    const paras = sec.content
+        .split(/\n\n+/)
+        .filter((p) => p.trim());
+    if (paras.length <= PARAGRAPHS_PER_PAGE) {
+        return [sec];
+    }
+    const pages: { id: string; title: string; content: string }[] = [];
+    for (let i = 0; i < paras.length; i += PARAGRAPHS_PER_PAGE) {
+        const chunk = paras.slice(i, i + PARAGRAPHS_PER_PAGE).join("\n\n");
+        const pageIndex = Math.floor(i / PARAGRAPHS_PER_PAGE);
+        pages.push({
+            id: `${sec.id}-${pageIndex}`,
+            title: pageIndex === 0 ? sec.title : `${sec.title} (cont.)`,
+            content: chunk,
+        });
+    }
+    return pages;
+}
+
 export function PrivacyPanel(): JSX.Element {
     const [privacyPolicyMd, setPrivacyPolicyMd] = useState("");
     const [commitHistory, setCommitHistory] = useState([] as any[]);
+    const setSectionIds = useSetRouteSections();
 
     useEffect(() => {
         const load = async () => {
@@ -112,6 +142,24 @@ export function PrivacyPanel(): JSX.Element {
         () => splitPolicyBySections(privacyPolicyMd),
         [privacyPolicyMd]
     );
+
+    const allPages = useMemo(() => {
+        const pages: { id: string; title: string; content: string }[] = [];
+        for (const sec of policySections) {
+            pages.push(...splitSectionIntoPages(sec));
+        }
+        return pages;
+    }, [policySections]);
+
+    const sectionIds = useMemo(() => {
+        const ids = ["privacy-header", ...allPages.map((p) => p.id)];
+        if (commitHistory.length > 0) ids.push("privacy-update-history");
+        return ids;
+    }, [allPages, commitHistory.length]);
+
+    useEffect(() => {
+        setSectionIds("/privacy-policy", sectionIds);
+    }, [setSectionIds, sectionIds]);
 
     return (
         <div className="mobile-cards privacy-panel-cards">
@@ -145,25 +193,25 @@ export function PrivacyPanel(): JSX.Element {
                 </div>
             </section>
 
-            {policySections.map((sec, idx) => (
+            {allPages.map((page, idx) => (
                 <section
-                    key={sec.id}
+                    key={page.id}
                     className="section mobile-card"
-                    id={sec.id}
+                    id={page.id}
                 >
                     <div className="columns container has-text-left about-columns">
                         <div className="column section-bg" aria-hidden>
                             <WitchyOrbs
                                 roomPath="/privacy-policy"
-                                slotId={sec.id}
+                                slotId={page.id}
                                 section={idx % 2 === 0 ? "about" : "features"}
                             />
                         </div>
                         <div className="column section-content">
                             <div className="content-frame content has-text-justified">
-                                <h2 className="title is-4">{sec.title}</h2>
+                                <h2 className="title is-4">{page.title}</h2>
                                 <div className="privacy-section-scroll">
-                                    {sec.content
+                                    {page.content
                                         .split(/\n\n+/)
                                         .filter((p) => p.trim())
                                         .map((para, i) => (

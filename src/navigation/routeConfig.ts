@@ -5,10 +5,9 @@ export interface RouteDef {
     sectionIds: readonly string[];
 }
 
-/** Lateral order (left→right): Home, Contact, Download, Privacy (last) */
+/** Lateral order (left→right): Home, Download, Privacy (last) */
 export const LATERAL_ROUTES: RouteDef[] = [
-    { path: "/", sectionIds: ["hero", "about", "features"] },
-    { path: "/contact", sectionIds: ["contact"] },
+    { path: "/", sectionIds: ["hero", "about", "features", "contact"] },
     ...(DOWNLOAD_ENABLED
         ? [
               {

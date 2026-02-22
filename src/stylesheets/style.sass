@@ -325,8 +325,11 @@ $instrument-glow: rgba(231, 0, 0, 0.06)
   position: fixed
   z-index: 900
   padding: 0.4rem
-  background: linear-gradient(145deg, rgba(25, 25, 28, 0.98) 0%, rgba(12, 14, 16, 0.99) 50%, rgba(18, 18, 20, 0.98) 100%)
-  border: 1px solid rgba(80, 82, 90, 0.5)
+  touch-action: manipulation
+  background: rgba(8, 10, 12, 0.35)
+  backdrop-filter: blur(12px)
+  -webkit-backdrop-filter: blur(12px)
+  border: 1px solid rgba(80, 82, 90, 0.4)
   border-radius: 4px
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -2px 4px rgba(0, 0, 0, 0.4), inset 2px 0 4px rgba(0, 0, 0, 0.2), inset -2px 0 4px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 24px $instrument-glow
   pointer-events: auto
@@ -561,6 +564,202 @@ $position-gauge-cell: 36px
 @media (min-width: 769px)
   .position-gauge--shake
     animation: position-gauge-shake 0.4s ease-in-out
+
+////////////////////////////////////////////////////////////////
+// Floating actions – scroll to top above settings cog, bottom right
+////////////////////////////////////////////////////////////////
+.app-floating-actions
+  position: fixed
+  bottom: 1.25rem
+  right: 1.25rem
+  z-index: 901
+  display: flex
+  flex-direction: column
+  align-items: flex-end
+  gap: 0.5rem
+
+.scroll-to-top-button
+  width: 40px
+  height: 40px
+  padding: 0
+  border: 1px solid rgba(80, 82, 90, 0.5)
+  border-radius: 8px
+  background: rgba(8, 10, 12, 0.5)
+  backdrop-filter: blur(12px)
+  -webkit-backdrop-filter: blur(12px)
+  color: rgba(255, 255, 255, 0.7)
+  cursor: pointer
+  display: flex
+  align-items: center
+  justify-content: center
+  transition: color 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 8px rgba(0, 0, 0, 0.3)
+  &:hover
+    color: rgba(231, 0, 0, 0.9)
+    border-color: rgba(231, 0, 0, 0.35)
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 20px rgba(231, 0, 0, 0.15)
+  &:focus
+    outline: 2px solid rgba(231, 0, 0, 0.5)
+    outline-offset: 2px
+  svg
+    width: 18px
+    height: 18px
+
+.settings-menu
+  position: relative
+  bottom: auto
+  right: auto
+.settings-menu__trigger
+  width: 40px
+  height: 40px
+  padding: 0
+  border: 1px solid rgba(80, 82, 90, 0.5)
+  border-radius: 8px
+  background: rgba(8, 10, 12, 0.5)
+  backdrop-filter: blur(12px)
+  -webkit-backdrop-filter: blur(12px)
+  color: rgba(255, 255, 255, 0.7)
+  cursor: pointer
+  display: flex
+  align-items: center
+  justify-content: center
+  transition: color 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 8px rgba(0, 0, 0, 0.3)
+  &:hover
+    color: rgba(231, 0, 0, 0.9)
+    border-color: rgba(231, 0, 0, 0.35)
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 20px rgba(231, 0, 0, 0.15)
+  &:focus
+    outline: 2px solid rgba(231, 0, 0, 0.5)
+    outline-offset: 2px
+  svg
+    width: 18px
+    height: 18px
+.settings-menu__panel
+  position: absolute
+  bottom: calc(100% + 0.5rem)
+  right: 0
+  min-width: 260px
+  background: rgba(8, 10, 12, 0.5)
+  backdrop-filter: blur($glass-blur)
+  -webkit-backdrop-filter: blur($glass-blur)
+  border: 1px solid $glass-border
+  border-radius: 8px
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 40px rgba(231, 0, 0, 0.08)
+  overflow: hidden
+  &::before
+    content: ""
+    position: absolute
+    inset: 0
+    background: $glass-tint
+    pointer-events: none
+    border-radius: inherit
+.settings-menu__header
+  display: flex
+  align-items: center
+  justify-content: space-between
+  padding: 0.75rem 1rem
+  border-bottom: 1px solid rgba(80, 82, 90, 0.4)
+  background: rgba(0, 0, 0, 0.2)
+.settings-menu__title
+  font-size: 0.85rem
+  font-weight: 600
+  color: rgba(255, 255, 255, 0.95)
+  letter-spacing: 0.03em
+.settings-menu__close
+  width: 28px
+  height: 28px
+  padding: 0
+  border: none
+  border-radius: 4px
+  background: transparent
+  color: rgba(255, 255, 255, 0.5)
+  cursor: pointer
+  display: flex
+  align-items: center
+  justify-content: center
+  transition: color 0.2s, background 0.2s
+  &:hover
+    color: rgba(255, 255, 255, 0.9)
+    background: rgba(255, 255, 255, 0.08)
+  svg
+    width: 12px
+    height: 12px
+.settings-menu__body
+  padding: 0.75rem 1rem
+.settings-menu__row
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 0.5rem 1rem
+  cursor: pointer
+  user-select: none
+  padding: 0.5rem 0
+  border-radius: 6px
+  transition: background 0.15s
+  &:hover
+    background: rgba(255, 255, 255, 0.03)
+.settings-menu__label
+  flex: 1 1 100%
+  font-size: 0.8rem
+  font-weight: 500
+  color: rgba(255, 255, 255, 0.9)
+.settings-menu__hint
+  font-size: 0.7rem
+  color: rgba(255, 255, 255, 0.5)
+.settings-menu__toggle
+  flex-shrink: 0
+  display: inline-flex
+  align-items: center
+  width: 44px
+  height: 24px
+  padding: 2px
+  border: 1px solid rgba(80, 82, 90, 0.6)
+  border-radius: 12px
+  background: rgba(20, 22, 26, 0.8)
+  transition: background 0.2s, border-color 0.2s
+  pointer-events: none
+.settings-menu__toggle--on
+  border-color: rgba(145, 230, 67, 0.5)
+  background: rgba(30, 50, 20, 0.6)
+  &:hover
+    border-color: rgba(145, 230, 67, 0.7)
+.settings-menu__toggle-track
+  display: block
+  width: 100%
+  height: 100%
+  border-radius: 10px
+  position: relative
+.settings-menu__toggle-knob
+  position: absolute
+  top: 2px
+  left: 2px
+  width: 18px
+  height: 18px
+  border-radius: 50%
+  background: linear-gradient(145deg, rgba(90, 92, 98, 0.95), rgba(60, 62, 68, 0.98))
+  box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.08), inset -2px -2px 4px rgba(0, 0, 0, 0.5)
+  transition: transform 0.2s ease, background 0.2s, box-shadow 0.2s
+.settings-menu__toggle--on .settings-menu__toggle-knob
+  transform: translateX(20px)
+  background: linear-gradient(145deg, rgba(170, 240, 120, 1), $incinerator-green 45%)
+  box-shadow: inset 2px 2px 4px rgba(200, 255, 180, 0.4), 0 0 10px rgba(145, 230, 67, 0.4)
+
+@media (max-width: 768px)
+  .app-floating-actions
+    bottom: 1rem
+    right: 1rem
+  .scroll-to-top-button,
+  .settings-menu__trigger
+    width: 44px
+    height: 44px
+  .settings-menu__panel
+    min-width: 280px
+    right: -0.25rem
+
+@media (min-width: 769px)
+  .app-floating-actions
+    right: 6.5rem
 
 .navbar-sticky-wrapper
   position: fixed
@@ -1970,6 +2169,11 @@ $mobile-gap: 0.5rem
 $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0, 80, 0.08) 25%, rgba(231, 0, 0, 0.1) 50%, rgba(120, 0, 120, 0.06) 75%, rgba(231, 0, 0, 0.12) 100%)
 
 @media (max-width: $mobile)
+  // Each route panel = one viewport; mobile-cards scrolls vertically between sections
+  .route-panel
+    overflow: hidden
+    display: flex
+    flex-direction: column
   .navbar-sticky-wrapper
     min-height: $navbar-height-mobile
     max-width: 100%
@@ -2001,25 +2205,27 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     height: 100%
     box-sizing: border-box
     min-height: 0
-  .mobile-cards
+  .route-panel .mobile-cards,
+  .route-panel .home-panel-cards,
+  .route-panel .contact-panel-cards,
+  .route-panel .privacy-panel-cards,
+  .route-panel .download-panel-cards
     display: flex
     flex: 1
-    flex-direction: row
+    flex-direction: column
     min-height: 0
     min-width: 0
     width: 100%
-    overflow-x: auto
-    overflow-y: hidden
-    overscroll-behavior-y: none
-    scroll-snap-type: x mandatory
+    overflow-y: auto
+    overflow-x: hidden
+    scroll-snap-type: y mandatory
     scroll-behavior: smooth
     -webkit-overflow-scrolling: touch
-    width: 100%
     -ms-overflow-style: none
     scrollbar-width: none
-  .mobile-cards::-webkit-scrollbar
+  .route-panel .mobile-cards::-webkit-scrollbar
     display: none
-  .mobile-card
+  .route-panel .mobile-card
     flex: 0 0 100%
     width: 100%
     min-width: 0
@@ -2063,8 +2269,7 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     flex: 1
     min-height: 0
     min-width: 0
-    overflow-y: auto
-    overflow-x: hidden
+    overflow: hidden
     overflow-wrap: break-word
     word-wrap: break-word
   .section.mobile-card .content-frame p,
@@ -2082,8 +2287,6 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     min-height: 0
     min-width: 0
     overflow-x: hidden
-  #hero.hero.is-fullheight
-    min-height: 0
   #hero .hero-columns,
   #contact .hero-columns
     flex: 1

@@ -1,5 +1,4 @@
 import { Contact } from "./Contact";
-import { ContactPanel } from "./ContactPanel";
 import { Download } from "./Download";
 import { DownloadPanel } from "./DownloadPanel";
 import { Home } from "./Home";
@@ -11,7 +10,6 @@ import { Team } from "./Team";
 
 export {
     Contact,
-    ContactPanel,
     Download,
     DownloadPanel,
     Home,

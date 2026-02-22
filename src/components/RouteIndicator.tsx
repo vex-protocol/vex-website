@@ -6,7 +6,7 @@ import {
     pathForIndex,
 } from "../navigation/routeConfig";
 
-/** Lateral route indicator – shows which page (Home, Privacy, Contact, Download) */
+/** Lateral route indicator – shows which page (Home, Download, Privacy) */
 export function RouteIndicator(): JSX.Element {
     const history = useHistory();
     const location = useLocation();

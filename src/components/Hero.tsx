@@ -21,17 +21,17 @@ export function Hero(props: { content: JSX.Element }): JSX.Element {
 
 const NAVBAR_MENU_CONTENT = (
     <>
-        <Link className="navbar-item navbar-menu-item" to="/privacy-policy">
-            Privacy Policy
-        </Link>
-        <Link className="navbar-item navbar-menu-item" to="/contact">
-            Contact
+        <Link className="navbar-item navbar-menu-item" to="/">
+            Home
         </Link>
         {DOWNLOAD_ENABLED && (
             <Link className="navbar-item navbar-menu-item" to="/download">
                 Download
             </Link>
         )}
+        <Link className="navbar-item navbar-menu-item" to="/privacy-policy">
+            Privacy Policy
+        </Link>
     </>
 );
 
