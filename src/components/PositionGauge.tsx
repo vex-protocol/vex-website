@@ -7,6 +7,7 @@ type Props = {
     verticalScrollRef: React.RefObject<HTMLDivElement | null>;
     sectionIds: readonly string[];
     shake?: boolean;
+    attemptDirection?: "left" | "right" | "up" | "down" | null;
 };
 
 /** Plus-shaped gauge: center = current (x,y), arms = available moves */
@@ -15,6 +16,7 @@ export function PositionGauge({
     verticalScrollRef,
     sectionIds,
     shake,
+    attemptDirection = null,
 }: Props): JSX.Element {
     const history = useHistory();
     const [verticalIndex, setVerticalIndex] = useState(0);
@@ -109,47 +111,105 @@ export function PositionGauge({
 
     return (
         <div
-            className={`position-gauge position-gauge--plus ${shake ? "position-gauge--shake" : ""}`}
+            className={`position-gauge position-gauge--plus ${
+                shake ? "position-gauge--shake" : ""
+            }`}
             role="group"
             aria-label="Position gauge"
         >
             <div className="position-gauge__cross">
                 {/* North: prev section (y-1) */}
-                <div className="position-gauge__arm position-gauge__arm--n">
+                <div
+                    className={`position-gauge__arm position-gauge__arm--n ${
+                        attemptDirection === "up"
+                            ? "position-gauge__arm--flicker"
+                            : ""
+                    }`}
+                >
                     <ArmTile
                         available={hasNorth}
                         label="Previous section"
-                        onClick={hasNorth ? () => goToVertical(verticalIndex - 1) : undefined}
+                        onClick={
+                            hasNorth
+                                ? () => goToVertical(verticalIndex - 1)
+                                : undefined
+                        }
                     />
                 </div>
-                {/* Center: current position (fire red orb in same cube) */}
+                {/* Center: (x,y) reticle indicator */}
                 <div className="position-gauge__arm position-gauge__arm--c">
-                    <div className="position-gauge__round position-gauge__round--center" aria-hidden>
-                        <span className="position-gauge__round-inner" />
+                    <div
+                        className="position-gauge__round position-gauge__round--center"
+                        aria-label={`Position ${lateralIndex + 1}, ${
+                            verticalIndex + 1
+                        }`}
+                    >
+                        <div className="position-gauge__reticle">
+                            <span className="position-gauge__reticle-cross position-gauge__reticle-cross--h" />
+                            <span className="position-gauge__reticle-cross position-gauge__reticle-cross--v" />
+                            <span className="position-gauge__reticle-dot" />
+                            <span className="position-gauge__reticle-ring" />
+                            <span
+                                className="position-gauge__coords"
+                                aria-hidden
+                            >
+                                {lateralIndex + 1},{verticalIndex + 1}
+                            </span>
+                        </div>
                     </div>
                 </div>
                 {/* South: next section (y+1) */}
-                <div className="position-gauge__arm position-gauge__arm--s">
+                <div
+                    className={`position-gauge__arm position-gauge__arm--s ${
+                        attemptDirection === "down"
+                            ? "position-gauge__arm--flicker"
+                            : ""
+                    }`}
+                >
                     <ArmTile
                         available={hasSouth}
                         label="Next section"
-                        onClick={hasSouth ? () => goToVertical(verticalIndex + 1) : undefined}
+                        onClick={
+                            hasSouth
+                                ? () => goToVertical(verticalIndex + 1)
+                                : undefined
+                        }
                     />
                 </div>
                 {/* West: prev route (x-1) */}
-                <div className="position-gauge__arm position-gauge__arm--w">
+                <div
+                    className={`position-gauge__arm position-gauge__arm--w ${
+                        attemptDirection === "left"
+                            ? "position-gauge__arm--flicker"
+                            : ""
+                    }`}
+                >
                     <ArmTile
                         available={hasWest}
                         label="Previous route"
-                        onClick={hasWest ? () => goToLateral(lateralIndex - 1) : undefined}
+                        onClick={
+                            hasWest
+                                ? () => goToLateral(lateralIndex - 1)
+                                : undefined
+                        }
                     />
                 </div>
                 {/* East: next route (x+1) */}
-                <div className="position-gauge__arm position-gauge__arm--e">
+                <div
+                    className={`position-gauge__arm position-gauge__arm--e ${
+                        attemptDirection === "right"
+                            ? "position-gauge__arm--flicker"
+                            : ""
+                    }`}
+                >
                     <ArmTile
                         available={hasEast}
                         label="Next route"
-                        onClick={hasEast ? () => goToLateral(lateralIndex + 1) : undefined}
+                        onClick={
+                            hasEast
+                                ? () => goToLateral(lateralIndex + 1)
+                                : undefined
+                        }
                     />
                 </div>
             </div>

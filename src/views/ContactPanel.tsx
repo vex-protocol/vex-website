@@ -39,11 +39,15 @@ export function ContactPanel(): JSX.Element {
                     aria-hidden
                 />
                 <div className="hero-body">
-                    <div className="columns container has-text-left is-vcentered about-columns">
-                        <div className="column section-bg" aria-hidden>
-                            <WitchyOrbs section="about" />
+                    <div className="columns container has-text-left hero-columns">
+                        <div className="column is-half section-bg" aria-hidden>
+                            <WitchyOrbs
+                                roomPath="/contact"
+                                slotId="contact"
+                                section="about"
+                            />
                         </div>
-                        <div className="column is-12 section-content">
+                        <div className="column is-half section-content">
                             <div className="content-frame content">
                                 <span className="card-header">
                                     <span className="card-header__title card-title--aviation">

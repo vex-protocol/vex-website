@@ -33,7 +33,7 @@ export function HomePanel() {
                 <div className="hero-body">
                     <div className="columns container has-text-left hero-columns">
                         <div className="column is-half section-bg" aria-hidden>
-                            <WitchyHero />
+                            <WitchyHero roomPath="/" />
                         </div>
                         <div className="column is-half section-content">
                             <div className="content-frame content">
@@ -53,8 +53,8 @@ export function HomePanel() {
                                     Simple privacy and powerful end to end
                                     encryption technology for communication.
                                     Real-time messaging with large groups of
-                                    people or chatting with your friends
-                                    without compromising your privacy.
+                                    people or chatting with your friends without
+                                    compromising your privacy.
                                 </p>
                                 {DOWNLOAD_ENABLED ? (
                                     <button
@@ -89,7 +89,11 @@ export function HomePanel() {
             <section className="section mobile-card" id="about">
                 <div className="columns container has-text-left is-vcentered about-columns">
                     <div className="column section-bg" aria-hidden>
-                        <WitchyOrbs section="about" />
+                        <WitchyOrbs
+                            roomPath="/"
+                            slotId="home-about"
+                            section="about"
+                        />
                     </div>
                     <div className="column is-12 section-content">
                         <div className="content-frame content">
@@ -106,10 +110,10 @@ export function HomePanel() {
                                 </span>
                             </span>
                             <p className="subtitle">
-                                Vex Chat is a secure instant messaging
-                                platform for social and commercial use. A
-                                private place to share ideas that protects
-                                your identity and keeps you in control.
+                                Vex Chat is a secure instant messaging platform
+                                for social and commercial use. A private place
+                                to share ideas that protects your identity and
+                                keeps you in control.
                             </p>
                             {DOWNLOAD_ENABLED ? (
                                 <button
@@ -141,7 +145,11 @@ export function HomePanel() {
             <section className="section mobile-card" id="features">
                 <div className="columns container has-text-left features-columns">
                     <div className="column section-bg" aria-hidden>
-                        <WitchyOrbs section="features" />
+                        <WitchyOrbs
+                            roomPath="/"
+                            slotId="home-features"
+                            section="features"
+                        />
                     </div>
                     <div className="column is-12 section-content">
                         <div className="content-frame content">
@@ -165,15 +173,14 @@ export function HomePanel() {
                             </p>
                             <h2 className="title">Free of censorship</h2>
                             <p className="subtitle">
-                                Your messages are end to end encrypted,
-                                meaning we couldn&apos;t even read them if
-                                we wanted to.
+                                Your messages are end to end encrypted, meaning
+                                we couldn&apos;t even read them if we wanted to.
                             </p>
                             <h2 className="title">No surveillance</h2>
                             <p className="subtitle">
-                                We collect as little data as possible to
-                                provide you with chat service. We don&apos;t
-                                spy on you or collect data for profit.
+                                We collect as little data as possible to provide
+                                you with chat service. We don&apos;t spy on you
+                                or collect data for profit.
                             </p>
                             <div className="features-ctas">
                                 <Link

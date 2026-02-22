@@ -14,12 +14,7 @@ import {
     routeIndex,
     pathForIndex,
 } from "../navigation/routeConfig";
-import {
-    HomePanel,
-    ContactPanel,
-    PrivacyPanel,
-    DownloadPanel,
-} from "../views";
+import { HomePanel, ContactPanel, PrivacyPanel, DownloadPanel } from "../views";
 
 const PANELS: Record<string, () => JSX.Element> = {
     "/": () => <HomePanel />,
@@ -34,6 +29,9 @@ export function AppNavigator(): JSX.Element {
     const lateralRef = useRef<HTMLDivElement | null>(null);
     const verticalRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
     const [indicatorShake, setIndicatorShake] = useState(false);
+    const [attemptDirection, setAttemptDirection] = useState<
+        "left" | "right" | "up" | "down" | null
+    >(null);
     const touchStart = useRef<{ x: number; y: number } | null>(null);
     const programmaticScrollRef = useRef(false);
 
@@ -71,7 +69,9 @@ export function AppNavigator(): JSX.Element {
                 const panelWidth = el.clientWidth;
                 if (panelWidth <= 0) return;
                 const idx = Math.round(el.scrollLeft / panelWidth);
-                const path = pathForIndex(Math.max(0, Math.min(idx, LATERAL_ROUTES.length - 1)));
+                const path = pathForIndex(
+                    Math.max(0, Math.min(idx, LATERAL_ROUTES.length - 1))
+                );
                 if (path !== location.pathname) {
                     history.replace(path);
                 }
@@ -89,8 +89,12 @@ export function AppNavigator(): JSX.Element {
         (delta: number) => {
             const next = currentRouteIdx + delta;
             if (next < 0 || next >= LATERAL_ROUTES.length) {
+                setAttemptDirection(delta < 0 ? "left" : "right");
                 setIndicatorShake(true);
-                setTimeout(() => setIndicatorShake(false), 400);
+                setTimeout(() => {
+                    setIndicatorShake(false);
+                    setAttemptDirection(null);
+                }, 400);
                 return;
             }
             history.push(pathForIndex(next));
@@ -102,9 +106,9 @@ export function AppNavigator(): JSX.Element {
         (delta: number) => {
             const el = currentVerticalRef;
             if (!el || sectionIds.length === 0) return;
-            const sections = sectionIds.map((id) => el.querySelector(`#${id}`)).filter(
-                (s): s is HTMLElement => s !== null
-            );
+            const sections = sectionIds
+                .map((id) => el.querySelector(`#${id}`))
+                .filter((s): s is HTMLElement => s !== null);
             if (sections.length === 0) return;
 
             const scrollPos = el.scrollTop;
@@ -121,8 +125,12 @@ export function AppNavigator(): JSX.Element {
 
             const next = currentIndex + delta;
             if (next < 0 || next >= sections.length) {
+                setAttemptDirection(delta < 0 ? "up" : "down");
                 setIndicatorShake(true);
-                setTimeout(() => setIndicatorShake(false), 400);
+                setTimeout(() => {
+                    setIndicatorShake(false);
+                    setAttemptDirection(null);
+                }, 400);
                 return;
             }
             sections[next].scrollIntoView({
@@ -180,9 +188,12 @@ export function AppNavigator(): JSX.Element {
         }
     };
 
-    const setVerticalRef = useCallback((idx: number, el: HTMLDivElement | null) => {
-        if (el) verticalRefs.current.set(idx, el);
-    }, []);
+    const setVerticalRef = useCallback(
+        (idx: number, el: HTMLDivElement | null) => {
+            if (el) verticalRefs.current.set(idx, el);
+        },
+        []
+    );
 
     return (
         <div className="app app-navigator">
@@ -192,6 +203,7 @@ export function AppNavigator(): JSX.Element {
                 verticalScrollRef={{ current: currentVerticalRef }}
                 sectionIds={sectionIds}
                 shake={indicatorShake}
+                attemptDirection={attemptDirection}
             />
             <div
                 className="lateral-strip"

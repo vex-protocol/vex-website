@@ -41,7 +41,7 @@ $white: $bright-white-100
 
 // Override bulma – black + red (#e70000) + witchy accents
 $primary: $vex-red
-$link: $vex-red-bright
+$link: $ice-blue
 $info: $vex-red-dim
 $success: $witch-gold
 $warning: $witch-gold
@@ -410,23 +410,111 @@ $position-gauge-cell: 36px
   transition: box-shadow 0.25s, filter 0.25s
   z-index: 1
 
-// Center: fire red luminescent orb (you are here) – same cube, no pointer
+// Center: (x,y) reticle – aviation HUD crosshair, fire red glow
 .position-gauge__round--center
   cursor: default
   pointer-events: none
-.position-gauge__round--center .position-gauge__round-inner
-  background: radial-gradient(circle at 35% 35%, rgba(255, 120, 100, 1), $fire-red 45%, rgba(180, 0, 0, 0.95) 70%, rgba(120, 0, 0, 0.9) 100%)
-  box-shadow: inset 2px 2px 4px rgba(255, 180, 160, 0.4), inset -1px -1px 2px rgba(0, 0, 0, 0.3), 0 0 10px rgba(231, 0, 0, 0.8), 0 0 20px rgba(231, 0, 0, 0.5), 0 0 30px rgba(231, 0, 0, 0.3)
+
+.position-gauge__reticle
+  position: relative
+  width: 14px
+  height: 14px
+  display: flex
+  align-items: center
+  justify-content: center
+
+.position-gauge__reticle-cross
+  position: absolute
+  background: $fire-red
+  box-shadow: 0 0 4px $fire-red, 0 0 8px rgba(231, 0, 0, 0.6)
+.position-gauge__reticle-cross--h
+  width: 12px
+  height: 1px
+  top: 50%
+  left: 50%
+  transform: translate(-50%, -50%)
+.position-gauge__reticle-cross--v
+  width: 1px
+  height: 12px
+  top: 50%
+  left: 50%
+  transform: translate(-50%, -50%)
+
+.position-gauge__reticle-dot
+  position: absolute
+  width: 2px
+  height: 2px
+  top: 50%
+  left: 50%
+  transform: translate(-50%, -50%)
+  border-radius: 50%
+  background: $fire-red
+  box-shadow: 0 0 4px $fire-red, 0 0 8px rgba(231, 0, 0, 0.8)
+
+.position-gauge__reticle-ring
+  position: absolute
+  width: 14px
+  height: 14px
+  top: 50%
+  left: 50%
+  transform: translate(-50%, -50%)
+  border: 1px solid rgba(231, 0, 0, 0.6)
+  border-radius: 50%
+  box-shadow: 0 0 4px rgba(231, 0, 0, 0.4), inset 0 0 4px rgba(231, 0, 0, 0.2)
+
+.position-gauge__coords
+  position: absolute
+  bottom: -5px
+  left: 50%
+  transform: translateX(-50%)
+  font-size: 7px
+  font-family: monospace
+  font-weight: 600
+  color: $fire-red
+  text-shadow: 0 0 3px rgba(231, 0, 0, 0.9), 0 0 6px rgba(231, 0, 0, 0.6)
+  white-space: nowrap
+  line-height: 1
 
 // Arm rounds: available = incinerator green luminescent (can navigate)
 .position-gauge__round--available .position-gauge__round-inner
   background: radial-gradient(circle at 35% 35%, rgba(170, 240, 120, 1), $incinerator-green 45%, rgba(100, 200, 50, 0.95) 70%, rgba(80, 180, 40, 0.9) 100%)
   box-shadow: inset 2px 2px 4px rgba(200, 255, 180, 0.4), inset -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 8px rgba(145, 230, 67, 0.6), 0 0 16px rgba(145, 230, 67, 0.4)
 
-// Arm rounds: unavailable = amber luminescent (at boundary)
+// Arm rounds: unavailable = grey status (at boundary)
 .position-gauge__round--unavailable .position-gauge__round-inner
-  background: radial-gradient(circle at 35% 35%, rgba(255, 220, 140, 1), $amber 45%, rgba(200, 150, 0, 0.95) 70%, rgba(180, 130, 0, 0.9) 100%)
-  box-shadow: inset 2px 2px 4px rgba(255, 240, 200, 0.4), inset -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 10px rgba(212, 148, 0, 0.8), 0 0 20px rgba(212, 148, 0, 0.5), 0 0 30px rgba(212, 148, 0, 0.3)
+  background: radial-gradient(circle at 35% 35%, rgba(90, 92, 98, 0.95), rgba(60, 62, 68, 0.98) 50%, rgba(40, 42, 48, 0.99) 100%)
+  box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.06), inset -2px -2px 4px rgba(0, 0, 0, 0.5), 0 0 4px rgba(80, 82, 90, 0.5)
+  transition: background 0.05s, box-shadow 0.05s
+
+// When hitting boundary: broken LED amber flicker only on the direction pressed
+.position-gauge--shake .position-gauge__arm--flicker .position-gauge__round--unavailable .position-gauge__round-inner
+  animation: position-gauge-flicker-amber 0.4s ease-in-out
+
+@keyframes position-gauge-flicker-amber
+  0%, 100%
+    background: radial-gradient(circle at 35% 35%, rgba(90, 92, 98, 0.95), rgba(60, 62, 68, 0.98) 50%, rgba(40, 42, 48, 0.99) 100%)
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.06), inset -2px -2px 4px rgba(0, 0, 0, 0.5), 0 0 4px rgba(80, 82, 90, 0.5)
+  8%
+    background: radial-gradient(circle at 35% 35%, rgba(255, 200, 100, 0.9), $amber 45%, rgba(180, 130, 0, 0.95) 70%, rgba(140, 100, 0, 0.9) 100%)
+    box-shadow: inset 2px 2px 4px rgba(255, 240, 200, 0.3), inset -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 8px rgba(212, 148, 0, 0.7), 0 0 16px rgba(212, 148, 0, 0.4)
+  15%
+    background: radial-gradient(circle at 35% 35%, rgba(90, 92, 98, 0.95), rgba(60, 62, 68, 0.98) 50%, rgba(40, 42, 48, 0.99) 100%)
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.06), inset -2px -2px 4px rgba(0, 0, 0, 0.5), 0 0 4px rgba(80, 82, 90, 0.5)
+  22%
+    background: radial-gradient(circle at 35% 35%, rgba(255, 200, 100, 0.7), $amber 45%, rgba(180, 130, 0, 0.8) 70%, rgba(140, 100, 0, 0.85) 100%)
+    box-shadow: inset 2px 2px 4px rgba(255, 240, 200, 0.2), 0 0 6px rgba(212, 148, 0, 0.5)
+  30%
+    background: radial-gradient(circle at 35% 35%, rgba(90, 92, 98, 0.95), rgba(60, 62, 68, 0.98) 50%, rgba(40, 42, 48, 0.99) 100%)
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.06), inset -2px -2px 4px rgba(0, 0, 0, 0.5), 0 0 4px rgba(80, 82, 90, 0.5)
+  45%
+    background: radial-gradient(circle at 35% 35%, rgba(255, 200, 100, 0.5), $amber 45%, rgba(180, 130, 0, 0.6) 70%, rgba(140, 100, 0, 0.7) 100%)
+    box-shadow: 0 0 4px rgba(212, 148, 0, 0.4)
+  55%
+    background: radial-gradient(circle at 35% 35%, rgba(90, 92, 98, 0.95), rgba(60, 62, 68, 0.98) 50%, rgba(40, 42, 48, 0.99) 100%)
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.06), inset -2px -2px 4px rgba(0, 0, 0, 0.5), 0 0 4px rgba(80, 82, 90, 0.5)
+  75%
+    background: radial-gradient(circle at 35% 35%, rgba(255, 200, 100, 0.3), $amber 45%, rgba(180, 130, 0, 0.4) 70%, rgba(140, 100, 0, 0.5) 100%)
+    box-shadow: 0 0 2px rgba(212, 148, 0, 0.3)
 
 .position-gauge__round--unavailable
   cursor: default
@@ -967,6 +1055,22 @@ $orb-rainbow: conic-gradient(#e70000, #c5698b, #2a075b, #a8c8df, #91e643, #d9c2a
   height: 80px
   animation-duration: 18s
   animation-delay: -2s
+  // Thinner bezels – inset shadows scale down for small orbs
+  box-shadow: inset -3px -3px 8px rgba(0,0,0,0.4), inset 2px 2px 6px rgba(255,100,100,0.2), 0 0 30px 8px $orb-red-glow, 0 0 50px 12px rgba(231, 0, 0, 0.2)
+  &::before
+    border-width: 1px
+  &.witchy-orb--purple
+    box-shadow: inset -3px -3px 8px rgba(0,0,0,0.4), inset 2px 2px 6px rgba(90, 42, 142, 0.25), 0 0 30px 8px $orb-purple-glow, 0 0 50px 12px rgba(42, 7, 91, 0.2)
+  &.witchy-orb--blue
+    box-shadow: inset -3px -3px 8px rgba(0,0,0,0.4), inset 2px 2px 6px rgba(122, 176, 224, 0.2), 0 0 30px 8px $orb-blue-glow, 0 0 50px 12px rgba(82, 145, 191, 0.2)
+  &.witchy-orb--green
+    box-shadow: inset -3px -3px 8px rgba(0,0,0,0.4), inset 2px 2px 6px rgba(168, 230, 122, 0.2), 0 0 30px 8px $orb-green-glow, 0 0 50px 12px rgba(71, 131, 17, 0.2)
+  &.witchy-orb--pink
+    box-shadow: inset -3px -3px 8px rgba(0,0,0,0.4), inset 2px 2px 6px rgba(232, 165, 192, 0.2), 0 0 30px 8px $orb-pink-glow, 0 0 50px 12px rgba(197, 105, 139, 0.2)
+  &.witchy-orb--cream
+    box-shadow: inset -3px -3px 8px rgba(0,0,0,0.4), inset 2px 2px 6px rgba(217, 194, 163, 0.25), 0 0 30px 8px $orb-cream-glow, 0 0 50px 12px rgba(217, 194, 163, 0.15)
+  &.witchy-orb--rainbow
+    box-shadow: inset -3px -3px 8px rgba(0,0,0,0.35), inset 2px 2px 6px rgba(255,255,255,0.12), 0 0 30px 8px rgba(197, 105, 139, 0.35), 0 0 50px 12px rgba(231, 0, 0, 0.15)
   .witchy-orb__particle
     transform: translate3d(0, -32px, 0)
   .witchy-orb__particles
@@ -1019,9 +1123,9 @@ $orb-rainbow: conic-gradient(#e70000, #c5698b, #2a075b, #a8c8df, #91e643, #d9c2a
   pointer-events: none
   z-index: 0
 .witchy-spacecraft
-  fill: $fire-red
+  // fill comes from inline style (origin planet color) – do not override
   opacity: 0.5
-  animation: witchy-spacecraft-arrival 5s linear infinite
+  animation: witchy-spacecraft-arrival 6s linear infinite
 .witchy-spacecraft-explosion
   pointer-events: none
 .witchy-spacecraft-explosion__particle
@@ -1641,6 +1745,12 @@ a.button .icon-right
 .content 
   z-index: 99
 
+// Links: ice blue (unused) / royal purple (visited)
+a
+  color: $ice-blue
+a:visited
+  color: $royal-purple
+
 // Content frame: CRT monitor aesthetic – scanlines, curved corners, subtle flicker
 .content-frame
   background: $glass-bg
@@ -1693,46 +1803,41 @@ a.button .icon-right
 #hero 
   .content h2:not(:first-child)
     margin-top: 1rem
-  .witchy-container
-    width: 100%
-    height: 100%
-    position: absolute
-    top: 0
-    left: 0
-    overflow: hidden
-    z-index: 0
-    pointer-events: none
 
-#about 
-  .witchy-container--about
-    width: 100%
-    min-height: 280px
-    position: relative
-    overflow: visible
-    display: flex
-    align-items: center
-    justify-content: center
+// Section-bg: establish containing block so witchy-container fills it (desktop); mobile uses absolute
+.section-bg
+  position: relative
 
-#features 
-  .witchy-container--features
-    width: 100%
-    min-height: 280px
-    position: relative
-    overflow: visible
-    display: flex
-    align-items: center
-    justify-content: center
-  .media + .media 
-    margin-top: 2rem
-    padding-top: 2rem
-    border-top: none
-  .witchy-container
-    width: 100%
-    height: 100%
-    position: relative
-    min-height: 320px
-    z-index: 0
-    overflow: hidden
+// Full-height orb/star canvas everywhere (hero, about, features, contact, etc.)
+.section-bg .witchy-container
+  width: 100%
+  height: 100%
+  min-height: 0
+  position: absolute
+  top: 0
+  left: 0
+  overflow: hidden
+  z-index: 0
+  pointer-events: none
+
+#features .media + .media 
+  margin-top: 2rem
+  padding-top: 2rem
+  border-top: none
+
+// Privacy policy: scrollable paragraphs when viewport is short
+.privacy-section-scroll
+  flex: 1
+  min-height: 0
+  overflow-y: auto
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+.privacy-paragraph
+  flex-shrink: 0
+  max-height: 35vh
+  overflow-y: auto
+  padding-right: 0.25rem
 
 ////////////////////////////////////////////////////////////////
 // Desktop: navbar fixed, middle scrolls (Home page only)
@@ -1743,6 +1848,14 @@ $tablet-up: 769px
   .navbar-over-halo .container
     padding-left: 1rem
     padding-right: 1rem
+  .navbar .logo-text
+    font-size: 1.5rem
+  .navbar .logo--square
+    width: 28px
+    height: 28px
+  .navbar .logo-glitch
+    width: 28px
+    height: 28px
   .app
     padding-top: $navbar-height
     height: 100%
@@ -1769,36 +1882,72 @@ $tablet-up: 769px
   .section.mobile-card .section-content
     flex: 1
     min-height: 0
-  #hero .hero-body
+  #hero .hero-body,
+  #contact .hero-body,
+  #contact-hero .hero-body,
+  #download-hero .hero-body,
+  #privacy-header .hero-body
     flex: 1
     min-height: 0
     display: flex
     flex-direction: column
   #hero .hero-columns,
+  #contact .hero-columns,
+  #contact-hero .hero-columns,
+  #download-hero .hero-columns,
+  #privacy-header .hero-columns,
   #about .about-columns,
-  #features .features-columns
+  #features .features-columns,
+  #contact-hero .about-columns,
+  #contact-links .about-columns,
+  #privacy-header .about-columns,
+  #download-hero .about-columns,
+  #download-releases .about-columns,
+  [id^="privacy-"] .about-columns
     flex: 1
     min-height: 0
     align-items: stretch
   // 50/50 split: orbs panel | content panel (each full-height)
+  #hero .section-bg,
   #about .section-bg,
-  #features .section-bg
+  #features .section-bg,
+  #contact .section-bg,
+  #contact-hero .section-bg,
+  #contact-links .section-bg,
+  #privacy-header .section-bg,
+  #download-hero .section-bg,
+  #download-releases .section-bg,
+  [id^="privacy-"] .section-bg
     flex: 1 1 50%
     min-width: 0
     min-height: 0
     display: flex
     align-items: stretch
     position: relative
+  #hero .section-content,
   #about .section-content,
-  #features .section-content
+  #features .section-content,
+  #contact .section-content,
+  #contact-hero .section-content,
+  #contact-links .section-content,
+  #privacy-header .section-content,
+  #download-hero .section-content,
+  #download-releases .section-content
     flex: 1 1 50%
     min-width: 0
     display: flex
     flex-direction: column
     justify-content: center
     align-items: flex-start
+  #hero .section-bg .witchy-container,
   #about .section-bg .witchy-container,
-  #features .section-bg .witchy-container
+  #features .section-bg .witchy-container,
+  #contact .section-bg .witchy-container,
+  #contact-hero .section-bg .witchy-container,
+  #contact-links .section-bg .witchy-container,
+  #privacy-header .section-bg .witchy-container,
+  #download-hero .section-bg .witchy-container,
+  #download-releases .section-bg .witchy-container
     width: 100%
     flex: 1
     min-height: 320px
@@ -1886,7 +2035,13 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
   // Each frame starts at a different vertical position (centered, 1/3 down, 2/3 down)
   #hero.mobile-card,
   #about.mobile-card,
-  #features.mobile-card
+  #features.mobile-card,
+  #contact.mobile-card,
+  #contact-hero.mobile-card,
+  #contact-links.mobile-card,
+  #privacy-header.mobile-card,
+  #download-hero.mobile-card,
+  #download-releases.mobile-card
     justify-content: flex-start
   .mobile-card .container
     padding: 0
@@ -1929,11 +2084,17 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     overflow-x: hidden
   #hero.hero.is-fullheight
     min-height: 0
-  #hero .hero-columns
+  #hero .hero-columns,
+  #contact .hero-columns
     flex: 1
     min-height: 0
   #about .about-columns,
-  #features .features-columns
+  #features .features-columns,
+  #contact-hero .about-columns,
+  #contact-links .about-columns,
+  #privacy-header .about-columns,
+  #download-hero .about-columns,
+  #download-releases .about-columns
     flex: 1
     min-height: 0
   .hero-halo-bg
@@ -1943,7 +2104,13 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     filter: brightness(0.5) contrast(1.05)
   #hero .hero-columns,
   #about .about-columns,
-  #features .features-columns
+  #features .features-columns,
+  #contact .hero-columns,
+  #contact-hero .hero-columns,
+  #contact-links .about-columns,
+  #privacy-header .hero-columns,
+  #download-hero .hero-columns,
+  #download-releases .about-columns
     display: flex
     flex-direction: column
     position: relative

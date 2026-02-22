@@ -1,6 +1,10 @@
 import React from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import { LATERAL_ROUTES, routeIndex, pathForIndex } from "../navigation/routeConfig";
+import {
+    LATERAL_ROUTES,
+    routeIndex,
+    pathForIndex,
+} from "../navigation/routeConfig";
 
 /** Lateral route indicator – shows which page (Home, Privacy, Contact, Download) */
 export function RouteIndicator(): JSX.Element {
@@ -20,8 +24,12 @@ export function RouteIndicator(): JSX.Element {
                     type="button"
                     role="tab"
                     aria-selected={i === currentIdx}
-                    aria-label={`Go to ${route.path === "/" ? "home" : route.path.slice(1)}`}
-                    className={`route-indicator__dot ${i === currentIdx ? "route-indicator__dot--active" : ""}`}
+                    aria-label={`Go to ${
+                        route.path === "/" ? "home" : route.path.slice(1)
+                    }`}
+                    className={`route-indicator__dot ${
+                        i === currentIdx ? "route-indicator__dot--active" : ""
+                    }`}
                     onClick={() => history.push(pathForIndex(i))}
                 />
             ))}

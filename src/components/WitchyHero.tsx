@@ -40,14 +40,21 @@ const COLOR_TO_MODIFIER: Record<OrbColor, string> = {
     rainbow: "witchy-orb--rainbow",
 };
 
-export function WitchyHero(): JSX.Element {
+export function WitchyHero({
+    roomPath = "/",
+}: {
+    roomPath?: string;
+}): JSX.Element {
     const isMobile = useIsMobile();
     const orbCount = isMobile ? ORB_COUNT_MOBILE : ORB_COUNT;
     const positions = isMobile ? ORB_POSITIONS_MOBILE : ORB_POSITIONS;
     const sizes = isMobile ? ORB_SIZES_MOBILE : ORB_SIZES;
     const starCount = isMobile ? STAR_COUNT_MOBILE : STAR_COUNT;
 
-    const orbs = useMemo(() => generateOrbs(orbCount, "hero"), [orbCount]);
+    const orbs = useMemo(() => generateOrbs(orbCount, "home-hero", roomPath), [
+        orbCount,
+        roomPath,
+    ]);
 
     const stars = Array.from({ length: starCount }, (_, i) => ({
         id: i,

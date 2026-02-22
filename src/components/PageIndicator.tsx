@@ -19,9 +19,9 @@ export function PageIndicator({
     const updateIndex = useCallback(() => {
         const el = scrollRef.current;
         if (!el) return;
-        const sections = sectionIds.map((id) => el.querySelector(`#${id}`)).filter(
-            (s): s is HTMLElement => s !== null
-        );
+        const sections = sectionIds
+            .map((id) => el.querySelector(`#${id}`))
+            .filter((s): s is HTMLElement => s !== null);
         if (sections.length === 0) return;
 
         const isHorizontal = el.scrollWidth > el.clientWidth;
@@ -80,7 +80,11 @@ export function PageIndicator({
                         role="tab"
                         aria-selected={i === currentIndex}
                         aria-label={`Go to page ${i + 1}`}
-                        className={`page-indicator__round ${i === currentIndex ? "page-indicator__round--loaded" : "page-indicator__round--spent"}`}
+                        className={`page-indicator__round ${
+                            i === currentIndex
+                                ? "page-indicator__round--loaded"
+                                : "page-indicator__round--spent"
+                        }`}
                         onClick={() => goTo(i)}
                     >
                         <span className="page-indicator__round-inner" />

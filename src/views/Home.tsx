@@ -33,7 +33,8 @@ export function Home() {
             // Down/Right = advance (next section); Up/Left = go back (matches scroll/carousel convention)
             const advanceKeys = ["ArrowDown", "ArrowRight"];
             const backKeys = ["ArrowUp", "ArrowLeft"];
-            if (!advanceKeys.includes(e.key) && !backKeys.includes(e.key)) return;
+            if (!advanceKeys.includes(e.key) && !backKeys.includes(e.key))
+                return;
             const target = e.target as HTMLElement;
             if (
                 target.tagName === "INPUT" ||
@@ -78,7 +79,10 @@ export function Home() {
                     block: "start",
                     inline: "start",
                 });
-            } else if ((advance && currentIndex >= sections.length - 1) || (goBack && currentIndex <= 0)) {
+            } else if (
+                (advance && currentIndex >= sections.length - 1) ||
+                (goBack && currentIndex <= 0)
+            ) {
                 e.preventDefault();
                 setIndicatorShake(true);
                 setTimeout(() => setIndicatorShake(false), 400);
@@ -109,7 +113,7 @@ export function Home() {
                                 className="column is-half section-bg"
                                 aria-hidden
                             >
-                                <WitchyHero />
+                                <WitchyHero roomPath="/" />
                             </div>
                             <div className="column is-half section-content">
                                 <div className="content-frame content">
@@ -165,7 +169,11 @@ export function Home() {
                 <section className="section mobile-card" id="about">
                     <div className="columns container has-text-left is-vcentered about-columns">
                         <div className="column section-bg" aria-hidden>
-                            <WitchyOrbs section="about" />
+                            <WitchyOrbs
+                                roomPath="/"
+                                slotId="home-about"
+                                section="about"
+                            />
                         </div>
                         <div className="column is-12 section-content">
                             <div className="content-frame content">
@@ -219,7 +227,11 @@ export function Home() {
                 <section className="section mobile-card" id="features">
                     <div className="columns container has-text-left features-columns">
                         <div className="column section-bg" aria-hidden>
-                            <WitchyOrbs section="features" />
+                            <WitchyOrbs
+                                roomPath="/"
+                                slotId="home-features"
+                                section="features"
+                            />
                         </div>
                         <div className="column is-12 section-content">
                             <div className="content-frame content">

@@ -99,16 +99,22 @@ const ORB_LAYOUTS: Record<
     },
 };
 
-// Fewer routes with spacecraft (4 craft total)
+// Cycle: each orb emits to next, craft destroyed at dest, dest emits to its next (staggered delays)
 const SPACECRAFT_ROUTES: [number, number][] = [
     [0, 1],
-    [1, 4],
+    [1, 2],
+    [2, 3],
     [3, 4],
-    [2, 5],
+    [4, 5],
+    [5, 0],
 ];
-// Mobile: 1 route between first 2 orbs
-const SPACECRAFT_ROUTES_MOBILE: [number, number][] = [[0, 1]];
-const SPACECRAFT_DURATION = 5;
+// Mobile: cycle between 3 orbs
+const SPACECRAFT_ROUTES_MOBILE: [number, number][] = [
+    [0, 1],
+    [1, 2],
+    [2, 0],
+];
+const SPACECRAFT_DURATION = 6;
 
 const COLOR_TO_MODIFIER: Record<OrbColor, string> = {
     red: "",
@@ -134,8 +140,12 @@ const EXPLOSION_PARTICLE_COUNT = 8;
 
 /** Orbs = planets with images, stars drift, spacecraft lights move between them */
 export function WitchyOrbs({
+    roomPath,
+    slotId,
     section,
 }: {
+    roomPath: string;
+    slotId: string;
     section: WitchyOrbsSection;
 }): JSX.Element {
     const isMobile = useIsMobile();
@@ -150,9 +160,10 @@ export function WitchyOrbs({
         : SPACECRAFT_ROUTES;
     const starCount = isMobile ? STAR_COUNT_MOBILE : STAR_COUNT;
 
-    const orbs = useMemo(() => generateOrbs(orbCount, section), [
+    const orbs = useMemo(() => generateOrbs(orbCount, slotId, roomPath), [
         orbCount,
-        section,
+        slotId,
+        roomPath,
     ]);
 
     const stars = Array.from({ length: starCount }, (_, i) => ({
@@ -205,7 +216,8 @@ export function WitchyOrbs({
                     const pathD = `M ${x1} ${y1} L ${x2} ${y2}`;
                     const originColor = orbs[a]?.color ?? "red";
                     const destColor = orbs[b]?.color ?? "red";
-                    const begin = idx * 1.2;
+                    // Stagger: each craft departs when prev arrives, so dest "emits" on receive
+                    const begin = idx * SPACECRAFT_DURATION;
                     return (
                         <g key={`${a}-${b}`}>
                             <circle

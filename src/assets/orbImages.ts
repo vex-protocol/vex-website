@@ -1,7 +1,9 @@
 /**
- * Orb images – auto-loaded from color folders, no duplicate images per batch.
- * Chance rates: 50% red, 30% purple, 5% green, 5% blue, 5% pink, 5% cream
+ * Procedural orb generation per room. Seed = unix timestamp + 4 crypto bytes.
+ * No image duplicates from the previous room; pad with empty orbs if needed.
  */
+
+import { DOWNLOAD_ENABLED } from "../components/constants";
 
 const COLOR_FOLDERS: Record<string, string> = {
     red: "FIRERED",
@@ -15,9 +17,7 @@ const COLOR_FOLDERS: Record<string, string> = {
 
 export type OrbColor = keyof typeof COLOR_FOLDERS;
 
-/** Load all images from color folders (auto-discovers new files at build time) */
 function loadAllImagesByColor(): Record<OrbColor, string[]> {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const ctx = (require as any).context(
         ".",
         true,
@@ -42,7 +42,7 @@ function loadAllImagesByColor(): Record<OrbColor, string[]> {
 
 export const ORB_IMAGES_BY_COLOR = loadAllImagesByColor();
 
-export const COLOR_CHANCES: [OrbColor, number][] = [
+const COLOR_CHANCES: [OrbColor, number][] = [
     ["red", 0.5],
     ["purple", 0.3],
     ["green", 0.05],
@@ -51,7 +51,6 @@ export const COLOR_CHANCES: [OrbColor, number][] = [
     ["cream", 0.05],
 ];
 
-/** Color distribution: 50% red, 30% purple, 5% each green/blue/pink/cream, rainbow always ≥1 */
 const COLOR_RATIOS: Record<OrbColor, number> = {
     red: 0.5,
     purple: 0.3,
@@ -59,101 +58,122 @@ const COLOR_RATIOS: Record<OrbColor, number> = {
     blue: 0.05,
     pink: 0.05,
     cream: 0.05,
-    rainbow: 0.5, // energy for rainbow (no ratio, reserved slot)
+    rainbow: 0.5,
 };
 
-/** Power level (energy) per color – proportional to color ratio (red strongest, minor colors weaker) */
-function getEnergyForColor(color: OrbColor): number {
+/** Room config: total orb count per room and slot offsets */
+const ROOM_CONFIG: Record<
+    string,
+    { total: number; slots: { id: string; start: number; count: number }[] }
+> = {
+    "/": {
+        total: 16,
+        slots: [
+            { id: "home-hero", start: 0, count: 4 },
+            { id: "home-about", start: 4, count: 6 },
+            { id: "home-features", start: 10, count: 6 },
+        ],
+    },
+    "/contact": {
+        total: 6,
+        slots: [{ id: "contact", start: 0, count: 6 }],
+    },
+    "/download": {
+        total: 12,
+        slots: [
+            { id: "download-hero", start: 0, count: 6 },
+            { id: "download-releases", start: 6, count: 6 },
+        ],
+    },
+    "/privacy-policy": {
+        total: 48,
+        slots: [
+            { id: "privacy-header", start: 0, count: 6 },
+            { id: "privacy-intro", start: 6, count: 6 },
+            { id: "privacy-why-you-should-care", start: 12, count: 6 },
+            { id: "privacy-what-is-collected", start: 18, count: 6 },
+            { id: "privacy-what-isnt-collected", start: 24, count: 6 },
+            { id: "privacy-what-is-shared", start: 30, count: 6 },
+            { id: "privacy-updates-and-more", start: 36, count: 6 },
+            { id: "privacy-update-history", start: 42, count: 6 },
+        ],
+    },
+};
+
+/** Mulberry32 seeded RNG */
+function mulberry32(seed: number): () => number {
+    return () => {
+        seed |= 0;
+        let t = (seed += 0x6d2b79f5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+function getSeed(): number {
+    const ts = Date.now();
+    const buf = new Uint8Array(4);
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+        crypto.getRandomValues(buf);
+    }
+    const r = (buf[0]! << 24) | (buf[1]! << 16) | (buf[2]! << 8) | buf[3]!;
+    return (ts >>> 0) ^ r;
+}
+
+function getEnergyForColor(color: OrbColor, rng: () => number): number {
     const ratio = color === "rainbow" ? 0.5 : COLOR_RATIOS[color];
     const base = ratio * 1.2;
-    const jitter = (Math.random() - 0.5) * 0.25;
+    const jitter = (rng() - 0.5) * 0.25;
     return Math.max(0.05, Math.min(0.98, base + jitter));
 }
 
-/** Cached page batch – survives StrictMode remount, ensures unique orbs per section */
-const PAGE_ORB_COUNTS = { hero: 4, about: 6, features: 6 } as const;
-let cachedPageOrbs: Array<{
-    color: OrbColor;
-    image: string;
-    energy: number;
-}> | null = null;
+let lastRoomId: string | null = null;
+let lastRoomImages: Set<string> = new Set();
+const roomCache: Record<
+    string,
+    Array<{ color: OrbColor; image: string; energy: number }>
+> = {};
 
-function getPageOrbs(): Array<{
-    color: OrbColor;
-    image: string;
-    energy: number;
-}> {
-    if (cachedPageOrbs) return cachedPageOrbs;
-    const total =
-        PAGE_ORB_COUNTS.hero + PAGE_ORB_COUNTS.about + PAGE_ORB_COUNTS.features;
+/** Pick image for a color – only from that color's folder, exclude last room. Empty if none. */
+function pickImageForColor(
+    color: OrbColor,
+    lastRoomImages: Set<string>,
+    usedThisRoom: Set<string>,
+    rng: () => number
+): string {
+    const images = ORB_IMAGES_BY_COLOR[color] ?? [];
+    const available = images.filter(
+        (path) => !lastRoomImages.has(path) && !usedThisRoom.has(path)
+    );
+    if (available.length === 0) return "";
+    const pick = available[Math.floor(rng() * available.length)]!;
+    usedThisRoom.add(pick);
+    return pick;
+}
 
-    // Always include exactly one rainbow orb (uses RAINBOW folder images)
-    const rainbowSlot = Math.floor(Math.random() * total);
+function generateRoomOrbs(
+    roomPath: string,
+    rng: () => number
+): Array<{ color: OrbColor; image: string; energy: number }> {
+    const cfg = ROOM_CONFIG[roomPath];
+    if (!cfg) return [];
 
+    const total = cfg.total;
+    const usedThisRoom = new Set<string>();
+
+    const rainbowSlot = Math.floor(rng() * total);
     const colorSlots: OrbColor[] = [];
-    const remaining = total - 1; // one slot reserved for rainbow
-    const counts: Record<string, number> = {
-        red: 0,
-        purple: 0,
-        green: 0,
-        blue: 0,
-        pink: 0,
-        cream: 0,
-    };
+    const remaining = total - 1;
     for (const [color, ratio] of COLOR_CHANCES) {
         const n = Math.round(remaining * ratio);
         for (let i = 0; i < n && colorSlots.length < remaining; i++) {
             colorSlots.push(color as OrbColor);
-            counts[color]++;
         }
     }
     while (colorSlots.length < remaining) colorSlots.push("red" as OrbColor);
     while (colorSlots.length > remaining) colorSlots.pop();
-
-    // Insert rainbow at reserved index
     colorSlots.splice(rainbowSlot, 0, "rainbow");
-
-    const usedByColor: Record<string, Set<string>> = {
-        red: new Set(),
-        purple: new Set(),
-        green: new Set(),
-        blue: new Set(),
-        pink: new Set(),
-        cream: new Set(),
-        rainbow: new Set(),
-    };
-
-    function pickImage(color: OrbColor): string {
-        const images = ORB_IMAGES_BY_COLOR[color] ?? [];
-        const available = images.filter((img) => !usedByColor[color].has(img));
-        if (available.length > 0) {
-            const img = available[Math.floor(Math.random() * available.length)];
-            usedByColor[color].add(img);
-            return img;
-        }
-        // Rainbow must never be empty: fallback to any available image from other folders
-        if (color === "rainbow") {
-            const allColors: OrbColor[] = [
-                "red",
-                "purple",
-                "green",
-                "blue",
-                "pink",
-                "cream",
-                "rainbow",
-            ];
-            for (const c of allColors) {
-                const imgs = ORB_IMAGES_BY_COLOR[c] ?? [];
-                const avail = imgs.filter((img) => !usedByColor[c].has(img));
-                if (avail.length > 0) {
-                    const img = avail[Math.floor(Math.random() * avail.length)];
-                    usedByColor[c].add(img);
-                    return img;
-                }
-            }
-        }
-        return "";
-    }
 
     const result: Array<{
         color: OrbColor;
@@ -162,53 +182,53 @@ function getPageOrbs(): Array<{
     }> = [];
 
     for (let i = 0; i < total; i++) {
-        const color = colorSlots[i];
-        const energy = getEnergyForColor(color);
-        const image = pickImage(color);
+        const color = colorSlots[i]!;
+        const energy = getEnergyForColor(color, rng);
+        const image = pickImageForColor(
+            color,
+            lastRoomImages,
+            usedThisRoom,
+            rng
+        );
         result.push({ color, image, energy });
     }
 
-    for (let i = result.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [result[i], result[j]] = [result[j], result[i]];
-    }
-
-    cachedPageOrbs = result;
+    lastRoomImages = new Set(usedThisRoom);
+    if (lastRoomId) delete roomCache[lastRoomId];
+    lastRoomId = roomPath;
     return result;
 }
 
-/** Energy threshold: below this, orb does not rotate at all */
 export const ENERGY_ROTATE_THRESHOLD = 0.35;
 
-/** Get orbs for a section – no duplicates, cached for page (survives StrictMode remount) */
+/** Get orbs for a slot. Lazily generates when cache is empty (new room). */
 export function generateOrbs(
     count: number,
-    section?: keyof typeof PAGE_ORB_COUNTS
+    slotId: string,
+    roomPath: string
 ): Array<{ color: OrbColor; image: string; energy: number }> {
-    const all = getPageOrbs();
-    if (section === "hero")
-        return all.slice(0, Math.min(count, PAGE_ORB_COUNTS.hero));
-    if (section === "about")
-        return all.slice(
-            PAGE_ORB_COUNTS.hero,
-            PAGE_ORB_COUNTS.hero + Math.min(count, PAGE_ORB_COUNTS.about)
-        );
-    if (section === "features")
-        return all.slice(
-            PAGE_ORB_COUNTS.hero + PAGE_ORB_COUNTS.about,
-            PAGE_ORB_COUNTS.hero +
-                PAGE_ORB_COUNTS.about +
-                Math.min(count, PAGE_ORB_COUNTS.features)
-        );
-    return all.slice(0, count);
+    const cfg = ROOM_CONFIG[roomPath];
+    if (!cfg) return [];
+
+    if (!roomCache[roomPath]) {
+        const seed = getSeed();
+        const rng = mulberry32(seed);
+        roomCache[roomPath] = generateRoomOrbs(roomPath, rng);
+    }
+
+    const pool = roomCache[roomPath]!;
+
+    const slot = cfg.slots.find((s) => s.id === slotId);
+    if (!slot) return pool.slice(0, count);
+
+    const take = Math.min(count, slot.count);
+    return pool.slice(slot.start, slot.start + take);
 }
 
-/** Drift duration in s: higher energy = faster drift (shorter duration) */
 export function getDriftDuration(energy: number): number {
     return 18 + (1 - energy) * 22;
 }
 
-/** Rotate duration in s when energy > threshold. Below threshold returns null. */
 export function getRotateDuration(energy: number): number | null {
     if (energy < ENERGY_ROTATE_THRESHOLD) return null;
     return 25 + (1 - energy) * 20;

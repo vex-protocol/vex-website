@@ -41,7 +41,8 @@ export function Contact(): JSX.Element {
         const handleKeyDown = (e: KeyboardEvent) => {
             const advanceKeys = ["ArrowDown", "ArrowRight"];
             const backKeys = ["ArrowUp", "ArrowLeft"];
-            if (!advanceKeys.includes(e.key) && !backKeys.includes(e.key)) return;
+            if (!advanceKeys.includes(e.key) && !backKeys.includes(e.key))
+                return;
             const target = e.target as HTMLElement;
             if (
                 target.tagName === "INPUT" ||
@@ -80,7 +81,11 @@ export function Contact(): JSX.Element {
                     <div className="hero-body">
                         <div className="columns container has-text-left is-vcentered about-columns">
                             <div className="column section-bg" aria-hidden>
-                                <WitchyOrbs section="about" />
+                                <WitchyOrbs
+                                    roomPath="/contact"
+                                    slotId="contact"
+                                    section="about"
+                                />
                             </div>
                             <div className="column is-12 section-content">
                                 <div className="content-frame content">
