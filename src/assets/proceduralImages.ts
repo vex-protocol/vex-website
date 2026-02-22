@@ -1,21 +1,71 @@
 /**
  * Procedural image selection per playthrough. Shares "used once" with orb images.
+ * Card icons use full orb pool (all colors); heading color matches the image's color folder.
  */
 
-import { isImageUsed, markImagesUsed } from "./orbImages";
-import girlRed from "./girl-red.jpg";
+import type { OrbColor } from "./orbImages";
+import {
+    isImageUsed,
+    markImagesUsed,
+    ORB_IMAGES_BY_COLOR,
+} from "./orbImages";
 import haloRed from "./halo-red.jpeg";
-import basedmilio from "./FIRERED/basedmilio4.jpeg";
-import redGirl from "./FIRERED/REDGIRL.jpeg";
-import plane from "./FIRERED/plane.jpg";
 import blackHole from "./ROYALPURPLE/BLACKHOLE.jpg";
 
-const MASCOT_IMAGES = [girlRed, basedmilio, redGirl, plane];
 const HALO_IMAGES = [haloRed, blackHole];
+
+/** Build flat list of { image, color } from all orb images */
+const IMAGES_WITH_COLORS: Array<{ image: string; color: OrbColor }> = (() => {
+    const result: Array<{ image: string; color: OrbColor }> = [];
+    for (const [color, images] of Object.entries(ORB_IMAGES_BY_COLOR)) {
+        for (const img of images ?? []) {
+            result.push({ image: img, color: color as OrbColor });
+        }
+    }
+    return result;
+})();
+
+/** Hex colors for headings, keyed by orb color folder */
+const COLOR_HEX: Record<OrbColor, string> = {
+    red: "#e70000",
+    purple: "#7c3aed",
+    green: "#91e643",
+    blue: "#a8c8df",
+    pink: "#c5698b",
+    cream: "#d9c2a3",
+    rainbow: "#e70000",
+};
+
+export type CardWithColor = {
+    image: string;
+    color: string;
+    colorBg: string;
+};
+
+/** Darken a hex color for button backgrounds */
+function darkenHex(hex: string, amount: number): string {
+    const n = parseInt(hex.slice(1), 16);
+    const r = Math.round(((n >> 16) & 255) * amount);
+    const g = Math.round(((n >> 8) & 255) * amount);
+    const b = Math.round((n & 255) * amount);
+    return (
+        "#" +
+        [r, g, b]
+            .map((x) => Math.max(0, x).toString(16).padStart(2, "0"))
+            .join("")
+    );
+}
 
 const cache: Record<
     string,
-    { mascot: string; halo: string; card: string; card2: string }
+    {
+        mascot: string;
+        halo: string;
+        card: CardWithColor;
+        card2: CardWithColor;
+        cardHero: CardWithColor;
+        cardContact: CardWithColor;
+    }
 > = {};
 let seedCache: Record<string, number> = {};
 
@@ -55,7 +105,32 @@ function pickDistinctIndices(
     return indices;
 }
 
-/** Get procedural mascot for hero. Same for whole run. Never reuses images used by orbs or prior picks. */
+/** Pick distinct items from pool (image+color), avoiding used images. */
+function pickCardIcons(
+    pool: Array<{ image: string; color: OrbColor }>,
+    count: number,
+    rng: () => number
+): CardWithColor[] {
+    const available = pool.filter(({ image }) => !isImageUsed(image));
+    const indices = pickDistinctIndices(
+        available.length,
+        Math.min(count, available.length),
+        rng
+    );
+    const picked = indices.map((i) => available[i]!);
+    const images = picked.map((p) => p.image);
+    markImagesUsed(images);
+    return picked.map(({ image, color }) => {
+        const hex = COLOR_HEX[color] ?? COLOR_HEX.red;
+        return {
+            image,
+            color: hex,
+            colorBg: darkenHex(hex, 0.45),
+        };
+    });
+}
+
+/** Get procedural mascot for hero orb. Same for whole run. */
 export function getProceduralMascot(runKey: number): string {
     if (cache[String(runKey)]) return cache[String(runKey)].mascot;
     const key = String(runKey);
@@ -66,17 +141,28 @@ export function getProceduralMascot(runKey: number): string {
         halosAvailable.length > 0
             ? halosAvailable[Math.floor(rng() * halosAvailable.length)]!
             : HALO_IMAGES[0]!;
-    const mascotsAvailable = MASCOT_IMAGES.filter((p) => !isImageUsed(p));
-    const avatarIndices = pickDistinctIndices(
-        mascotsAvailable.length,
-        Math.min(3, mascotsAvailable.length),
-        rng
-    );
-    const mascot = mascotsAvailable[avatarIndices[0] ?? 0] ?? MASCOT_IMAGES[0]!;
-    const card = mascotsAvailable[avatarIndices[1] ?? 0] ?? mascot;
-    const card2 = mascotsAvailable[avatarIndices[2] ?? 0] ?? card;
-    markImagesUsed([halo, mascot, card, card2].filter(Boolean));
-    cache[String(runKey)] = { mascot, halo, card, card2 };
+    markImagesUsed([halo]);
+
+    const cards = pickCardIcons(IMAGES_WITH_COLORS, 5, rng);
+    const mascot = cards[0]?.image ?? IMAGES_WITH_COLORS[0]?.image ?? "";
+    const fallback = {
+        image: mascot,
+        color: COLOR_HEX.red,
+        colorBg: darkenHex(COLOR_HEX.red, 0.45),
+    };
+    const card = cards[1] ?? cards[0] ?? fallback;
+    const card2 = cards[2] ?? card;
+    const cardHero = cards[3] ?? card;
+    const cardContact = cards[4] ?? card2;
+
+    cache[String(runKey)] = {
+        mascot,
+        halo,
+        card,
+        card2,
+        cardHero,
+        cardContact,
+    };
     return mascot;
 }
 
@@ -87,16 +173,30 @@ export function getProceduralHalo(runKey: number): string {
     return cache[String(runKey)].halo;
 }
 
-/** Get procedural card image for about section. Same for whole run. */
-export function getProceduralCard(runKey: number): string {
+/** Get procedural card for about section. Same for whole run. */
+export function getProceduralCard(runKey: number): CardWithColor {
     if (cache[String(runKey)]) return cache[String(runKey)].card;
     getProceduralMascot(runKey); // populate cache
     return cache[String(runKey)].card;
 }
 
-/** Get procedural card image for features section. Same for whole run. */
-export function getProceduralCard2(runKey: number): string {
+/** Get procedural card for features section. Same for whole run. */
+export function getProceduralCard2(runKey: number): CardWithColor {
     if (cache[String(runKey)]) return cache[String(runKey)].card2;
     getProceduralMascot(runKey); // populate cache
     return cache[String(runKey)].card2;
+}
+
+/** Get procedural card for hero card icon. Same for whole run. */
+export function getProceduralCardHero(runKey: number): CardWithColor {
+    if (cache[String(runKey)]) return cache[String(runKey)].cardHero;
+    getProceduralMascot(runKey); // populate cache
+    return cache[String(runKey)].cardHero;
+}
+
+/** Get procedural card for contact card icon. Same for whole run. */
+export function getProceduralCardContact(runKey: number): CardWithColor {
+    if (cache[String(runKey)]) return cache[String(runKey)].cardContact;
+    getProceduralMascot(runKey); // populate cache
+    return cache[String(runKey)].cardContact;
 }

@@ -47,8 +47,11 @@ export const GITHUB_WEB_URLS = {
 export const DOWNLOAD_ENABLED =
     process.env.REACT_APP_DOWNLOAD_ENABLED === "true";
 
-// Brand: text rendered next to the square logo (navbar + hero)
+// Brand: text rendered next to the square logo (navbar)
 export const LOGO_TEXT = "Vex Heavy Industries";
+
+// Hero card tagline (logo + this text)
+export const HERO_CARD_TAGLINE = "Private Chat For Sensitive Young Men";
 
 // Social
 export const TWITTER_HANDLE = "vexwtf7";

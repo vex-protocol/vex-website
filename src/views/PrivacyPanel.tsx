@@ -3,6 +3,7 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import haloRed from "../assets/halo-red.jpeg";
 import { WitchyOrbs } from "../components/WitchyOrbs";
+import { useProceduralImages } from "../hooks/useProceduralImages";
 import {
     GITHUB_ENDPOINTS,
     GITHUB_RAW_URLS,
@@ -26,7 +27,7 @@ function Commit(props: { commit: any; showLastUpdated: boolean }): JSX.Element {
     );
 }
 
-/** Split markdown by ## headers into sections; first chunk is intro (before any ##). Combines Updates + Hat Tips + Feedback. */
+/** Split markdown by ## headers into sections; first chunk is intro (before any ##). Each section gets its own card. */
 function splitPolicyBySections(
     md: string
 ): { id: string; title: string; content: string }[] {
@@ -38,8 +39,6 @@ function splitPolicyBySections(
             .replace(/'/g, "")
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/^-|-$/g, "");
-
-    const COMBINE_TAIL = ["updates", "hat-tips", "feedback"];
 
     const parts = md.split(/\n## /);
     const intro = parts[0].trim();
@@ -55,7 +54,6 @@ function splitPolicyBySections(
         });
     }
 
-    const tailBlocks: { title: string; content: string }[] = [];
     for (let i = 1; i < parts.length; i++) {
         const block = parts[i];
         const lineEnd = block.indexOf("\n");
@@ -63,25 +61,10 @@ function splitPolicyBySections(
             lineEnd >= 0 ? block.slice(0, lineEnd).trim() : block.trim();
         const content = lineEnd >= 0 ? block.slice(lineEnd + 1).trim() : "";
         const slug = idFromTitle(title);
-
-        if (COMBINE_TAIL.includes(slug)) {
-            tailBlocks.push({ title, content });
-        } else {
-            sections.push({
-                id: `privacy-${slug}`,
-                title,
-                content,
-            });
-        }
-    }
-
-    if (tailBlocks.length > 0) {
         sections.push({
-            id: "privacy-updates-and-more",
-            title: "Updates, Acknowledgments & Feedback",
-            content: tailBlocks
-                .map((b) => `## ${b.title}\n\n${b.content}`)
-                .join("\n\n"),
+            id: `privacy-${slug}`,
+            title,
+            content,
         });
     }
 
@@ -115,6 +98,7 @@ export function PrivacyPanel(): JSX.Element {
     const [privacyPolicyMd, setPrivacyPolicyMd] = useState("");
     const [commitHistory, setCommitHistory] = useState([] as any[]);
     const setSectionIds = useSetRouteSections();
+    const { card } = useProceduralImages();
 
     useEffect(() => {
         const load = async () => {
@@ -159,6 +143,23 @@ export function PrivacyPanel(): JSX.Element {
         setSectionIds("/privacy-policy", sectionIds);
     }, [setSectionIds, sectionIds]);
 
+    const scrollToPolicy = () => {
+        const firstId = allPages[0]?.id;
+        if (firstId) {
+            const el = document.getElementById(firstId);
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }
+    };
+
+    const lastUpdated = commitHistory[0]?.commit?.author?.date
+        ? new Date(commitHistory[0].commit.author.date).toLocaleDateString(
+              undefined,
+              { year: "numeric", month: "long", day: "numeric" }
+          )
+        : null;
+
     return (
         <div className="mobile-cards privacy-panel-cards">
             <section
@@ -170,22 +171,55 @@ export function PrivacyPanel(): JSX.Element {
                     style={{ backgroundImage: `url(${haloRed})` }}
                     aria-hidden
                 />
-                <div className="hero-body">
-                    <div className="columns container has-text-left hero-columns">
-                        <div className="column is-half section-bg" aria-hidden>
-                            <WitchyOrbs
-                                roomPath="/privacy-policy"
-                                slotId="privacy-header"
-                                section="about"
-                            />
-                        </div>
-                        <div className="column is-half section-content">
-                            <div className="content-frame content-frame--crt content is-large is-family-monospace">
-                                <h1 className="title">privacy policy</h1>
-                                <h2 className="subtitle is-size-5">
-                                    we care about your privacy
-                                </h2>
-                            </div>
+                <div className="columns container has-text-left is-vcentered about-columns">
+                    <div className="column section-bg" aria-hidden>
+                        <WitchyOrbs
+                            roomPath="/privacy-policy"
+                            slotId="privacy-header"
+                            section="about"
+                        />
+                    </div>
+                    <div className="column is-12 section-content">
+                        <div
+                            className="content-frame content-frame--crt content-frame--procedural content"
+                            style={{
+                                ["--card-accent-color" as string]:
+                                    card.color,
+                                ["--card-accent-bg" as string]:
+                                    card.colorBg,
+                                ["--card-accent-glow" as string]:
+                                    card.color + "60",
+                                ["--card-accent-glow-strong" as string]:
+                                    card.color + "99",
+                            } as React.CSSProperties}
+                        >
+                            <span className="card-header">
+                                <span className="card-header__img-wrap">
+                                    <img
+                                        src={card.image}
+                                        alt=""
+                                        className="card-header__img"
+                                    />
+                                </span>
+                                <span className="card-header__title card-title--aviation">
+                                    PRIVACY POLICY
+                                </span>
+                            </span>
+                            <p className="subtitle">
+                                We care about your privacy. Our policy explains
+                                what data we collect and how we use it.
+                            </p>
+                            {lastUpdated && (
+                                <p className="help no-pad">
+                                    Last updated {lastUpdated}
+                                </p>
+                            )}
+                            <button
+                                onClick={scrollToPolicy}
+                                className="button is-medium is-primary"
+                            >
+                                Read the privacy policy
+                            </button>
                         </div>
                     </div>
                 </div>

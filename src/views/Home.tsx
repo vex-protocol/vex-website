@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter } from "@fortawesome/free-brands-svg-icons";
-import logo from "../assets/vex_icon.svg";
 import { WitchyHero } from "../components/WitchyHero";
 import { useProceduralImages } from "../hooks/useProceduralImages";
 import { WitchyOrbs } from "../components/WitchyOrbs";
@@ -11,7 +10,7 @@ import { Link, useHistory } from "react-router-dom";
 import {
     DOWNLOAD_ENABLED,
     GITHUB_WEB_URLS,
-    LOGO_TEXT,
+    HERO_CARD_TAGLINE,
     TWITTER_HANDLE,
     TWITTER_URL,
 } from "../components/constants";
@@ -20,7 +19,7 @@ const SECTION_IDS = ["hero", "about", "features"];
 
 export function Home() {
     const history = useHistory();
-    const { halo, card, card2 } = useProceduralImages();
+    const { halo, card, card2, cardHero } = useProceduralImages();
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const [indicatorShake, setIndicatorShake] = useState(false);
 
@@ -106,26 +105,34 @@ export function Home() {
                         style={{ backgroundImage: `url(${halo})` }}
                         aria-hidden
                     />
-                    <div className="hero-body">
-                        <div className="columns container has-text-left hero-columns">
-                            <div
-                                className="column is-half section-bg"
-                                aria-hidden
-                            >
-                                <WitchyHero roomPath="/" />
-                            </div>
-                            <div className="column is-half section-content">
-                                <div className="content-frame content">
-                                    <span className="card-header hero-logo">
-                                        <span className="logo-glitch">
+                    <div className="columns container has-text-left about-columns">
+                        <div className="column section-bg" aria-hidden>
+                            <WitchyHero roomPath="/" />
+                        </div>
+                        <div className="column is-12 section-content">
+                                <div
+                                    className="content-frame content-frame--crt content-frame--procedural content"
+                                    style={{
+                                        ["--card-accent-color" as string]:
+                                            cardHero.color,
+                                        ["--card-accent-bg" as string]:
+                                            cardHero.colorBg,
+                                        ["--card-accent-glow" as string]:
+                                            cardHero.color + "60",
+                                        ["--card-accent-glow-strong" as string]:
+                                            cardHero.color + "99",
+                                    } as React.CSSProperties}
+                                >
+                                    <span className="card-header">
+                                        <span className="card-header__img-wrap">
                                             <img
-                                                src={logo}
-                                                className="logo logo--square card-header__img"
+                                                src={cardHero.image}
                                                 alt=""
+                                                className="card-header__img"
                                             />
                                         </span>
                                         <span className="card-header__title card-title--aviation">
-                                            {LOGO_TEXT}
+                                            {HERO_CARD_TAGLINE}
                                         </span>
                                     </span>
                                     <p className="subtitle is-4">
@@ -162,7 +169,6 @@ export function Home() {
                                 </div>
                             </div>
                         </div>
-                    </div>
                 </section>
 
                 <section className="section mobile-card" id="about">
@@ -175,19 +181,31 @@ export function Home() {
                             />
                         </div>
                         <div className="column is-12 section-content">
-                            <div className="content-frame content">
-                                <span className="card-header">
-                                    <span className="card-header__img-wrap">
-                                        <img
-                                            src={card}
-                                            alt=""
-                                            className="card-header__img"
-                                        />
-                                    </span>
-                                    <span className="card-header__title card-title--aviation">
-                                        PRIVACY IS NOT A CRIME
-                                    </span>
+                            <div
+                                className="content-frame content-frame--crt content-frame--procedural content"
+                                style={{
+                                    ["--card-accent-color" as string]:
+                                        card.color,
+                                    ["--card-accent-bg" as string]:
+                                        card.colorBg,
+                                    ["--card-accent-glow" as string]:
+                                        card.color + "60",
+                                    ["--card-accent-glow-strong" as string]:
+                                        card.color + "99",
+                                } as React.CSSProperties}
+                            >
+                            <span className="card-header">
+                                <span className="card-header__img-wrap">
+                                    <img
+                                        src={card.image}
+                                        alt=""
+                                        className="card-header__img"
+                                    />
                                 </span>
+                                <span className="card-header__title card-title--aviation">
+                                    PRIVACY IS NOT A CRIME
+                                </span>
+                            </span>
                                 <p className="subtitle">
                                     Vex Chat is a secure instant messaging
                                     platform for social and commercial use. A
@@ -233,19 +251,31 @@ export function Home() {
                             />
                         </div>
                         <div className="column is-12 section-content">
-                            <div className="content-frame content">
-                                <span className="card-header">
-                                    <span className="card-header__img-wrap">
-                                        <img
-                                            src={card2}
-                                            alt=""
-                                            className="card-header__img"
-                                        />
-                                    </span>
-                                    <span className="card-header__title card-title--aviation">
-                                        ENCRYPTED BY DEFAULT
-                                    </span>
+                            <div
+                                className="content-frame content-frame--crt content-frame--procedural content"
+                                style={{
+                                    ["--card-accent-color" as string]:
+                                        card2.color,
+                                    ["--card-accent-bg" as string]:
+                                        card2.colorBg,
+                                    ["--card-accent-glow" as string]:
+                                        card2.color + "60",
+                                    ["--card-accent-glow-strong" as string]:
+                                        card2.color + "99",
+                                } as React.CSSProperties}
+                            >
+                            <span className="card-header">
+                                <span className="card-header__img-wrap">
+                                    <img
+                                        src={card2.image}
+                                        alt=""
+                                        className="card-header__img"
+                                    />
                                 </span>
+                                <span className="card-header__title card-title--aviation">
+                                    ENCRYPTED BY DEFAULT
+                                </span>
+                            </span>
                                 <h2 className="title">Your conversation</h2>
                                 <p className="subtitle">
                                     Vex is open-source, encrypted and free. It

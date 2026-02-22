@@ -1193,10 +1193,6 @@ $menu-padding: 1.25rem
   pointer-events: none
   filter: brightness(0.5) contrast(1.05)
   opacity: 0.6
-.hero--with-halo .hero-body
-  position: relative
-  z-index: 1
-
 .section
   background-color: $vex-black
 
@@ -2166,15 +2162,91 @@ a:visited
   padding-top: 2rem
   border-top: none
 
-// Privacy policy: black CRT scanline frame behind text
+// Privacy policy: black CRT frame – scanlines only on titles/subtitles, not body text
 .content-frame--crt
   background: #0a0a0c
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 0 120px 40px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(231, 0, 0, 0.06), 0 1px 0 rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(0, 0, 0, 0.8)
   &::before
     background: radial-gradient(ellipse 90% 90% at 50% 50%, transparent 30%, rgba(0, 0, 0, 0.15) 80%, rgba(0, 0, 0, 0.3) 100%), linear-gradient(180deg, rgba(231, 0, 0, 0.02) 0%, transparent 50%, rgba(0, 0, 0, 0.05) 100%)
   &::after
+    display: none
+.content-frame--crt .title,
+.content-frame--crt .card-header__title
+  position: relative
+  &::after
+    content: ""
+    position: absolute
+    inset: 0
     background: repeating-linear-gradient(0deg, transparent 0px, transparent 1px, rgba(0, 0, 0, 0.35) 1px, rgba(0, 0, 0, 0.35) 2px)
     opacity: 0.9
+    pointer-events: none
+
+// Procedural card theming – theme icon glow + all text with image's color
+.content-frame--procedural
+  .card-header__img-wrap
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5), 0 0 16px var(--card-accent-glow), 0 0 8px var(--card-accent-glow)
+  .card-header__title
+    color: var(--card-accent-color) !important
+    text-shadow: 0 0 12px var(--card-accent-glow), 0 0 4px var(--card-accent-glow-strong)
+  .subtitle,
+  .title,
+  .help,
+  p
+    color: var(--card-accent-color) !important
+  a
+    color: var(--card-accent-color) !important
+  a:hover
+    color: var(--card-accent-color) !important
+    filter: brightness(1.15)
+  .button.is-primary:not(.is-outlined),
+  a.button.is-primary:not(.is-outlined)
+    background: linear-gradient(145deg, var(--card-accent-color) 0%, var(--card-accent-bg) 100%) !important
+    border-color: var(--card-accent-color) !important
+    color: #fff !important
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 0 12px var(--card-accent-glow), 0 0 20px var(--card-accent-glow)
+    &:hover
+      background: linear-gradient(145deg, var(--card-accent-color) 0%, var(--card-accent-bg) 100%) !important
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 16px var(--card-accent-glow), 0 0 24px var(--card-accent-glow-strong)
+  .button.is-primary.is-outlined,
+  a.button.is-primary.is-outlined
+    border-color: var(--card-accent-color) !important
+    color: var(--card-accent-color) !important
+    text-shadow: 0 0 6px var(--card-accent-glow) !important
+    &:hover
+      border-color: var(--card-accent-color) !important
+      color: var(--card-accent-color) !important
+      text-shadow: 0 0 10px var(--card-accent-glow) !important
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 0 16px var(--card-accent-glow), 0 0 24px var(--card-accent-glow-strong) !important
+      &::before
+        background: radial-gradient(circle at 35% 35%, var(--card-accent-color), var(--card-accent-bg) 45%, var(--card-accent-bg) 100%) !important
+        box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.3), inset -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 10px var(--card-accent-glow), 0 0 18px var(--card-accent-glow-strong) !important
+  .button.is-outlined:hover
+    border-color: var(--card-accent-color)
+    color: var(--card-accent-color)
+    box-shadow: 0 0 10px var(--card-accent-glow)
+
+// Standalone themed button (outside procedural cards) – same styling when wrapper has accent vars
+.themed-button-wrapper
+  display: inline-block
+  .button.is-primary:not(.is-outlined),
+  a.button.is-primary:not(.is-outlined)
+    background: linear-gradient(145deg, var(--card-accent-color) 0%, var(--card-accent-bg) 100%) !important
+    border-color: var(--card-accent-color) !important
+    color: #fff !important
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 0 12px var(--card-accent-glow)
+    &:hover
+      background: linear-gradient(145deg, var(--card-accent-color) 0%, var(--card-accent-bg) 100%) !important
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 16px var(--card-accent-glow)
+  .button.is-primary.is-outlined
+    border-color: var(--card-accent-color) !important
+    color: var(--card-accent-color) !important
+    &:hover
+      border-color: var(--card-accent-color) !important
+      color: var(--card-accent-color) !important
+      box-shadow: 0 0 10px var(--card-accent-glow)
+      &::before
+        background: radial-gradient(circle at 35% 35%, var(--card-accent-color), var(--card-accent-bg) 100%) !important
+        box-shadow: 0 0 10px var(--card-accent-glow) !important
 
 // Privacy policy: scrollable paragraphs when viewport is short
 .privacy-section-scroll
@@ -2233,22 +2305,10 @@ $tablet-up: 769px
   .section.mobile-card .section-content
     flex: 1
     min-height: 0
-  #hero .hero-body,
-  #contact .hero-body,
-  #contact-hero .hero-body,
-  #download-hero .hero-body,
-  #privacy-header .hero-body
-    flex: 1
-    min-height: 0
-    display: flex
-    flex-direction: column
-  #hero .hero-columns,
-  #contact .hero-columns,
-  #contact-hero .hero-columns,
-  #download-hero .hero-columns,
-  #privacy-header .hero-columns,
+  #hero .about-columns,
   #about .about-columns,
   #features .features-columns,
+  #contact .about-columns,
   #contact-hero .about-columns,
   #contact-links .about-columns,
   #privacy-header .about-columns,
@@ -2442,20 +2502,10 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     overflow-wrap: break-word
     word-wrap: break-word
     word-break: break-word
-  .hero--with-halo .hero-body
-    padding: $mobile-gap
-    flex: 1
-    display: flex
-    align-items: flex-start
-    min-height: 0
-    min-width: 0
-    overflow-x: hidden
-  #hero .hero-columns,
-  #contact .hero-columns
-    flex: 1
-    min-height: 0
+  #hero .about-columns,
   #about .about-columns,
   #features .features-columns,
+  #contact .about-columns,
   #contact-hero .about-columns,
   #contact-links .about-columns,
   #privacy-header .about-columns,
@@ -2468,20 +2518,14 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
     background-position: center 20%
     opacity: 0.55
     filter: brightness(0.5) contrast(1.05)
-  #hero .hero-columns
-    display: flex
-    flex-direction: column
-    position: static
-    min-width: 0
-    width: 100%
-    max-width: 100%
+  #hero .about-columns,
   #about .about-columns,
   #features .features-columns,
-  #contact .hero-columns,
-  #contact-hero .hero-columns,
+  #contact .about-columns,
+  #contact-hero .about-columns,
   #contact-links .about-columns,
-  #privacy-header .hero-columns,
-  #download-hero .hero-columns,
+  #privacy-header .about-columns,
+  #download-hero .about-columns,
   #download-releases .about-columns
     display: flex
     flex-direction: column
@@ -2630,3 +2674,33 @@ $holographic-tint: linear-gradient(135deg, rgba(231, 0, 0, 0.12) 0%, rgba(180, 0
   .cta
     display: flex
     justify-content: center
+
+////////////////////////////////////////////////////////////////
+// Procedural accent – override outlined hover (must come last to beat base)
+////////////////////////////////////////////////////////////////
+.content-frame--procedural .button.is-primary.is-outlined:hover,
+.content-frame--procedural a.button.is-primary.is-outlined:hover,
+.content-frame--procedural .button.is-primary.is-outlined.is-small:hover,
+.content-frame--procedural a.button.is-primary.is-outlined.is-small:hover,
+.content-frame--procedural .button.is-primary.is-outlined.is-medium:hover,
+.content-frame--procedural a.button.is-primary.is-outlined.is-medium:hover,
+.content-frame--procedural .button.is-primary.is-outlined.is-large:hover,
+.content-frame--procedural a.button.is-primary.is-outlined.is-large:hover
+  color: var(--card-accent-color) !important
+  border-color: var(--card-accent-color) !important
+  text-shadow: 0 0 10px var(--card-accent-glow) !important
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 0 16px var(--card-accent-glow), 0 0 24px var(--card-accent-glow-strong) !important
+  &::before
+    background: radial-gradient(circle at 35% 35%, var(--card-accent-color), var(--card-accent-bg) 45%, var(--card-accent-bg) 100%) !important
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.3), inset -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 10px var(--card-accent-glow), 0 0 18px var(--card-accent-glow-strong) !important
+
+.themed-button-wrapper .button.is-primary.is-outlined:hover,
+.themed-button-wrapper a.button.is-primary.is-outlined:hover,
+.themed-button-wrapper .button.is-primary.is-outlined.is-small:hover,
+.themed-button-wrapper a.button.is-primary.is-outlined.is-small:hover
+  color: var(--card-accent-color) !important
+  border-color: var(--card-accent-color) !important
+  box-shadow: 0 0 10px var(--card-accent-glow)
+  &::before
+    background: radial-gradient(circle at 35% 35%, var(--card-accent-color), var(--card-accent-bg) 100%) !important
+    box-shadow: 0 0 10px var(--card-accent-glow) !important

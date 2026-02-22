@@ -78,8 +78,7 @@ export function Contact(): JSX.Element {
                         style={{ backgroundImage: `url(${haloRed})` }}
                         aria-hidden
                     />
-                    <div className="hero-body">
-                        <div className="columns container has-text-left is-vcentered about-columns">
+                    <div className="columns container has-text-left is-vcentered about-columns">
                             <div className="column section-bg" aria-hidden>
                                 <WitchyOrbs
                                     roomPath="/contact"
@@ -118,7 +117,6 @@ export function Contact(): JSX.Element {
                                 </div>
                             </div>
                         </div>
-                    </div>
                 </section>
             </div>
         </div>

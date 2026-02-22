@@ -15,16 +15,15 @@ export function DownloadPanel(): JSX.Element {
                     style={{ backgroundImage: `url(${haloRed})` }}
                     aria-hidden
                 />
-                <div className="hero-body">
-                    <div className="columns container has-text-left hero-columns">
-                        <div className="column is-half section-bg" aria-hidden>
-                            <WitchyOrbs
-                                roomPath="/download"
-                                slotId="download-hero"
-                                section="about"
-                            />
-                        </div>
-                        <div className="column is-half section-content">
+                <div className="columns container has-text-left about-columns">
+                    <div className="column section-bg" aria-hidden>
+                        <WitchyOrbs
+                            roomPath="/download"
+                            slotId="download-hero"
+                            section="about"
+                        />
+                    </div>
+                    <div className="column section-content">
                             <div className="content-frame content">
                                 <span className="card-header">
                                     <span className="card-header__title card-title--aviation">
@@ -38,7 +37,6 @@ export function DownloadPanel(): JSX.Element {
                             </div>
                         </div>
                     </div>
-                </div>
             </section>
 
             <section className="section mobile-card" id="download-releases">
