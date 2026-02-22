@@ -567,7 +567,7 @@ body.scroll-to-top-active
 ////////////////////////////////////////////////////////////////
 .app-floating-controller
   position: fixed
-  bottom: 1.25rem
+  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0))
   left: 0
   right: 0
   z-index: 900
@@ -576,7 +576,6 @@ body.scroll-to-top-active
   align-items: flex-end
   pointer-events: none
   padding: 0 1.25rem
-  padding-bottom: env(safe-area-inset-bottom, 0)
 
 .app-floating-controller__scroll-top
   pointer-events: auto
