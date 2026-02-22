@@ -39,7 +39,7 @@ export function PageIndicator({
             index = i;
         }
         setCurrentIndex(index);
-    }, [scrollRef, sectionIds]);
+    }, [scrollRef, sectionIds]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         const el = scrollRef.current;

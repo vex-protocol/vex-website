@@ -54,11 +54,12 @@ export function WitchyHero({
 
     const { respawnTrigger } = useRespawn();
     const { mascot } = useProceduralImages();
-    const orbs = useMemo(() => generateOrbs(orbCount, "home-hero", roomPath), [
-        orbCount,
-        roomPath,
-        respawnTrigger,
-    ]);
+    const orbs = useMemo(
+        () => generateOrbs(orbCount, "home-hero", roomPath),
+        // respawnTrigger intentionally triggers regeneration when it changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [orbCount, roomPath, respawnTrigger]
+    );
 
     const stars = Array.from({ length: starCount }, (_, i) => ({
         id: i,

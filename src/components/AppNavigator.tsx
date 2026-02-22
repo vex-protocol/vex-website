@@ -389,7 +389,7 @@ export function AppNavigator(): JSX.Element {
             const axis = isHorizontal ? "x" : "y";
 
             e.preventDefault();
-            if (wheelAccum.current[axis] > 0 !== sign > 0)
+            if ((wheelAccum.current[axis] > 0) !== (sign > 0))
                 wheelAccum.current[axis] = 0;
             wheelAccum.current[axis] += delta;
 

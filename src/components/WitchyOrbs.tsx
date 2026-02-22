@@ -161,13 +161,14 @@ export function WitchyOrbs({
         : SPACECRAFT_ROUTES;
     const starCount = isMobile ? STAR_COUNT_MOBILE : STAR_COUNT;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- respawnTrigger used in useMemo deps to trigger regeneration
     const { respawnTrigger } = useRespawn();
-    const orbs = useMemo(() => generateOrbs(orbCount, slotId, roomPath), [
-        orbCount,
-        slotId,
-        roomPath,
-        respawnTrigger,
-    ]);
+    const orbs = useMemo(
+        () => generateOrbs(orbCount, slotId, roomPath),
+        // respawnTrigger intentionally triggers regeneration when it changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [orbCount, slotId, roomPath, respawnTrigger]
+    );
 
     const stars = Array.from({ length: starCount }, (_, i) => ({
         id: i,
