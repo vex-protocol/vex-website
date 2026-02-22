@@ -140,8 +140,6 @@ export function PositionGauge({
         [
             hasWest,
             hasEast,
-            hasNorth,
-            hasSouth,
             lateralIndex,
             verticalIndex,
             sectionIds.length,
