@@ -6,7 +6,7 @@ type RespawnContextValue = {
     respawnTrigger: number;
     respawn: () => void;
     scrollToTop: () => void;
-    /** Respawn (fresh orbs) + scroll to top of current route, or go to home (1,1) if already at depth 1 on another route */
+    /** Logo click: invalidate cache + bump respawn; caller navigates to home at top */
     logoClick: () => void;
 };
 
@@ -19,7 +19,7 @@ export function RespawnProvider({
 }: {
     children: React.ReactNode;
     scrollToTop?: () => void;
-    /** Called after invalidateRoomCache + bump respawnTrigger. Should navigate to / or scrollToTop. */
+    /** Called after invalidateRoomCache + bump respawnTrigger. Should navigate to /?depth=1. */
     logoClick?: () => void;
 }): JSX.Element {
     const history = useHistory();

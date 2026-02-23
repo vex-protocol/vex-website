@@ -392,20 +392,10 @@ export function AppNavigator(): JSX.Element {
         updateDepthParam,
     ]);
 
-    /** Respawn (fresh orbs) + scroll to top of current route, or go to home at last home depth if already at depth 1 on another route */
+    /** Logo click: always respawn to home (/) at top (depth 1). RespawnContext handles cache invalidation. */
     const handleLogoClick = useCallback(() => {
-        const isAtDepth1 = depthParam == null || depthParam === 1;
-        const isOnAnotherRoute = location.pathname !== "/";
-        if (isOnAnotherRoute && isAtDepth1) {
-            const homeDepth = lastDepthByRouteIdxRef.current[0] ?? 1;
-            history.push({
-                pathname: "/",
-                search: `?depth=${homeDepth}`,
-            });
-        } else {
-            scrollToTop();
-        }
-    }, [location.pathname, depthParam, history, scrollToTop]);
+        history.push({ pathname: "/", search: "?depth=1" });
+    }, [history]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {

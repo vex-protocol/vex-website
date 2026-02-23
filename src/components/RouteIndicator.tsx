@@ -5,13 +5,10 @@ import {
     routeIndex,
     pathForIndex,
 } from "../navigation/routeConfig";
-import { useRouteDepth } from "../context/RouteDepthContext";
-
 /** Lateral route indicator – shows which page (Home, Download, Privacy) */
 export function RouteIndicator(): JSX.Element {
     const history = useHistory();
     const location = useLocation();
-    const { getDepthForRouteIdx } = useRouteDepth();
     const currentIdx = routeIndex(location.pathname);
 
     return (
@@ -32,13 +29,12 @@ export function RouteIndicator(): JSX.Element {
                     className={`route-indicator__dot ${
                         i === currentIdx ? "route-indicator__dot--active" : ""
                     }`}
-                    onClick={() => {
-                        const depth = getDepthForRouteIdx(i);
+                    onClick={() =>
                         history.push({
                             pathname: pathForIndex(i),
-                            search: `?depth=${depth}`,
-                        });
-                    }}
+                            search: "?depth=1",
+                        })
+                    }
                 />
             ))}
         </div>
