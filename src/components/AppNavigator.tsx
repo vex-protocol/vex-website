@@ -95,15 +95,36 @@ export function AppNavigator(): JSX.Element {
         }
     }, [location.pathname, location.search, history, getDepthForRouteIdx]);
 
-    const scrollPanelToTopInstant = useCallback((el: HTMLDivElement) => {
-        document.body.classList.add("scroll-to-top-active");
-        el.scrollTop = 0;
-        const mobileCards = el.querySelector(".mobile-cards");
-        if (mobileCards) (mobileCards as HTMLElement).scrollTop = 0;
-        setTimeout(() => {
-            document.body.classList.remove("scroll-to-top-active");
-        }, 150);
-    }, []);
+    const scrollPanelToTopInstant = useCallback(
+        (el: HTMLDivElement | null) => {
+            if (!el) return;
+            const clearClass = () => {
+                document.body.classList.remove("scroll-to-top-active");
+            };
+            document.body.classList.add("scroll-to-top-active");
+            const removeClassTimeout = setTimeout(clearClass, 200);
+            const doScroll = () => {
+                try {
+                    el.scrollTop = 0;
+                    const mobileCards = el.querySelector(".mobile-cards");
+                    if (mobileCards) {
+                        (mobileCards as HTMLElement).scrollTop = 0;
+                    }
+                } catch {
+                    // ensure we never leave body in scroll-to-top-active
+                } finally {
+                    clearTimeout(removeClassTimeout);
+                    setTimeout(clearClass, 50);
+                }
+            };
+            if (isMobile) {
+                requestAnimationFrame(doScroll);
+            } else {
+                doScroll();
+            }
+        },
+        [isMobile]
+    );
 
     // Scroll lateral strip FIRST when pathname changes – must run before scroll-to-top so target panel is visible
     // On mobile, defer by one frame so layout has settled (avoids blank panel during transition)
@@ -363,7 +384,13 @@ export function AppNavigator(): JSX.Element {
         const el = verticalRefs.current.get(currentRouteIdx);
         if (!el) return;
         scrollPanelToTopInstant(el);
-    }, [currentRouteIdx, scrollPanelToTopInstant]);
+        lastDepthByRouteIdxRef.current[currentRouteIdx] = 1;
+        updateDepthParam(1);
+    }, [
+        currentRouteIdx,
+        scrollPanelToTopInstant,
+        updateDepthParam,
+    ]);
 
     /** Respawn (fresh orbs) + scroll to top of current route, or go to home at last home depth if already at depth 1 on another route */
     const handleLogoClick = useCallback(() => {
@@ -468,6 +495,7 @@ export function AppNavigator(): JSX.Element {
         return () => window.removeEventListener("wheel", onWheel);
     }, [navigate]);
 
+    // On mobile: prevent default touchmove so we handle flicks in touchEnd and snap to next/prev view.
     useEffect(() => {
         const el = lateralRef.current;
         if (!el) return;
@@ -499,7 +527,6 @@ export function AppNavigator(): JSX.Element {
             return;
         }
         if (absDy > absDx && absDy > threshold && sectionIds.length > 0) {
-            // Inverted for touch: swipe up = next section, swipe down = prev (matches mobile scroll metaphor)
             navigate(dy < 0 ? "down" : "up");
         }
     };
