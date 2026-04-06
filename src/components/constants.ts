@@ -1,9 +1,9 @@
 // Website Domain
-export const WEBSITE_DOMAIN = process.env.REACT_APP_WEBSITE_DOMAIN || "vex.wtf";
+export const WEBSITE_DOMAIN = import.meta.env.VITE_WEBSITE_DOMAIN || "vex.wtf";
 
 // API Endpoints
 export const API_BASE_URL =
-    process.env.REACT_APP_API_BASE_URL || "https://api.vex.wtf";
+    import.meta.env.VITE_API_BASE_URL || "https://api.vex.wtf";
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -45,7 +45,7 @@ export const GITHUB_WEB_URLS = {
 
 // Feature flags
 export const DOWNLOAD_ENABLED =
-    process.env.REACT_APP_DOWNLOAD_ENABLED === "true";
+    import.meta.env.VITE_DOWNLOAD_ENABLED === "true";
 
 // Brand: text rendered next to the square logo (navbar)
 export const LOGO_TEXT = "Vex Heavy Industries";
