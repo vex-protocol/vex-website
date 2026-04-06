@@ -900,7 +900,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                 </p>
                                 <p className="mt-1 font-mono text-lg text-zinc-100">
                                     {spireMeta?.uptimePercent !== null
-                                        ? `${spireMeta?.uptimePercent}%`
+                                        ? `${spireMeta?.uptimePercent?.toFixed(2)}%`
                                         : "n/a"}
                                 </p>
                             </div>
@@ -930,7 +930,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                         </div>
                         <div className="mt-4">
                             <p className="mb-2 text-[11px] uppercase tracking-[0.12em] text-zinc-500">
-                                Reliability strip
+                                Reliability
                             </p>
                             <div
                                 className="relative z-20 grid w-full gap-[3px] overflow-visible pb-1"
