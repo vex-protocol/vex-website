@@ -1,0 +1,13 @@
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
+body {
+    background-color: rgb(9 9 11);
+    color: rgb(244 244 245);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+}

@@ -3,45 +3,20 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
-        "@fortawesome/fontawesome-svg-core": "^1.2.32",
-        "@fortawesome/free-brands-svg-icons": "^5.15.1",
-        "@fortawesome/free-solid-svg-icons": "^5.15.1",
-        "@fortawesome/react-fontawesome": "^0.1.13",
-        "@testing-library/jest-dom": "^5.11.4",
-        "@testing-library/react": "^11.1.0",
-        "@testing-library/user-event": "^12.1.10",
-        "@types/jest": "^26.0.15",
-        "@types/node": "^12.0.0",
-        "@types/react": "^16.9.53",
-        "@types/react-dom": "^16.9.8",
-        "@types/react-router-dom": "^5.1.7",
-        "@types/uuid": "^8.3.0",
-        "axios": "^0.21.0",
-        "bulma": "^0.9.1",
-        "css-vars": "^2.3.0",
-        "msgpack-lite": "^0.1.26",
-        "react": "^17.0.1",
-        "react-dom": "^17.0.1",
-        "react-icons": "^5.5.0",
-        "react-markdown": "^5.0.3",
-        "react-router-dom": "^5.2.0",
-        "react-spring": "^8.0.27",
-        "sass": "^1.83.0",
-        "typescript": "^4.0.3",
-        "uuid": "^8.3.2"
+        "date-fns": "^4.1.0",
+        "lucide-preact": "^0.542.0",
+        "preact": "^10.27.2",
+        "preact-router": "^4.1.2"
     },
     "scripts": {
-        "start": "vite",
         "dev": "vite",
+        "start": "vite",
         "build": "vite build",
         "preview": "vite preview",
-        "compress-images": "node scripts/compress-images.js",
-        "generate-orb-images": "node scripts/generate-orb-images.js",
-        "build:assets": "npm run generate-orb-images && npm run compress-images",
         "test": "vitest --passWithNoTests",
         "predeploy": "npm run build",
         "deploy": "gh-pages -d dist",
-        "prettier": "node ./node_modules/prettier/bin-prettier.js '**/*.{ts,tsx,json,md}' --tab-width 4 --trailing-comma es5 --ignore-path .gitignore  --arrow-parens always --write"
+        "format": "node ./node_modules/prettier/bin-prettier.js '**/*.{ts,tsx,json,md}' --tab-width 4 --ignore-path .gitignore --write"
     },
     "browserslist": {
         "production": [
@@ -56,14 +31,12 @@
         ]
     },
     "devDependencies": {
-        "@types/msgpack-lite": "^0.1.7",
-        "@vitejs/plugin-react": "^5.0.4",
         "autoprefixer": "^10.4.24",
         "gh-pages": "^3.1.0",
         "postcss": "^8.5.6",
         "prettier": "^2.2.1",
-        "sharp": "^0.33.0",
         "tailwindcss": "^3.4.19",
+        "typescript": "^5.9.3",
         "vite": "^7.1.10",
         "vitest": "^3.2.4"
     }
