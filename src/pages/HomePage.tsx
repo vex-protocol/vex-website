@@ -1,5 +1,5 @@
 import type { JSX } from "preact";
-import { formatDistanceToNowStrict } from "date-fns";
+import { format, formatDistanceToNowStrict } from "date-fns";
 import { useEffect, useState } from "preact/hooks";
 import {
     Check,
@@ -66,9 +66,17 @@ type MonitorSummaryResponse = {
 type MonitorTimeseriesBlock = {
     bucketStart: string;
     bucketEnd: string;
+    /** Monitor polls in the bucket (alias of sampleCount when provided by API). */
+    total?: number;
+    /** Polls where the target was up (alias of upCount). */
+    online?: number;
+    /** Polls where the target was down / error (alias of downCount). */
+    offline?: number;
     sampleCount: number;
     upCount: number;
     downCount: number;
+    /** Max − min of requests_total in the bucket, or null if unavailable. */
+    serviceRequestsDelta?: number | null;
     uptimePercent: number;
     avgLatencyMs: number | null;
     p95LatencyMs: number | null;
@@ -148,6 +156,217 @@ const LIBVEX_GITHUB_URL = "https://github.com/vex-protocol/libvex-js";
 const SPIRE_GITHUB_URL = "https://github.com/vex-protocol/spire";
 const UPTIME_BLOCK_WINDOW_HOURS = 24;
 const UPTIME_BLOCK_BUCKET_MINUTES = 60;
+
+function getMonitorBucketPollCounts(block: MonitorTimeseriesBlock): {
+    total: number;
+    online: number;
+    offline: number;
+} {
+    return {
+        total: block.total ?? block.sampleCount,
+        online: block.online ?? block.upCount,
+        offline: block.offline ?? block.downCount,
+    };
+}
+
+function formatBucketWindowClock(block: MonitorTimeseriesBlock): string {
+    const start = new Date(block.bucketStart);
+    const end = new Date(block.bucketEnd);
+    return `${format(start, "MMM d, HH:mm")} → ${format(end, "HH:mm")}`;
+}
+
+function formatBucketDurationLabel(block: MonitorTimeseriesBlock): string {
+    const ms =
+        new Date(block.bucketEnd).getTime() -
+        new Date(block.bucketStart).getTime();
+    const mins = Math.max(0, Math.round(ms / 60000));
+    if (mins >= 60 && mins % 60 === 0) {
+        const h = mins / 60;
+        return h === 1 ? "1 hour" : `${h} hours`;
+    }
+    return mins === 1 ? "1 minute" : `${mins} minutes`;
+}
+
+function checkSuccessTone(percent: number): string {
+    if (percent >= 99.5) return "text-emerald-300";
+    if (percent >= 95) return "text-amber-200";
+    return "text-red-300";
+}
+
+function UptimeStripPopoverPanel(props: {
+    block: MonitorTimeseriesBlock;
+}): JSX.Element {
+    const { block } = props;
+    const { total, online, offline } = getMonitorBucketPollCounts(block);
+    const windowLabel = formatBucketWindowClock(block);
+    const durationLabel = formatBucketDurationLabel(block);
+    const hasSamples = block.status !== "no_data" && total > 0;
+    const checkPct = hasSamples ? block.uptimePercent : null;
+    const gap = Math.max(0, total - online - offline);
+
+    return (
+        <div
+            className="w-[min(17rem,calc(100vw-2rem))] rounded-xl border border-white/[0.12] bg-zinc-950/95 p-3.5 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.75)] ring-1 ring-white/[0.06] backdrop-blur-md"
+            role="tooltip"
+        >
+            <div className="border-b border-white/[0.08] pb-2.5">
+                <p className="font-mono text-[11px] leading-snug text-zinc-200">
+                    {windowLabel}
+                </p>
+                <p className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                    {durationLabel} window · {formatRelativeTime(block.bucketStart)}
+                </p>
+            </div>
+            {!hasSamples ? (
+                <p className="mt-2.5 text-xs leading-relaxed text-zinc-400">
+                    No monitor samples in this bucket.
+                </p>
+            ) : (
+                <dl className="mt-2.5 space-y-2 text-xs">
+                    <div className="flex items-baseline justify-between gap-3">
+                        <dt className="text-zinc-500">Check health</dt>
+                        <dd
+                            className={`font-mono text-sm font-medium tabular-nums ${checkSuccessTone(
+                                checkPct ?? 0
+                            )}`}
+                        >
+                            {checkPct?.toFixed(1)}%
+                        </dd>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-3">
+                        <dt className="text-zinc-500">Monitor polls</dt>
+                        <dd className="font-mono tabular-nums text-zinc-200">
+                            {total.toLocaleString()}
+                        </dd>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-3">
+                        <dt className="text-zinc-500">Up / down</dt>
+                        <dd className="font-mono tabular-nums text-zinc-200">
+                            <span className="text-emerald-300/95">
+                                {online.toLocaleString()}
+                            </span>
+                            <span className="text-zinc-600"> / </span>
+                            <span className="text-red-300/95">
+                                {offline.toLocaleString()}
+                            </span>
+                            {gap > 0 ? (
+                                <span className="text-zinc-500">
+                                    {" "}
+                                    (+{gap} unknown)
+                                </span>
+                            ) : null}
+                        </dd>
+                    </div>
+                    {block.serviceRequestsDelta != null ? (
+                        <div className="flex items-baseline justify-between gap-3">
+                            <dt className="text-zinc-500">Requests served (Δ)</dt>
+                            <dd className="font-mono tabular-nums text-zinc-200">
+                                {block.serviceRequestsDelta.toLocaleString()}
+                            </dd>
+                        </div>
+                    ) : null}
+                    {block.avgLatencyMs != null ? (
+                        <div className="flex items-baseline justify-between gap-3">
+                            <dt className="text-zinc-500">Latency (avg)</dt>
+                            <dd className="font-mono tabular-nums text-zinc-200">
+                                {Math.round(block.avgLatencyMs)}ms
+                            </dd>
+                        </div>
+                    ) : null}
+                    {block.p95LatencyMs != null ? (
+                        <div className="flex items-baseline justify-between gap-3">
+                            <dt className="text-zinc-500">Latency (p95)</dt>
+                            <dd className="font-mono tabular-nums text-zinc-200">
+                                {Math.round(block.p95LatencyMs)}ms
+                            </dd>
+                        </div>
+                    ) : null}
+                    {block.maxLatencyMs != null ? (
+                        <div className="flex items-baseline justify-between gap-3">
+                            <dt className="text-zinc-500">Latency (max)</dt>
+                            <dd className="font-mono tabular-nums text-zinc-200">
+                                {Math.round(block.maxLatencyMs)}ms
+                            </dd>
+                        </div>
+                    ) : null}
+                </dl>
+            )}
+        </div>
+    );
+}
+
+function UptimeReliabilityStripBlock(props: {
+    block: MonitorTimeseriesBlock;
+}): JSX.Element {
+    const { block } = props;
+    const { total } = getMonitorBucketPollCounts(block);
+    const shortTitle =
+        block.status === "no_data" || total === 0
+            ? `No samples · ${formatBucketWindowClock(block)}`
+            : `${block.uptimePercent.toFixed(1)}% checks OK · ${total} polls`;
+
+    return (
+        <div
+            className="group relative min-w-0 rounded-[2px] outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/45 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+            tabIndex={0}
+            title={shortTitle}
+        >
+            {/* pt-1.5 bridges the gap under the bar so hover/focus is not lost before the panel */}
+            <div className="invisible absolute left-1/2 top-full z-[75] flex -translate-x-1/2 translate-y-1 flex-col items-center pt-1.5 opacity-0 transition-all duration-200 ease-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                <UptimeStripPopoverPanel block={block} />
+            </div>
+            <UptimeReliabilityStripCell block={block} />
+        </div>
+    );
+}
+
+function UptimeReliabilityStripCell(props: {
+    block: MonitorTimeseriesBlock;
+}): JSX.Element {
+    const { total, online, offline } = getMonitorBucketPollCounts(props.block);
+    const gap = Math.max(0, total - online - offline);
+
+    if (props.block.status === "no_data" || total === 0) {
+        return (
+            <span className="h-6 rounded-[2px] bg-zinc-600/80" />
+        );
+    }
+
+    if (gap === 0 && offline === 0) {
+        return (
+            <span className="h-6 rounded-[2px] bg-emerald-400/90" />
+        );
+    }
+
+    if (gap === 0 && online === 0) {
+        return (
+            <span className="h-6 rounded-[2px] bg-red-400/90" />
+        );
+    }
+
+    return (
+        <span className="flex h-6 w-full min-w-0 overflow-hidden rounded-[2px]">
+            {online > 0 ? (
+                <span
+                    className="min-w-0 bg-emerald-400/90"
+                    style={{ flex: online }}
+                />
+            ) : null}
+            {offline > 0 ? (
+                <span
+                    className="min-w-0 bg-red-400/90"
+                    style={{ flex: offline }}
+                />
+            ) : null}
+            {gap > 0 ? (
+                <span
+                    className="min-w-0 bg-zinc-600/80"
+                    style={{ flex: gap }}
+                />
+            ) : null}
+        </span>
+    );
+}
 
 function formatRelativeTime(value: string): string {
     return `${formatDistanceToNowStrict(new Date(value), { addSuffix: true })}`;
@@ -591,9 +810,11 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                 </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 sm:p-10">
-                <div className="pointer-events-none absolute -left-20 -top-24 h-52 w-52 rounded-full bg-[#e70000]/15 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-28 right-16 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
+            <div className="relative overflow-visible rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 sm:p-10">
+                <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+                    <div className="absolute -left-20 -top-24 h-52 w-52 rounded-full bg-[#e70000]/15 blur-3xl" />
+                    <div className="absolute -bottom-28 right-16 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
+                </div>
                 <div className="relative">
                     <h2 className="max-w-4xl text-3xl font-bold tracking-tight text-zinc-50 sm:text-5xl">
                         Run on Spire with confidence.
@@ -712,7 +933,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                 Reliability strip
                             </p>
                             <div
-                                className="grid w-full gap-[3px]"
+                                className="relative z-20 grid w-full gap-[3px] overflow-visible pb-1"
                                 style={{
                                     gridTemplateColumns: `repeat(${totalUptimeBlockSlots}, minmax(0, 1fr))`,
                                 }}
@@ -726,29 +947,10 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                             />
                                         );
                                     }
-                                    const barClass =
-                                        block.status === "up"
-                                            ? "bg-emerald-400/90"
-                                            : block.status === "down"
-                                            ? "bg-red-400/90"
-                                            : "bg-zinc-600/80";
-                                    const hoverTitle =
-                                        block.status === "no_data"
-                                            ? undefined
-                                            : [
-                                                  formatRelativeTime(
-                                                      block.bucketStart
-                                                  ),
-                                                  `avg latency ${Math.round(
-                                                      block.avgLatencyMs ?? 0
-                                                  )}ms`,
-                                                  `${block.sampleCount} requests handled`,
-                                              ].join(" · ");
                                     return (
-                                        <span
+                                        <UptimeReliabilityStripBlock
                                             key={block.bucketStart}
-                                            className={`h-6 rounded-[2px] ${barClass}`}
-                                            title={hoverTitle}
+                                            block={block}
                                         />
                                     );
                                 })}
