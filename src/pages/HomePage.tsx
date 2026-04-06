@@ -481,6 +481,18 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
         "unknown";
     const runtimeRefShort =
         runtimeRef === "unknown" ? runtimeRef : runtimeRef.slice(0, 7);
+    const endpointStatusToneClass =
+        spireMeta === null
+            ? "text-zinc-400"
+            : spireMeta.apiReachable
+            ? "text-emerald-300"
+            : "text-amber-300";
+    const endpointStatusLabel =
+        spireMeta === null
+            ? "checking"
+            : spireMeta.apiReachable
+            ? "online"
+            : "degraded";
 
     return (
         <section className="space-y-6">
@@ -618,16 +630,10 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                     {spireApiUrl}
                                 </p>
                                 <span
-                                    className={
-                                        spireMeta?.apiReachable
-                                            ? "inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-emerald-300"
-                                            : "inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-amber-300"
-                                    }
+                                    className={`inline-flex shrink-0 items-center gap-1.5 text-xs font-medium ${endpointStatusToneClass}`}
                                 >
                                     <span className="h-2 w-2 rounded-full bg-current" />
-                                    {spireMeta?.apiReachable
-                                        ? "online"
-                                        : "degraded"}
+                                    {endpointStatusLabel}
                                 </span>
                             </div>
                             <button
