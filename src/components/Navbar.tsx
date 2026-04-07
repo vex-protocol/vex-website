@@ -35,9 +35,9 @@ export function Navbar(props: { currentPath: string }): JSX.Element {
                     Menu
                 </button>
 
-                <ul className="hidden items-center gap-2 md:flex">
+                <ul className="m-0 hidden list-none items-center gap-2 p-0 md:flex">
                     {LINKS.map((link) => (
-                        <li key={link.href}>
+                        <li key={link.href} className="list-none">
                             <NavItem
                                 href={link.href}
                                 label={link.label}
@@ -49,9 +49,9 @@ export function Navbar(props: { currentPath: string }): JSX.Element {
             </nav>
 
             {menuOpen && (
-                <ul className="space-y-1 border-t border-white/10 px-4 py-3 md:hidden">
+                <ul className="m-0 list-none space-y-1 border-t border-white/10 px-4 py-3 md:hidden">
                     {LINKS.map((link) => (
-                        <li key={link.href}>
+                        <li key={link.href} className="list-none">
                             <NavItem
                                 href={link.href}
                                 label={link.label}
@@ -79,7 +79,7 @@ function NavItem(props: {
             href={href}
             onClick={onNavigate}
             className={[
-                "inline-flex rounded-md px-3 py-2 text-xs uppercase tracking-[0.16em] transition-colors sm:text-sm",
+                "inline-flex rounded-md px-3 py-2 text-xs uppercase tracking-[0.16em] no-underline transition-colors sm:text-sm",
                 isActive
                     ? "bg-[#e70000]/20 text-[#e70000]"
                     : "text-zinc-300 hover:bg-white/5 hover:text-white",
