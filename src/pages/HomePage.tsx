@@ -64,6 +64,9 @@ type MonitorSummaryResponse = {
     };
 };
 
+/** Consecutive polls with the same outcome, oldest sample first (left in the strip). */
+type PollOkRun = { ok: boolean; count: number };
+
 type MonitorTimeseriesBlock = {
     bucketStart: string;
     bucketEnd: string;
@@ -76,6 +79,11 @@ type MonitorTimeseriesBlock = {
     sampleCount: number;
     upCount: number;
     downCount: number;
+    /**
+     * Strip segments in chronological order (left = earliest). Derived from
+     * `samples`/`polls` with timestamps, or from `poll_ok_runs` / `samples_ok`.
+     */
+    pollOkRuns?: PollOkRun[];
     /** Max − min of requests_total in the bucket, or null if unavailable. */
     serviceRequestsDelta?: number | null;
     uptimePercent: number;
@@ -157,6 +165,7 @@ const LIBVEX_GITHUB_URL = "https://github.com/vex-protocol/libvex-js";
 const SPIRE_GITHUB_URL = "https://github.com/vex-protocol/spire";
 const UPTIME_BLOCK_WINDOW_HOURS = 24;
 const UPTIME_BLOCK_BUCKET_MINUTES = 60;
+const SPIRE_META_REFRESH_MS = 60_000;
 
 function coerceNonNegInt(value: unknown): number {
     if (typeof value === "number" && Number.isFinite(value)) {
@@ -210,9 +219,272 @@ function pickIsoInstant(row: Record<string, unknown>, keys: string[]): string {
     return "";
 }
 
+function coerceSampleBool(value: unknown): boolean | null {
+    if (value === true || value === 1 || value === "1" || value === "true") {
+        return true;
+    }
+    if (value === false || value === 0 || value === "0" || value === "false") {
+        return false;
+    }
+    return null;
+}
+
+function booleansToRuns(values: boolean[]): PollOkRun[] {
+    if (values.length === 0) return [];
+    const runs: PollOkRun[] = [];
+    let cur = values[0];
+    let n = 1;
+    for (let i = 1; i < values.length; i++) {
+        if (values[i] === cur) n++;
+        else {
+            runs.push({ ok: cur, count: n });
+            cur = values[i];
+            n = 1;
+        }
+    }
+    runs.push({ ok: cur, count: n });
+    return runs;
+}
+
+function mergeAdjacentPollRuns(runs: PollOkRun[]): PollOkRun[] {
+    const out: PollOkRun[] = [];
+    for (const r of runs) {
+        if (r.count <= 0) continue;
+        const last = out[out.length - 1];
+        if (last && last.ok === r.ok) last.count += r.count;
+        else out.push({ ok: r.ok, count: r.count });
+    }
+    return out;
+}
+
+function parsePollRunEntry(raw: unknown): PollOkRun | null {
+    if (!raw || typeof raw !== "object") return null;
+    const o = raw as Record<string, unknown>;
+    const countRaw = o.n ?? o.count ?? o.samples;
+    const count =
+        countRaw === undefined || countRaw === null
+            ? 1
+            : coerceNonNegInt(countRaw);
+    if (count <= 0) return null;
+    let ok: boolean | null = null;
+    if (typeof o.ok === "boolean") ok = o.ok;
+    else if (o.ok === 1 || o.ok === "1" || o.ok === "true") ok = true;
+    else if (o.ok === 0 || o.ok === "0" || o.ok === "false") ok = false;
+    else if (typeof o.up === "boolean") ok = o.up;
+    else if (
+        o.status === "up" ||
+        o.status === "online" ||
+        o.status === "ok"
+    ) {
+        ok = true;
+    } else if (
+        o.status === "down" ||
+        o.status === "offline" ||
+        o.status === "error"
+    ) {
+        ok = false;
+    }
+    if (ok === null) return null;
+    return { ok, count };
+}
+
+function pollRunsMatchCounts(
+    runs: PollOkRun[],
+    sampleCount: number,
+    upCount: number,
+    downCount: number
+): boolean {
+    const sum = runs.reduce((s, r) => s + r.count, 0);
+    if (sum !== sampleCount) return false;
+    let up = 0;
+    let down = 0;
+    for (const r of runs) {
+        if (r.ok) up += r.count;
+        else down += r.count;
+    }
+    return up === upCount && down === downCount;
+}
+
+function extractTimestampMsFromValue(v: unknown): number | null {
+    if (typeof v === "number" && Number.isFinite(v)) {
+        const ms = v < 1e12 ? v * 1000 : v;
+        const d = new Date(ms);
+        if (!Number.isNaN(d.getTime())) return ms;
+        return null;
+    }
+    if (typeof v === "string" && v.length > 0) {
+        const parsed = Date.parse(v);
+        if (!Number.isNaN(parsed)) return parsed;
+    }
+    return null;
+}
+
+function coerceOkFromSampleRecord(o: Record<string, unknown>): boolean | null {
+    if (typeof o.ok === "boolean") return o.ok;
+    if (o.ok === 1 || o.ok === "1" || o.ok === "true") return true;
+    if (o.ok === 0 || o.ok === "0" || o.ok === "false") return false;
+    if (typeof o.up === "boolean") return o.up;
+    if (
+        o.status === "up" ||
+        o.status === "online" ||
+        o.status === "ok"
+    ) {
+        return true;
+    }
+    if (
+        o.status === "down" ||
+        o.status === "offline" ||
+        o.status === "error"
+    ) {
+        return false;
+    }
+    return null;
+}
+
+function sampleRecordTimeMs(o: Record<string, unknown>): number | null {
+    const timeKeys = [
+        "sampledAt",
+        "sampled_at",
+        "timestamp",
+        "time",
+        "ts",
+        "at",
+        "createdAt",
+        "created_at",
+        "t",
+    ];
+    for (const tk of timeKeys) {
+        const ms = extractTimestampMsFromValue(o[tk]);
+        if (ms !== null) return ms;
+    }
+    return null;
+}
+
+function extractPollOkRunsFromTimestampedSamples(
+    row: Record<string, unknown>,
+    sampleCount: number,
+    upCount: number,
+    downCount: number
+): PollOkRun[] | undefined {
+    const arrayKeys = [
+        "samples",
+        "polls",
+        "checks",
+        "points",
+        "sample_points",
+        "bucket_samples",
+    ];
+    for (const key of arrayKeys) {
+        const arr = row[key];
+        if (!Array.isArray(arr) || arr.length !== sampleCount) continue;
+        const items: { t: number; ok: boolean; i: number }[] = [];
+        let bad = false;
+        for (let i = 0; i < arr.length; i++) {
+            const raw = arr[i];
+            if (!raw || typeof raw !== "object") {
+                bad = true;
+                break;
+            }
+            const o = raw as Record<string, unknown>;
+            const t = sampleRecordTimeMs(o);
+            const ok = coerceOkFromSampleRecord(o);
+            if (t === null || ok === null) {
+                bad = true;
+                break;
+            }
+            items.push({ t, ok, i });
+        }
+        if (bad) continue;
+        items.sort((a, b) => a.t - b.t || a.i - b.i);
+        const runs = booleansToRuns(items.map((x) => x.ok));
+        if (pollRunsMatchCounts(runs, sampleCount, upCount, downCount)) {
+            return runs;
+        }
+    }
+    return undefined;
+}
+
+function extractPollOkRuns(
+    row: Record<string, unknown>,
+    sampleCount: number,
+    upCount: number,
+    downCount: number
+): PollOkRun[] | undefined {
+    if (sampleCount === 0) return undefined;
+
+    const fromTimestamps = extractPollOkRunsFromTimestampedSamples(
+        row,
+        sampleCount,
+        upCount,
+        downCount
+    );
+    if (fromTimestamps) return fromTimestamps;
+
+    const runArrayKeys = [
+        "pollOkRuns",
+        "poll_ok_runs",
+        "okRuns",
+        "ok_runs",
+        "sampleRuns",
+        "sample_runs",
+        "outcomeRuns",
+        "outcome_runs",
+    ];
+    for (const key of runArrayKeys) {
+        const arr = row[key];
+        if (!Array.isArray(arr) || arr.length === 0) continue;
+        const runs = mergeAdjacentPollRuns(
+            arr
+                .map(parsePollRunEntry)
+                .filter((r): r is PollOkRun => r !== null)
+        );
+        if (
+            runs.length > 0 &&
+            pollRunsMatchCounts(runs, sampleCount, upCount, downCount)
+        ) {
+            return runs;
+        }
+    }
+
+    const boolArrayKeys = [
+        "samplesOk",
+        "samples_ok",
+        "sampleOutcomes",
+        "sample_outcomes",
+        "outcomes",
+        "pollsOk",
+        "polls_ok",
+    ];
+    for (const key of boolArrayKeys) {
+        const arr = row[key];
+        if (!Array.isArray(arr) || arr.length !== sampleCount) continue;
+        const bools: boolean[] = [];
+        let valid = true;
+        for (const v of arr) {
+            const b = coerceSampleBool(v);
+            if (b === null) {
+                valid = false;
+                break;
+            }
+            bools.push(b);
+        }
+        if (!valid) continue;
+        const runs = booleansToRuns(bools);
+        if (pollRunsMatchCounts(runs, sampleCount, upCount, downCount)) {
+            return runs;
+        }
+    }
+
+    return undefined;
+}
+
 function normalizeTimeseriesBlock(raw: unknown): MonitorTimeseriesBlock | null {
     if (!raw || typeof raw !== "object") return null;
     const row = raw as Record<string, unknown>;
+    const requestsRow =
+        row.requests && typeof row.requests === "object"
+            ? (row.requests as Record<string, unknown>)
+            : null;
     const bucketStart = pickIsoInstant(row, [
         "bucketStart",
         "bucket_start",
@@ -236,13 +508,16 @@ function normalizeTimeseriesBlock(raw: unknown): MonitorTimeseriesBlock | null {
     if (!bucketStart || !bucketEnd) return null;
 
     const sampleCount = coerceNonNegInt(
-        pickRecordField(row, ["sampleCount", "sample_count", "total"])
+        pickRecordField(row, ["sampleCount", "sample_count", "total"]) ??
+            requestsRow?.total
     );
     const upCount = coerceNonNegInt(
-        pickRecordField(row, ["upCount", "up_count", "online"])
+        pickRecordField(row, ["upCount", "up_count", "online"]) ??
+            requestsRow?.online
     );
     const downCount = coerceNonNegInt(
-        pickRecordField(row, ["downCount", "down_count", "offline"])
+        pickRecordField(row, ["downCount", "down_count", "offline"]) ??
+            requestsRow?.offline
     );
 
     const uptimeRaw = pickRecordField(row, ["uptimePercent", "uptime_percent"]);
@@ -277,6 +552,8 @@ function normalizeTimeseriesBlock(raw: unknown): MonitorTimeseriesBlock | null {
         serviceRequestsDelta = d;
     }
 
+    const pollOkRuns = extractPollOkRuns(row, sampleCount, upCount, downCount);
+
     return {
         bucketStart,
         bucketEnd,
@@ -286,6 +563,7 @@ function normalizeTimeseriesBlock(raw: unknown): MonitorTimeseriesBlock | null {
         sampleCount,
         upCount,
         downCount,
+        ...(pollOkRuns && pollOkRuns.length > 0 ? { pollOkRuns } : {}),
         serviceRequestsDelta,
         uptimePercent,
         avgLatencyMs: coerceNullableNumber(
@@ -526,11 +804,42 @@ function UptimeReliabilityStripCell(props: {
 }): JSX.Element {
     const { total, online, offline } = getMonitorBucketPollCounts(props.block);
     const gap = Math.max(0, total - online - offline);
+    const orderedRuns = props.block.pollOkRuns;
 
     const barFrame = "block h-full min-h-[1.5rem] w-full min-w-0 rounded-sm";
 
     if (props.block.status === "no_data" || total === 0) {
         return <span className={`${barFrame} bg-zinc-600/80`} />;
+    }
+
+    if (
+        orderedRuns &&
+        orderedRuns.length > 0 &&
+        pollRunsMatchCounts(orderedRuns, total, online, offline)
+    ) {
+        const runSum = orderedRuns.reduce((s, r) => s + r.count, 0);
+        const tailGap = Math.max(0, total - runSum);
+        return (
+            <span className={`flex ${barFrame} overflow-hidden`}>
+                {orderedRuns.map((run, i) => (
+                    <span
+                        key={i}
+                        className={
+                            run.ok
+                                ? "min-w-0 bg-emerald-400/90"
+                                : "min-w-0 bg-red-400/90"
+                        }
+                        style={{ flex: run.count }}
+                    />
+                ))}
+                {tailGap > 0 ? (
+                    <span
+                        className="min-w-0 bg-zinc-600/80"
+                        style={{ flex: tailGap }}
+                    />
+                ) : null}
+            </span>
+        );
     }
 
     if (gap === 0 && offline === 0) {
@@ -912,9 +1221,13 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
             }
         }
 
-        loadSpireMeta();
+        void loadSpireMeta();
+        const refreshTimer = window.setInterval(() => {
+            void loadSpireMeta();
+        }, SPIRE_META_REFRESH_MS);
         return () => {
             cancelled = true;
+            window.clearInterval(refreshTimer);
         };
     }, []);
 
