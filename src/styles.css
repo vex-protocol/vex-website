@@ -1,15 +1,31 @@
 html {
-    /* ~match 90% browser zoom: scales rem-based Tailwind type + spacing site-wide */
-    font-size: 90%;
+    font-size: 100%;
+}
+
+@media (min-width: 1024px) {
+    html {
+        /* desktop-only scale-down to mimic ~90% browser zoom */
+        font-size: 90%;
+    }
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
 html,
 body,
 #root {
     min-height: 100%;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 body {
+    margin: 0;
+    width: 100%;
     background-color: rgb(9 9 11);
     color: rgb(244 244 245);
     -webkit-font-smoothing: antialiased;

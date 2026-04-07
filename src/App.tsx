@@ -6,12 +6,12 @@ import { Navbar } from "./components/Navbar";
 export function App(): JSX.Element {
     const currentPath =
         typeof window !== "undefined" ? window.location.pathname : "/";
-    const [HomePage, setHomePage] = useState<ComponentType<{ path?: string }> | null>(
-        null
-    );
-    const [PrivacyPolicyPage, setPrivacyPolicyPage] = useState<
-        ComponentType<{ path?: string }> | null
-    >(null);
+    const [HomePage, setHomePage] = useState<ComponentType<{
+        path?: string;
+    }> | null>(null);
+    const [PrivacyPolicyPage, setPrivacyPolicyPage] = useState<ComponentType<{
+        path?: string;
+    }> | null>(null);
 
     useEffect(() => {
         if (HomePage || currentPath === "/privacy-policy") return;
@@ -49,8 +49,10 @@ export function App(): JSX.Element {
                     ) : (
                         <PrivacyPolicyLoading />
                     )
+                ) : HomePage ? (
+                    <HomePage />
                 ) : (
-                    HomePage ? <HomePage /> : <HomePageLoading />
+                    <HomePageLoading />
                 )}
             </main>
             <Footer />

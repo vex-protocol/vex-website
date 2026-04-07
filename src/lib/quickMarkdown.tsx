@@ -1,8 +1,8 @@
-import { Fragment, type ComponentChildren } from "preact";
+import { Fragment } from "preact";
+import type { ComponentChildren } from "preact";
 
 function parseInline(text: string): ComponentChildren[] {
-    const pattern =
-        /(`[^`]+`)|(\*\*[^*]+\*\*)|(\*[^*]+\*)|(\[[^\]]+\]\([^)]+\))/g;
+    const pattern = /(`[^`]+`)|(\*\*[^*]+\*\*)|(\*[^*]+\*)|(\[[^\]]+\]\([^)]+\))/g;
     const nodes: ComponentChildren[] = [];
     let lastIndex = 0;
     let match: RegExpExecArray | null;
@@ -24,10 +24,14 @@ function parseInline(text: string): ComponentChildren[] {
             );
         } else if (token.startsWith("**")) {
             nodes.push(
-                <strong key={`${match.index}-bold`}>{token.slice(2, -2)}</strong>
+                <strong key={`${match.index}-bold`}>
+                    {token.slice(2, -2)}
+                </strong>
             );
         } else if (token.startsWith("*")) {
-            nodes.push(<em key={`${match.index}-italic`}>{token.slice(1, -1)}</em>);
+            nodes.push(
+                <em key={`${match.index}-italic`}>{token.slice(1, -1)}</em>
+            );
         } else if (token.startsWith("[")) {
             const linkMatch = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
             if (linkMatch) {
@@ -58,8 +62,10 @@ function parseInline(text: string): ComponentChildren[] {
 }
 
 function headingClass(level: number): string {
-    if (level === 1) return "mt-8 text-3xl font-bold tracking-tight text-zinc-50";
-    if (level === 2) return "mt-7 text-2xl font-semibold tracking-tight text-zinc-50";
+    if (level === 1)
+        return "mt-8 text-3xl font-bold tracking-tight text-zinc-50";
+    if (level === 2)
+        return "mt-7 text-2xl font-semibold tracking-tight text-zinc-50";
     if (level === 3) return "mt-6 text-xl font-semibold text-zinc-100";
     return "mt-5 text-lg font-semibold text-zinc-100";
 }
@@ -103,22 +109,50 @@ export function renderQuickMarkdown(markdown: string): ComponentChildren[] {
             const level = heading[1].length;
             const content = parseInline(heading[2]);
             const className = headingClass(level);
-            if (level === 1) result.push(<h1 key={`h-${i}`} className={className}>{content}</h1>);
+            if (level === 1)
+                result.push(
+                    <h1 key={`h-${i}`} className={className}>
+                        {content}
+                    </h1>
+                );
             else if (level === 2)
-                result.push(<h2 key={`h-${i}`} className={className}>{content}</h2>);
+                result.push(
+                    <h2 key={`h-${i}`} className={className}>
+                        {content}
+                    </h2>
+                );
             else if (level === 3)
-                result.push(<h3 key={`h-${i}`} className={className}>{content}</h3>);
+                result.push(
+                    <h3 key={`h-${i}`} className={className}>
+                        {content}
+                    </h3>
+                );
             else if (level === 4)
-                result.push(<h4 key={`h-${i}`} className={className}>{content}</h4>);
+                result.push(
+                    <h4 key={`h-${i}`} className={className}>
+                        {content}
+                    </h4>
+                );
             else if (level === 5)
-                result.push(<h5 key={`h-${i}`} className={className}>{content}</h5>);
-            else result.push(<h6 key={`h-${i}`} className={className}>{content}</h6>);
+                result.push(
+                    <h5 key={`h-${i}`} className={className}>
+                        {content}
+                    </h5>
+                );
+            else
+                result.push(
+                    <h6 key={`h-${i}`} className={className}>
+                        {content}
+                    </h6>
+                );
             i++;
             continue;
         }
 
         if (/^(-{3,}|\*{3,})$/.test(line)) {
-            result.push(<hr key={`hr-${i}`} className="mt-6 border-white/10" />);
+            result.push(
+                <hr key={`hr-${i}`} className="mt-6 border-white/10" />
+            );
             i++;
             continue;
         }
@@ -148,7 +182,10 @@ export function renderQuickMarkdown(markdown: string): ComponentChildren[] {
                 i++;
             }
             result.push(
-                <ul key={`ul-${i}`} className="mt-4 list-disc space-y-1 pl-6 text-zinc-200">
+                <ul
+                    key={`ul-${i}`}
+                    className="mt-4 list-disc space-y-1 pl-6 text-zinc-200"
+                >
                     {items.map((item, index) => (
                         <li key={`ul-${i}-${index}`}>{parseInline(item)}</li>
                     ))}
@@ -201,5 +238,7 @@ export function renderQuickMarkdown(markdown: string): ComponentChildren[] {
         );
     }
 
-    return result.map((node, idx) => <Fragment key={`md-${idx}`}>{node}</Fragment>);
+    return result.map((node, idx) => (
+        <Fragment key={`md-${idx}`}>{node}</Fragment>
+    ));
 }

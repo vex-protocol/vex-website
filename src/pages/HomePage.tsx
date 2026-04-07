@@ -283,11 +283,7 @@ function parsePollRunEntry(raw: unknown): PollOkRun | null {
     else if (o.ok === 1 || o.ok === "1" || o.ok === "true") ok = true;
     else if (o.ok === 0 || o.ok === "0" || o.ok === "false") ok = false;
     else if (typeof o.up === "boolean") ok = o.up;
-    else if (
-        o.status === "up" ||
-        o.status === "online" ||
-        o.status === "ok"
-    ) {
+    else if (o.status === "up" || o.status === "online" || o.status === "ok") {
         ok = true;
     } else if (
         o.status === "down" ||
@@ -336,18 +332,10 @@ function coerceOkFromSampleRecord(o: Record<string, unknown>): boolean | null {
     if (o.ok === 1 || o.ok === "1" || o.ok === "true") return true;
     if (o.ok === 0 || o.ok === "0" || o.ok === "false") return false;
     if (typeof o.up === "boolean") return o.up;
-    if (
-        o.status === "up" ||
-        o.status === "online" ||
-        o.status === "ok"
-    ) {
+    if (o.status === "up" || o.status === "online" || o.status === "ok") {
         return true;
     }
-    if (
-        o.status === "down" ||
-        o.status === "offline" ||
-        o.status === "error"
-    ) {
+    if (o.status === "down" || o.status === "offline" || o.status === "error") {
         return false;
     }
     return null;
@@ -446,9 +434,7 @@ function extractPollOkRuns(
         const arr = row[key];
         if (!Array.isArray(arr) || arr.length === 0) continue;
         const runs = mergeAdjacentPollRuns(
-            arr
-                .map(parsePollRunEntry)
-                .filter((r): r is PollOkRun => r !== null)
+            arr.map(parsePollRunEntry).filter((r): r is PollOkRun => r !== null)
         );
         if (
             runs.length > 0 &&
@@ -660,7 +646,9 @@ function getMonitorBucketPollCounts(
 function formatBucketWindowClock(block: MonitorTimeseriesBlock): string {
     const start = new Date(block.bucketStart);
     const end = new Date(block.bucketEnd);
-    return `${BUCKET_DATE_TIME_FORMATTER.format(start)} -> ${BUCKET_TIME_FORMATTER.format(end)}`;
+    return `${BUCKET_DATE_TIME_FORMATTER.format(
+        start
+    )} -> ${BUCKET_TIME_FORMATTER.format(end)}`;
 }
 
 function formatBucketDurationLabel(block: MonitorTimeseriesBlock): string {
@@ -1028,7 +1016,10 @@ function DocsSourceLinkRow(props: {
                 rel="noreferrer"
                 className={DOC_SOURCE_LINK_CLASS}
             >
-                <GithubIcon className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                <GithubIcon
+                    className="h-4 w-4 shrink-0 opacity-90"
+                    aria-hidden
+                />
                 Source Code
             </a>
         </div>
@@ -1180,19 +1171,19 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                 let latestCommit: GitHubCommitApiResponse | undefined;
                 if (includeGithubMeta) {
                     try {
-                        const [runsResponse, commitsResponse] =
-                            await Promise.all([
-                                fetch(SPIRE_RUNS_API_URL),
-                                fetch(SPIRE_COMMITS_API_URL),
-                            ]);
+                        const [
+                            runsResponse,
+                            commitsResponse,
+                        ] = await Promise.all([
+                            fetch(SPIRE_RUNS_API_URL),
+                            fetch(SPIRE_COMMITS_API_URL),
+                        ]);
                         if (runsResponse.ok) {
-                            const runsData =
-                                (await runsResponse.json()) as GitHubWorkflowRunsResponse;
+                            const runsData = (await runsResponse.json()) as GitHubWorkflowRunsResponse;
                             latestRun = runsData.workflow_runs?.[0];
                         }
                         if (commitsResponse.ok) {
-                            const commitsData =
-                                (await commitsResponse.json()) as GitHubCommitApiResponse[];
+                            const commitsData = (await commitsResponse.json()) as GitHubCommitApiResponse[];
                             latestCommit = commitsData[0];
                         }
                     } catch {
@@ -1293,7 +1284,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
 
     return (
         <section className="space-y-6">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 sm:p-10">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 px-4 py-3 sm:p-10">
                 <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#e70000]/20 blur-3xl" />
                 <div className="pointer-events-none absolute -bottom-28 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-[#e70000]/10 blur-3xl" />
                 <div className="relative">
@@ -1306,13 +1297,13 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                         and server enabling end to end encrypted messaging to
                         nearly anything.
                     </p>
-                    <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/90 p-4 sm:p-5">
+                    <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/90 px-3.5 py-3 sm:p-5">
                         <div className="flex items-center justify-between gap-3">
                             <p className="text-xs uppercase tracking-[0.15em] text-zinc-500">
                                 Install
                             </p>
                             {libvexMeta ? (
-                                <div className="hidden items-center gap-2 sm:flex">
+                                <div className="hidden items-center gap-2 lg:flex">
                                     <VersionPill
                                         value={libvexMeta.latestVersion}
                                         href={LIBVEX_NPM_URL}
@@ -1351,7 +1342,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                             </button>
                         </div>
                         {libvexMeta ? (
-                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-zinc-500 sm:hidden">
+                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-zinc-500 lg:hidden">
                                 <VersionPill
                                     value={libvexMeta.latestVersion}
                                     href={LIBVEX_NPM_URL}
@@ -1374,7 +1365,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                 </div>
             </div>
 
-            <div className="relative overflow-visible rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 sm:p-10">
+            <div className="relative overflow-visible rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 px-4 py-3 sm:p-10">
                 <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
                     <div className="absolute -left-20 -top-24 h-52 w-52 rounded-full bg-[#e70000]/20 blur-3xl" />
                     <div className="absolute -bottom-28 right-16 h-56 w-56 rounded-full bg-[#e70000]/10 blur-3xl" />
@@ -1385,15 +1376,15 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                     </h2>
                     <p className="hero-lede mt-4 max-w-3xl text-base leading-7 text-zinc-300 sm:text-lg">
                         Use our hosted API or deploy your own to control your
-                        communications stack. 
+                        communications stack.
                     </p>
-                    <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/90 p-4 sm:p-5">
+                    <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/90 px-3.5 py-3 sm:p-5">
                         <div className="flex items-center justify-between gap-3">
                             <p className="text-xs uppercase tracking-[0.15em] text-zinc-500">
                                 Endpoint
                             </p>
                             {spireMeta ? (
-                                <div className="hidden items-center gap-2 sm:flex">
+                                <div className="hidden items-center gap-2 lg:flex">
                                     {spireMeta.healthVersion ? (
                                         <VersionPill
                                             value={spireMeta.healthVersion}
@@ -1438,7 +1429,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                             </button>
                         </div>
                         {spireMeta ? (
-                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-zinc-500 sm:hidden">
+                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-zinc-500 lg:hidden">
                                 {spireMeta.healthVersion ? (
                                     <VersionPill
                                         value={spireMeta.healthVersion}
@@ -1456,7 +1447,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                         ) : null}
                     </div>
 
-                    <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/80 p-4 sm:p-5">
+                    <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/80 px-3.5 py-3 sm:p-5">
                         <div className="grid gap-2 sm:grid-cols-3">
                             <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
                                 <p className="text-[0.6875rem] uppercase tracking-[0.12em] text-zinc-500">

@@ -1,6 +1,7 @@
 import { useState } from "preact/hooks";
 import logo from "../assets/vex_icon.svg";
 import { LOGO_TEXT } from "../lib/brand";
+import { MenuIcon } from "./Icons";
 
 const LINKS = [
     { href: "/", label: "Home" },
@@ -27,15 +28,16 @@ export function Navbar(props: { currentPath: string }): JSX.Element {
 
                 <button
                     type="button"
-                    className="inline-flex rounded-md border border-white/20 px-3 py-2 text-xs font-medium uppercase tracking-[0.18em] text-zinc-100 md:hidden"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/20 text-zinc-100 lg:hidden"
                     onClick={() => setMenuOpen((value) => !value)}
                     aria-expanded={menuOpen}
                     aria-label="Toggle navigation menu"
+                    title="Menu"
                 >
-                    Menu
+                    <MenuIcon className="h-5 w-5" />
                 </button>
 
-                <ul className="m-0 hidden list-none items-center gap-2 p-0 md:flex">
+                <ul className="m-0 hidden list-none items-center gap-2 p-0 lg:flex">
                     {LINKS.map((link) => (
                         <li key={link.href} className="list-none">
                             <NavItem
@@ -49,7 +51,7 @@ export function Navbar(props: { currentPath: string }): JSX.Element {
             </nav>
 
             {menuOpen && (
-                <ul className="m-0 list-none space-y-1 border-t border-white/10 px-4 py-3 md:hidden">
+                <ul className="m-0 list-none space-y-1 border-t border-white/10 px-4 py-3 lg:hidden">
                     {LINKS.map((link) => (
                         <li key={link.href} className="list-none">
                             <NavItem
