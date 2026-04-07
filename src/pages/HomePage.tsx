@@ -1,15 +1,14 @@
 import type { JSX } from "preact";
-import { format, formatDistanceToNowStrict } from "date-fns";
 import { useEffect, useState } from "preact/hooks";
 import {
-    BookOpen,
-    Check,
-    CheckCircle2,
-    Copy,
-    Github,
-    LoaderCircle,
-    XCircle,
-} from "lucide-preact";
+    BookOpenIcon,
+    CheckCircle2Icon,
+    CheckIcon,
+    CopyIcon,
+    GithubIcon,
+    LoaderCircleIcon,
+    XCircleIcon,
+} from "../components/Icons";
 
 type NpmPackageResponse = {
     "dist-tags"?: Record<string, string>;
@@ -166,6 +165,21 @@ const SPIRE_GITHUB_URL = "https://github.com/vex-protocol/spire";
 const UPTIME_BLOCK_WINDOW_HOURS = 24;
 const UPTIME_BLOCK_BUCKET_MINUTES = 60;
 const SPIRE_META_REFRESH_MS = 60_000;
+const BUCKET_DATE_TIME_FORMATTER = new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+});
+const BUCKET_TIME_FORMATTER = new Intl.DateTimeFormat(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+});
+const RELATIVE_TIME_FORMATTER = new Intl.RelativeTimeFormat(undefined, {
+    numeric: "always",
+});
 
 function coerceNonNegInt(value: unknown): number {
     if (typeof value === "number" && Number.isFinite(value)) {
@@ -648,7 +662,7 @@ function getMonitorBucketPollCounts(
 function formatBucketWindowClock(block: MonitorTimeseriesBlock): string {
     const start = new Date(block.bucketStart);
     const end = new Date(block.bucketEnd);
-    return `${format(start, "MMM d, HH:mm")} → ${format(end, "HH:mm")}`;
+    return `${BUCKET_DATE_TIME_FORMATTER.format(start)} -> ${BUCKET_TIME_FORMATTER.format(end)}`;
 }
 
 function formatBucketDurationLabel(block: MonitorTimeseriesBlock): string {
@@ -879,7 +893,40 @@ function UptimeReliabilityStripCell(props: {
 }
 
 function formatRelativeTime(value: string): string {
-    return `${formatDistanceToNowStrict(new Date(value), { addSuffix: true })}`;
+    const timestampMs = new Date(value).getTime();
+    if (!Number.isFinite(timestampMs)) return "unknown";
+    const diffSeconds = Math.round((timestampMs - Date.now()) / 1000);
+    const absSeconds = Math.abs(diffSeconds);
+    if (absSeconds < 60) {
+        return RELATIVE_TIME_FORMATTER.format(diffSeconds, "second");
+    }
+    const diffMinutes = Math.round(diffSeconds / 60);
+    const absMinutes = Math.abs(diffMinutes);
+    if (absMinutes < 60) {
+        return RELATIVE_TIME_FORMATTER.format(diffMinutes, "minute");
+    }
+    const diffHours = Math.round(diffMinutes / 60);
+    const absHours = Math.abs(diffHours);
+    if (absHours < 24) {
+        return RELATIVE_TIME_FORMATTER.format(diffHours, "hour");
+    }
+    const diffDays = Math.round(diffHours / 24);
+    const absDays = Math.abs(diffDays);
+    if (absDays < 7) {
+        return RELATIVE_TIME_FORMATTER.format(diffDays, "day");
+    }
+    const diffWeeks = Math.round(diffDays / 7);
+    const absWeeks = Math.abs(diffWeeks);
+    if (absWeeks < 5) {
+        return RELATIVE_TIME_FORMATTER.format(diffWeeks, "week");
+    }
+    const diffMonths = Math.round(diffDays / 30.4375);
+    const absMonths = Math.abs(diffMonths);
+    if (absMonths < 12) {
+        return RELATIVE_TIME_FORMATTER.format(diffMonths, "month");
+    }
+    const diffYears = Math.round(diffDays / 365.25);
+    return RELATIVE_TIME_FORMATTER.format(diffYears, "year");
 }
 
 function truncateCommitMessage(message: string, maxLength = 42): string {
@@ -963,11 +1010,11 @@ function BuildCommitPill(props: {
             )}`}
         >
             {state === "passing" ? (
-                <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                <CheckCircle2Icon className="h-3.5 w-3.5 shrink-0" />
             ) : state === "failing" ? (
-                <XCircle className="h-3.5 w-3.5 shrink-0" />
+                <XCircleIcon className="h-3.5 w-3.5 shrink-0" />
             ) : state === "running" ? (
-                <LoaderCircle className="h-3.5 w-3.5 shrink-0 animate-spin" />
+                <LoaderCircleIcon className="h-3.5 w-3.5 shrink-0 animate-spin" />
             ) : (
                 <span className="h-2 w-2 shrink-0 rounded-full bg-current" />
             )}
@@ -1008,7 +1055,10 @@ function DocsSourceLinkRow(props: {
                 rel="noreferrer"
                 className={DOC_SOURCE_LINK_CLASS}
             >
-                <BookOpen className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                <BookOpenIcon
+                    className="h-4 w-4 shrink-0 opacity-90"
+                    aria-hidden
+                />
                 Docs
             </a>
             <a
@@ -1017,7 +1067,7 @@ function DocsSourceLinkRow(props: {
                 rel="noreferrer"
                 className={DOC_SOURCE_LINK_CLASS}
             >
-                <Github className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                <GithubIcon className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                 Source Code
             </a>
         </div>
@@ -1333,9 +1383,9 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                 title={copied ? "Copied" : "Copy command"}
                             >
                                 {copied ? (
-                                    <Check className="h-5 w-5" />
+                                    <CheckIcon className="h-5 w-5" />
                                 ) : (
-                                    <Copy className="h-5 w-5" />
+                                    <CopyIcon className="h-5 w-5" />
                                 )}
                             </button>
                         </div>
@@ -1420,9 +1470,9 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                 }
                             >
                                 {copiedSpireApi ? (
-                                    <Check className="h-5 w-5" />
+                                    <CheckIcon className="h-5 w-5" />
                                 ) : (
-                                    <Copy className="h-5 w-5" />
+                                    <CopyIcon className="h-5 w-5" />
                                 )}
                             </button>
                         </div>

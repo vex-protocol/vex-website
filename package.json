@@ -4,7 +4,6 @@
     "private": true,
     "dependencies": {
         "date-fns": "^4.1.0",
-        "lucide-preact": "^0.542.0",
         "preact": "^10.27.2",
         "preact-router": "^4.1.2"
     },

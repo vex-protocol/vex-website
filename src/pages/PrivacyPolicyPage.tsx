@@ -1,4 +1,4 @@
-import { formatDistanceToNowStrict } from "date-fns";
+import formatDistanceToNowStrict from "date-fns/formatDistanceToNowStrict";
 import { useEffect, useState } from "preact/hooks";
 import { renderQuickMarkdown } from "../lib/quickMarkdown";
 

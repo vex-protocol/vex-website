@@ -1,4 +1,4 @@
-import { Github, Twitter } from "lucide-preact";
+import { GithubIcon, TwitterIcon } from "./Icons";
 import { COMPANY_NAME } from "../lib/brand";
 
 export function Footer(): JSX.Element {
@@ -15,7 +15,7 @@ export function Footer(): JSX.Element {
                         aria-label="Vex GitHub"
                         title="GitHub"
                     >
-                        <Github className="h-4 w-4" />
+                        <GithubIcon className="h-4 w-4" />
                     </a>
                     <a
                         href="https://twitter.com/vexwtf7"
@@ -25,7 +25,7 @@ export function Footer(): JSX.Element {
                         aria-label="Vex Twitter"
                         title="@vexwtf7"
                     >
-                        <Twitter className="h-4 w-4" />
+                        <TwitterIcon className="h-4 w-4" />
                     </a>
                 </div>
             </div>
