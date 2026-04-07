@@ -994,7 +994,7 @@ function BuildCommitPill(props: {
 }
 
 const DOC_SOURCE_LINK_CLASS =
-    "inline-flex items-center justify-center gap-2 rounded-lg border border-white/35 bg-zinc-50 px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-950 shadow-sm transition hover:border-white hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950";
+    "inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-zinc-950 px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0.5rem_1.5rem_rgba(0,0,0,0.4)] transition hover:border-white/35 hover:bg-zinc-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950";
 
 function DocsSourceLinkRow(props: {
     docsHref: string;
