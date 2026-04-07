@@ -1121,7 +1121,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
     useEffect(() => {
         let cancelled = false;
 
-        async function loadSpireMeta() {
+        async function loadSpireMeta(includeGithubMeta: boolean) {
             try {
                 const timeseriesUrl = new URL(SPIRE_UPTIME_TIMESERIES_URL);
                 timeseriesUrl.searchParams.set(
@@ -1133,23 +1133,11 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                     String(UPTIME_BLOCK_BUCKET_MINUTES)
                 );
 
-                const [
-                    runsResponse,
-                    commitsResponse,
-                    uptimeResponse,
-                    timeseriesResponse,
-                ] = await Promise.all([
-                    fetch(SPIRE_RUNS_API_URL),
-                    fetch(SPIRE_COMMITS_API_URL),
+                const [uptimeResponse, timeseriesResponse] = await Promise.all([
                     fetch(SPIRE_UPTIME_SUMMARY_URL, { cache: "no-store" }),
                     fetch(timeseriesUrl.toString(), { cache: "no-store" }),
                 ]);
-                if (
-                    !runsResponse.ok ||
-                    !commitsResponse.ok ||
-                    !uptimeResponse.ok
-                )
-                    return;
+                if (!uptimeResponse.ok) return;
 
                 let uptimeBlocks: MonitorTimeseriesBlock[] = [];
                 if (timeseriesResponse.ok) {
@@ -1161,11 +1149,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                     }
                 }
 
-                const runsData = (await runsResponse.json()) as GitHubWorkflowRunsResponse;
-                const commitsData = (await commitsResponse.json()) as GitHubCommitApiResponse[];
                 const uptimeData = (await uptimeResponse.json()) as MonitorSummaryResponse;
-                const latestRun = runsData.workflow_runs?.[0];
-                const latestCommit = commitsData[0];
                 const summary = uptimeData.data;
                 const latestSample = summary?.latest;
                 const runtimeSha =
@@ -1174,10 +1158,40 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                     latestSample.serviceCommitSha !== "unknown"
                         ? latestSample.serviceCommitSha.slice(0, 12)
                         : null;
+                let latestRun:
+                    | {
+                          status: string;
+                          conclusion: string | null;
+                          html_url: string;
+                          updated_at: string;
+                      }
+                    | undefined;
+                let latestCommit: GitHubCommitApiResponse | undefined;
+                if (includeGithubMeta) {
+                    try {
+                        const [runsResponse, commitsResponse] =
+                            await Promise.all([
+                                fetch(SPIRE_RUNS_API_URL),
+                                fetch(SPIRE_COMMITS_API_URL),
+                            ]);
+                        if (runsResponse.ok) {
+                            const runsData =
+                                (await runsResponse.json()) as GitHubWorkflowRunsResponse;
+                            latestRun = runsData.workflow_runs?.[0];
+                        }
+                        if (commitsResponse.ok) {
+                            const commitsData =
+                                (await commitsResponse.json()) as GitHubCommitApiResponse[];
+                            latestCommit = commitsData[0];
+                        }
+                    } catch {
+                        // keep previous build metadata when GitHub is unavailable/rate-limited
+                    }
+                }
 
                 if (!cancelled) {
                     setSpireUptimeBlocks(uptimeBlocks);
-                    setSpireMeta({
+                    setSpireMeta((prev) => ({
                         apiReachable: latestSample?.ok ?? false,
                         buildStatus: latestRun
                             ? `${latestRun.status}${
@@ -1185,9 +1199,10 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                       ? ` / ${latestRun.conclusion}`
                                       : ""
                               }`
-                            : "unknown",
-                        buildUpdatedAt: latestRun?.updated_at ?? "",
-                        buildUrl: latestRun?.html_url ?? "",
+                            : prev?.buildStatus ?? "unknown",
+                        buildUpdatedAt:
+                            latestRun?.updated_at ?? prev?.buildUpdatedAt ?? "",
+                        buildUrl: latestRun?.html_url ?? prev?.buildUrl ?? "",
                         healthVersion: latestSample?.serviceVersion ?? null,
                         healthCheckDurationMs:
                             latestSample?.statusCheckDurationMs ?? null,
@@ -1213,17 +1228,17 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                   authorUrl:
                                       latestCommit.author?.html_url ?? null,
                               }
-                            : null,
-                    });
+                            : prev?.latestCommit ?? null,
+                    }));
                 }
             } catch {
                 // silent fallback to static view
             }
         }
 
-        void loadSpireMeta();
+        void loadSpireMeta(true);
         const refreshTimer = window.setInterval(() => {
-            void loadSpireMeta();
+            void loadSpireMeta(false);
         }, SPIRE_META_REFRESH_MS);
         return () => {
             cancelled = true;
