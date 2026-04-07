@@ -963,9 +963,8 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                     </h1>
                     <p className="hero-lede mt-4 max-w-3xl text-base leading-7 text-zinc-300 sm:text-lg">
                         We believe privacy is a fundamental human right.{" "}
-                        <code>libvex</code> is a javascript library enabling end
-                        to end encrypted messaging to anything that runs
-                        javascript.
+                        <code>libvex</code> is an open source javascript library and server enabling end
+                        to end encrypted messaging to nearly anything. 
                     </p>
                     <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/90 p-4 sm:p-5">
                         <div className="flex items-center justify-between gap-3">
