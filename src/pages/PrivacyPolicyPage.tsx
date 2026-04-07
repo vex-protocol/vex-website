@@ -77,7 +77,10 @@ export function PrivacyPolicyPage(_: { path?: string }): JSX.Element {
             </p>
 
             {status === "loading" && (
-                <p className="mt-4 text-zinc-300">Loading policy...</p>
+                <div className="mt-4 inline-flex items-center gap-2 text-zinc-300">
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
+                    <span>Loading policy...</span>
+                </div>
             )}
 
             {status === "error" && (

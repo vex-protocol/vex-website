@@ -1281,6 +1281,10 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
             : spireMeta.apiReachable
             ? "online"
             : "degraded";
+    const endpointStatusDotClass =
+        spireMeta !== null && spireMeta.apiReachable
+            ? "h-2 w-2 rounded-full bg-current animate-pulse"
+            : "h-2 w-2 rounded-full bg-current";
 
     return (
         <section className="space-y-6">
@@ -1408,7 +1412,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                 <span
                                     className={`inline-flex shrink-0 items-center gap-1.5 text-xs font-medium ${endpointStatusToneClass}`}
                                 >
-                                    <span className="h-2 w-2 rounded-full bg-current" />
+                                    <span className={endpointStatusDotClass} />
                                     {endpointStatusLabel}
                                 </span>
                             </div>

@@ -63,7 +63,10 @@ export function App(): JSX.Element {
 function PrivacyPolicyLoading(): JSX.Element {
     return (
         <section className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 text-zinc-300">
-            Loading privacy policy...
+            <div className="inline-flex items-center gap-2">
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
+                <span>Loading privacy policy...</span>
+            </div>
         </section>
     );
 }
@@ -71,7 +74,10 @@ function PrivacyPolicyLoading(): JSX.Element {
 function HomePageLoading(): JSX.Element {
     return (
         <section className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 text-zinc-300">
-            Loading...
+            <div className="inline-flex items-center gap-2">
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
+                <span>Loading...</span>
+            </div>
         </section>
     );
 }
