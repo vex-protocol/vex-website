@@ -404,14 +404,14 @@ function UptimeStripPopoverPanel(props: {
 
     return (
         <div
-            className="w-[min(17rem,calc(100vw-2rem))] rounded-xl border border-white/[0.12] bg-zinc-950/95 p-3.5 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.75)] ring-1 ring-white/[0.06] backdrop-blur-md"
+            className="w-[min(17rem,calc(100vw-2rem))] rounded-xl border border-white/[0.12] bg-zinc-950/95 p-3.5 shadow-[0_0.75rem_2.5rem_-0.5rem_rgba(0,0,0,0.75)] ring-1 ring-white/[0.06] backdrop-blur-md"
             role="tooltip"
         >
             <div className="border-b border-white/[0.08] pb-2.5">
-                <p className="font-mono text-[11px] leading-snug text-zinc-200">
+                <p className="font-mono text-[0.6875rem] leading-snug text-zinc-200">
                     {windowLabel}
                 </p>
-                <p className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                <p className="mt-0.5 text-[0.625rem] uppercase tracking-[0.14em] text-zinc-500">
                     {durationLabel} window ·{" "}
                     {formatRelativeTime(block.bucketStart)}
                 </p>
@@ -508,7 +508,7 @@ function UptimeReliabilityStripBlock(props: {
 
     return (
         <div
-            className="group relative h-full min-h-[1.5rem] w-full min-w-0 rounded-[2px] outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/45 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+            className="group relative h-full min-h-[1.5rem] w-full min-w-0 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/45 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
             tabIndex={0}
             title={shortTitle}
         >
@@ -527,7 +527,7 @@ function UptimeReliabilityStripCell(props: {
     const { total, online, offline } = getMonitorBucketPollCounts(props.block);
     const gap = Math.max(0, total - online - offline);
 
-    const barFrame = "block h-full min-h-[1.5rem] w-full min-w-0 rounded-[2px]";
+    const barFrame = "block h-full min-h-[1.5rem] w-full min-w-0 rounded-sm";
 
     if (props.block.status === "no_data" || total === 0) {
         return <span className={`${barFrame} bg-zinc-600/80`} />;
@@ -593,7 +593,7 @@ function getBuildState(
 
 function VersionPill(props: { value: string; href?: string }): JSX.Element {
     const node = (
-        <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-mono text-zinc-200">
+        <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[0.6875rem] font-mono text-zinc-200">
             v{props.value}
         </span>
     );
@@ -648,7 +648,7 @@ function BuildCommitPill(props: {
             href={buildHref ?? commit.url}
             target="_blank"
             rel="noreferrer"
-            className={`inline-flex max-w-[310px] items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors hover:brightness-110 sm:max-w-[430px] ${toneClasses}`}
+            className={`inline-flex max-w-[19.375rem] items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] transition-colors hover:brightness-110 sm:max-w-[26.875rem] ${toneClasses}`}
             title={`${commit.message} · ${label} · ${formatRelativeTime(
                 commit.date
             )}`}
@@ -662,13 +662,13 @@ function BuildCommitPill(props: {
             ) : (
                 <span className="h-2 w-2 shrink-0 rounded-full bg-current" />
             )}
-            <span className="shrink-0 font-mono text-[12px] font-thin leading-none">
+            <span className="shrink-0 font-mono text-[0.75rem] font-thin leading-none">
                 {shortSha}
             </span>
-            <span className="max-w-[14ch] truncate text-[12px] font-semibold leading-none text-zinc-100 sm:max-w-[20ch]">
+            <span className="max-w-[14ch] truncate text-[0.75rem] font-semibold leading-none text-zinc-100 sm:max-w-[20ch]">
                 {message}
             </span>
-            <span className="shrink-0 text-[10px] text-zinc-400/80">
+            <span className="shrink-0 text-[0.625rem] text-zinc-400/80">
                 {label}
             </span>
             {commit.authorAvatarUrl ? (
@@ -1012,7 +1012,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                             </button>
                         </div>
                         {libvexMeta ? (
-                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-500 sm:hidden">
+                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-zinc-500 sm:hidden">
                                 <VersionPill
                                     value={libvexMeta.latestVersion}
                                     href={LIBVEX_NPM_URL}
@@ -1046,8 +1046,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                     </h2>
                     <p className="hero-lede mt-4 max-w-3xl text-base leading-7 text-zinc-300 sm:text-lg">
                         Use our hosted API or deploy your own to control your
-                        communications stack. We believe privacy is a
-                        fundamental human right.
+                        communications stack. 
                     </p>
                     <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/90 p-4 sm:p-5">
                         <div className="flex items-center justify-between gap-3">
@@ -1100,7 +1099,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                             </button>
                         </div>
                         {spireMeta ? (
-                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-500 sm:hidden">
+                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-zinc-500 sm:hidden">
                                 {spireMeta.healthVersion ? (
                                     <VersionPill
                                         value={spireMeta.healthVersion}
@@ -1121,7 +1120,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                     <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/80 p-4 sm:p-5">
                         <div className="grid gap-2 sm:grid-cols-3">
                             <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                                <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
+                                <p className="text-[0.6875rem] uppercase tracking-[0.12em] text-zinc-500">
                                     Availability (24h)
                                 </p>
                                 <p className="mt-1 font-mono text-lg text-zinc-100">
@@ -1133,7 +1132,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                 </p>
                             </div>
                             <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                                <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
+                                <p className="text-[0.6875rem] uppercase tracking-[0.12em] text-zinc-500">
                                     Avg latency
                                 </p>
                                 <p className="mt-1 font-mono text-lg text-zinc-100">
@@ -1145,7 +1144,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                 </p>
                             </div>
                             <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                                <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
+                                <p className="text-[0.6875rem] uppercase tracking-[0.12em] text-zinc-500">
                                     Total requests served
                                 </p>
                                 <p className="mt-1 font-mono text-lg text-zinc-100">
@@ -1157,20 +1156,20 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                             </div>
                         </div>
                         <div className="mt-4">
-                            <p className="mb-2 text-[11px] uppercase tracking-[0.12em] text-zinc-500">
+                            <p className="mb-2 text-[0.6875rem] uppercase tracking-[0.12em] text-zinc-500">
                                 Reliability
                             </p>
-                            <div className="relative z-20 flex w-full gap-0.5 overflow-visible pb-1 sm:gap-[3px]">
+                            <div className="relative z-20 flex w-full gap-0.5 overflow-visible pb-1 sm:gap-[0.1875rem]">
                                 {paddedUptimeBlocks.map((block, index) => {
                                     const slotClass =
-                                        "h-6 min-w-[5px] flex-1 basis-0";
+                                        "h-6 min-w-[0.3125rem] flex-1 basis-0";
                                     if (!block) {
                                         return (
                                             <div
                                                 key={`uptime-empty-${index}`}
                                                 className={slotClass}
                                             >
-                                                <span className="block h-full w-full rounded-[2px] bg-zinc-700/60" />
+                                                <span className="block h-full w-full rounded-sm bg-zinc-700/60" />
                                             </div>
                                         );
                                     }
@@ -1186,7 +1185,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                     );
                                 })}
                             </div>
-                            <div className="mt-1.5 flex items-center justify-between text-[11px] text-zinc-500">
+                            <div className="mt-1.5 flex items-center justify-between text-[0.6875rem] text-zinc-500">
                                 <span>{UPTIME_BLOCK_WINDOW_HOURS}h ago</span>
                                 <span>hourly blocks</span>
                                 <span>now</span>
