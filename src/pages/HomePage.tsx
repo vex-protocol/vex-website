@@ -2,6 +2,7 @@ import type { JSX } from "preact";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import { useEffect, useState } from "preact/hooks";
 import {
+    BookOpen,
     Check,
     CheckCircle2,
     Copy,
@@ -157,15 +158,212 @@ const SPIRE_GITHUB_URL = "https://github.com/vex-protocol/spire";
 const UPTIME_BLOCK_WINDOW_HOURS = 24;
 const UPTIME_BLOCK_BUCKET_MINUTES = 60;
 
-function getMonitorBucketPollCounts(block: MonitorTimeseriesBlock): {
+function coerceNonNegInt(value: unknown): number {
+    if (typeof value === "number" && Number.isFinite(value)) {
+        return Math.max(0, Math.floor(value));
+    }
+    if (typeof value === "string" && value.trim() !== "") {
+        const n = Number(value);
+        if (Number.isFinite(n)) return Math.max(0, Math.floor(n));
+    }
+    return 0;
+}
+
+function coerceNullableNumber(value: unknown): number | null {
+    if (value == null || value === "") return null;
+    const n = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(n) ? n : null;
+}
+
+function pickRecordField(
+    row: Record<string, unknown>,
+    keys: string[]
+): unknown {
+    for (const key of keys) {
+        if (row[key] !== undefined && row[key] !== null) return row[key];
+    }
+    return undefined;
+}
+
+function pickNonEmptyString(
+    row: Record<string, unknown>,
+    keys: string[]
+): string {
+    for (const key of keys) {
+        const v = row[key];
+        if (typeof v === "string" && v.length > 0) return v;
+    }
+    return "";
+}
+
+/** ISO string from field: non-empty string or unix epoch (seconds or ms). */
+function pickIsoInstant(row: Record<string, unknown>, keys: string[]): string {
+    for (const key of keys) {
+        const v = row[key];
+        if (typeof v === "string" && v.length > 0) return v;
+        if (typeof v === "number" && Number.isFinite(v)) {
+            const ms = v < 1e12 ? v * 1000 : v;
+            const d = new Date(ms);
+            if (!Number.isNaN(d.getTime())) return d.toISOString();
+        }
+    }
+    return "";
+}
+
+function normalizeTimeseriesBlock(raw: unknown): MonitorTimeseriesBlock | null {
+    if (!raw || typeof raw !== "object") return null;
+    const row = raw as Record<string, unknown>;
+    const bucketStart = pickIsoInstant(row, [
+        "bucketStart",
+        "bucket_start",
+        "start",
+        "from",
+        "startTime",
+        "start_time",
+        "tStart",
+        "t_start",
+    ]);
+    const bucketEnd = pickIsoInstant(row, [
+        "bucketEnd",
+        "bucket_end",
+        "end",
+        "to",
+        "endTime",
+        "end_time",
+        "tEnd",
+        "t_end",
+    ]);
+    if (!bucketStart || !bucketEnd) return null;
+
+    const sampleCount = coerceNonNegInt(
+        pickRecordField(row, ["sampleCount", "sample_count", "total"])
+    );
+    const upCount = coerceNonNegInt(
+        pickRecordField(row, ["upCount", "up_count", "online"])
+    );
+    const downCount = coerceNonNegInt(
+        pickRecordField(row, ["downCount", "down_count", "offline"])
+    );
+
+    const uptimeRaw = pickRecordField(row, ["uptimePercent", "uptime_percent"]);
+    let uptimePercent =
+        typeof uptimeRaw === "number" && Number.isFinite(uptimeRaw)
+            ? uptimeRaw
+            : sampleCount > 0
+            ? (upCount / sampleCount) * 100
+            : 0;
+
+    const statusRaw = row.status;
+    let status: MonitorTimeseriesBlock["status"];
+    if (statusRaw === "up" || statusRaw === "down" || statusRaw === "no_data") {
+        status = statusRaw;
+    } else if (sampleCount === 0) {
+        status = "no_data";
+    } else if (downCount === 0) {
+        status = "up";
+    } else if (upCount === 0) {
+        status = "down";
+    } else {
+        status = upCount >= downCount ? "up" : "down";
+    }
+
+    const deltaRaw = pickRecordField(row, [
+        "serviceRequestsDelta",
+        "service_requests_delta",
+    ]);
+    let serviceRequestsDelta: number | null = null;
+    if (deltaRaw !== undefined && deltaRaw !== null) {
+        const d = coerceNullableNumber(deltaRaw);
+        serviceRequestsDelta = d;
+    }
+
+    return {
+        bucketStart,
+        bucketEnd,
+        total: sampleCount,
+        online: upCount,
+        offline: downCount,
+        sampleCount,
+        upCount,
+        downCount,
+        serviceRequestsDelta,
+        uptimePercent,
+        avgLatencyMs: coerceNullableNumber(
+            pickRecordField(row, ["avgLatencyMs", "avg_latency_ms"])
+        ),
+        p95LatencyMs: coerceNullableNumber(
+            pickRecordField(row, ["p95LatencyMs", "p95_latency_ms"])
+        ),
+        maxLatencyMs: coerceNullableNumber(
+            pickRecordField(row, ["maxLatencyMs", "max_latency_ms"])
+        ),
+        status,
+    };
+}
+
+const TS_BLOCK_ARRAY_KEYS = [
+    "blocks",
+    "buckets",
+    "series",
+    "hourly",
+    "rows",
+    "items",
+] as const;
+
+const TS_NESTED_ROOT_KEYS = [
+    "data",
+    "payload",
+    "result",
+    "response",
+    "body",
+] as const;
+
+function extractTimeseriesBlockList(payload: unknown): unknown[] | undefined {
+    if (Array.isArray(payload)) return payload;
+    if (!payload || typeof payload !== "object") return undefined;
+    const root = payload as Record<string, unknown>;
+
+    for (const nk of TS_NESTED_ROOT_KEYS) {
+        const inner = root[nk];
+        if (inner && typeof inner === "object" && !Array.isArray(inner)) {
+            const o = inner as Record<string, unknown>;
+            for (const ak of TS_BLOCK_ARRAY_KEYS) {
+                if (Array.isArray(o[ak])) return o[ak] as unknown[];
+            }
+        }
+    }
+
+    for (const ak of TS_BLOCK_ARRAY_KEYS) {
+        if (Array.isArray(root[ak])) return root[ak] as unknown[];
+    }
+
+    for (const nk of TS_NESTED_ROOT_KEYS) {
+        const inner = root[nk];
+        if (Array.isArray(inner)) return inner;
+    }
+
+    return undefined;
+}
+
+function parseTimeseriesPayload(payload: unknown): MonitorTimeseriesBlock[] {
+    const list = extractTimeseriesBlockList(payload);
+    if (!list?.length) return [];
+    return list
+        .map(normalizeTimeseriesBlock)
+        .filter((b): b is MonitorTimeseriesBlock => b !== null);
+}
+
+function getMonitorBucketPollCounts(
+    block: MonitorTimeseriesBlock
+): {
     total: number;
     online: number;
     offline: number;
 } {
     return {
-        total: block.total ?? block.sampleCount,
-        online: block.online ?? block.upCount,
-        offline: block.offline ?? block.downCount,
+        total: coerceNonNegInt(block.total ?? block.sampleCount),
+        online: coerceNonNegInt(block.online ?? block.upCount),
+        offline: coerceNonNegInt(block.offline ?? block.downCount),
     };
 }
 
@@ -214,7 +412,8 @@ function UptimeStripPopoverPanel(props: {
                     {windowLabel}
                 </p>
                 <p className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-zinc-500">
-                    {durationLabel} window · {formatRelativeTime(block.bucketStart)}
+                    {durationLabel} window ·{" "}
+                    {formatRelativeTime(block.bucketStart)}
                 </p>
             </div>
             {!hasSamples ? (
@@ -259,7 +458,9 @@ function UptimeStripPopoverPanel(props: {
                     </div>
                     {block.serviceRequestsDelta != null ? (
                         <div className="flex items-baseline justify-between gap-3">
-                            <dt className="text-zinc-500">Requests served (Δ)</dt>
+                            <dt className="text-zinc-500">
+                                Requests served (Δ)
+                            </dt>
                             <dd className="font-mono tabular-nums text-zinc-200">
                                 {block.serviceRequestsDelta.toLocaleString()}
                             </dd>
@@ -307,7 +508,7 @@ function UptimeReliabilityStripBlock(props: {
 
     return (
         <div
-            className="group relative min-w-0 rounded-[2px] outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/45 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+            className="group relative h-full min-h-[1.5rem] w-full min-w-0 rounded-[2px] outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/45 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
             tabIndex={0}
             title={shortTitle}
         >
@@ -326,26 +527,26 @@ function UptimeReliabilityStripCell(props: {
     const { total, online, offline } = getMonitorBucketPollCounts(props.block);
     const gap = Math.max(0, total - online - offline);
 
+    const barFrame = "block h-full min-h-[1.5rem] w-full min-w-0 rounded-[2px]";
+
     if (props.block.status === "no_data" || total === 0) {
-        return (
-            <span className="h-6 rounded-[2px] bg-zinc-600/80" />
-        );
+        return <span className={`${barFrame} bg-zinc-600/80`} />;
     }
 
     if (gap === 0 && offline === 0) {
-        return (
-            <span className="h-6 rounded-[2px] bg-emerald-400/90" />
-        );
+        return <span className={`${barFrame} bg-emerald-400/90`} />;
     }
 
     if (gap === 0 && online === 0) {
-        return (
-            <span className="h-6 rounded-[2px] bg-red-400/90" />
-        );
+        return <span className={`${barFrame} bg-red-400/90`} />;
+    }
+
+    if (online === 0 && offline === 0 && gap === 0) {
+        return <span className={`${barFrame} bg-zinc-600/80`} />;
     }
 
     return (
-        <span className="flex h-6 w-full min-w-0 overflow-hidden rounded-[2px]">
+        <span className={`flex ${barFrame} overflow-hidden`}>
             {online > 0 ? (
                 <span
                     className="min-w-0 bg-emerald-400/90"
@@ -483,6 +684,37 @@ function BuildCommitPill(props: {
     );
 }
 
+const DOC_SOURCE_LINK_CLASS =
+    "inline-flex items-center justify-center gap-2 rounded-lg border border-white/35 bg-zinc-50 px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-950 shadow-sm transition hover:border-white hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950";
+
+function DocsSourceLinkRow(props: {
+    docsHref: string;
+    sourceHref: string;
+}): JSX.Element {
+    return (
+        <div className="mt-4 flex flex-wrap gap-2">
+            <a
+                href={props.docsHref}
+                target="_blank"
+                rel="noreferrer"
+                className={DOC_SOURCE_LINK_CLASS}
+            >
+                <BookOpen className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                Docs
+            </a>
+            <a
+                href={props.sourceHref}
+                target="_blank"
+                rel="noreferrer"
+                className={DOC_SOURCE_LINK_CLASS}
+            >
+                <Github className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                Source Code
+            </a>
+        </div>
+    );
+}
+
 export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
     const [libvexMeta, setLibvexMeta] = useState<LibvexMeta | null>(null);
     const [spireMeta, setSpireMeta] = useState<SpireMeta | null>(null);
@@ -606,20 +838,27 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                 if (
                     !runsResponse.ok ||
                     !commitsResponse.ok ||
-                    !uptimeResponse.ok ||
-                    !timeseriesResponse.ok
+                    !uptimeResponse.ok
                 )
                     return;
+
+                let uptimeBlocks: MonitorTimeseriesBlock[] = [];
+                if (timeseriesResponse.ok) {
+                    try {
+                        const timeseriesJson: unknown = await timeseriesResponse.json();
+                        uptimeBlocks = parseTimeseriesPayload(timeseriesJson);
+                    } catch {
+                        uptimeBlocks = [];
+                    }
+                }
 
                 const runsData = (await runsResponse.json()) as GitHubWorkflowRunsResponse;
                 const commitsData = (await commitsResponse.json()) as GitHubCommitApiResponse[];
                 const uptimeData = (await uptimeResponse.json()) as MonitorSummaryResponse;
-                const timeseriesData = (await timeseriesResponse.json()) as MonitorTimeseriesResponse;
                 const latestRun = runsData.workflow_runs?.[0];
                 const latestCommit = commitsData[0];
                 const summary = uptimeData.data;
                 const latestSample = summary?.latest;
-                const blocks = timeseriesData.data?.blocks ?? [];
                 const runtimeSha =
                     latestSample &&
                     latestSample.serviceCommitSha &&
@@ -628,7 +867,7 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                         : null;
 
                 if (!cancelled) {
-                    setSpireUptimeBlocks(blocks);
+                    setSpireUptimeBlocks(uptimeBlocks);
                     setSpireMeta({
                         apiReachable: latestSample?.ok ?? false,
                         buildStatus: latestRun
@@ -719,12 +958,14 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                 <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#e70000]/20 blur-3xl" />
                 <div className="pointer-events-none absolute -bottom-28 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-[#e70000]/10 blur-3xl" />
                 <div className="relative">
-                    <h1 className="max-w-4xl text-3xl font-bold tracking-tight text-zinc-50 sm:text-5xl">
+                    <h1 className="max-w-4xl text-balance text-3xl font-bold tracking-tight text-zinc-50 sm:text-5xl">
                         Add private chat anywhere.
                     </h1>
-                    <p className="mt-4 max-w-3xl text-base leading-7 text-zinc-300 sm:text-lg">
-                        libvex is a toolkit to integrate end to end encrypted
-                        messaging into your product.
+                    <p className="hero-lede mt-4 max-w-3xl text-base leading-7 text-zinc-300 sm:text-lg">
+                        We believe privacy is a fundamental human right.{" "}
+                        <code>libvex</code> is a javascript library enabling end
+                        to end encrypted messaging to anything that runs
+                        javascript.
                     </p>
                     <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/90 p-4 sm:p-5">
                         <div className="flex items-center justify-between gap-3">
@@ -787,43 +1028,28 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                             </div>
                         ) : null}
                     </div>
-                    <p className="mt-4 inline-flex items-center gap-2 text-sm">
-                        <a
-                            href={DOCS_URL}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center text-[#e70000] underline decoration-[#e70000] underline-offset-2 hover:text-[#ff2a2a]"
-                        >
-                            Read docs
-                        </a>
-                        <span className="text-zinc-600">·</span>
-                        <a
-                            href={LIBVEX_GITHUB_URL}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-[#e70000] underline decoration-[#e70000] underline-offset-2 hover:text-[#ff2a2a]"
-                        >
-                            <Github className="h-3.5 w-3.5 align-middle" />
-                            View libvex source
-                        </a>
-                    </p>
+                    <DocsSourceLinkRow
+                        docsHref={DOCS_URL}
+                        sourceHref={LIBVEX_GITHUB_URL}
+                    />
                 </div>
             </div>
 
             <div className="relative overflow-visible rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 sm:p-10">
                 <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
-                    <div className="absolute -left-20 -top-24 h-52 w-52 rounded-full bg-[#e70000]/15 blur-3xl" />
-                    <div className="absolute -bottom-28 right-16 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
+                    <div className="absolute -left-20 -top-24 h-52 w-52 rounded-full bg-[#e70000]/20 blur-3xl" />
+                    <div className="absolute -bottom-28 right-16 h-56 w-56 rounded-full bg-[#e70000]/10 blur-3xl" />
                 </div>
                 <div className="relative">
-                    <h2 className="max-w-4xl text-3xl font-bold tracking-tight text-zinc-50 sm:text-5xl">
-                        Run on Spire with confidence.
+                    <h2 className="max-w-4xl text-balance text-3xl font-bold tracking-tight text-zinc-50 sm:text-5xl">
+                        Reliable and resilient.
                     </h2>
-                    <p className="mt-4 max-w-3xl text-base leading-7 text-zinc-300 sm:text-lg">
-                        Production-grade backend for libvex clients. Verified
-                        uptime and latency are published live.
+                    <p className="hero-lede mt-4 max-w-3xl text-base leading-7 text-zinc-300 sm:text-lg">
+                        Use our hosted API or deploy your own to control your
+                        communications stack. We believe privacy is a
+                        fundamental human right.
                     </p>
-                    <div className="mt-4 rounded-xl border border-white/10 bg-zinc-950/90 p-4 sm:p-5">
+                    <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/90 p-4 sm:p-5">
                         <div className="flex items-center justify-between gap-3">
                             <p className="text-xs uppercase tracking-[0.15em] text-zinc-500">
                                 Endpoint
@@ -900,7 +1126,9 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                                 </p>
                                 <p className="mt-1 font-mono text-lg text-zinc-100">
                                     {spireMeta?.uptimePercent !== null
-                                        ? `${spireMeta?.uptimePercent?.toFixed(2)}%`
+                                        ? `${spireMeta?.uptimePercent?.toFixed(
+                                              2
+                                          )}%`
                                         : "n/a"}
                                 </p>
                             </div>
@@ -932,26 +1160,29 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                             <p className="mb-2 text-[11px] uppercase tracking-[0.12em] text-zinc-500">
                                 Reliability
                             </p>
-                            <div
-                                className="relative z-20 grid w-full gap-[3px] overflow-visible pb-1"
-                                style={{
-                                    gridTemplateColumns: `repeat(${totalUptimeBlockSlots}, minmax(0, 1fr))`,
-                                }}
-                            >
+                            <div className="relative z-20 flex w-full gap-0.5 overflow-visible pb-1 sm:gap-[3px]">
                                 {paddedUptimeBlocks.map((block, index) => {
+                                    const slotClass =
+                                        "h-6 min-w-[5px] flex-1 basis-0";
                                     if (!block) {
                                         return (
-                                            <span
+                                            <div
                                                 key={`uptime-empty-${index}`}
-                                                className="h-6 rounded-[2px] bg-zinc-700/60"
-                                            />
+                                                className={slotClass}
+                                            >
+                                                <span className="block h-full w-full rounded-[2px] bg-zinc-700/60" />
+                                            </div>
                                         );
                                     }
                                     return (
-                                        <UptimeReliabilityStripBlock
-                                            key={block.bucketStart}
-                                            block={block}
-                                        />
+                                        <div
+                                            key={`${block.bucketStart}-${index}`}
+                                            className={slotClass}
+                                        >
+                                            <UptimeReliabilityStripBlock
+                                                block={block}
+                                            />
+                                        </div>
                                     );
                                 })}
                             </div>
@@ -997,26 +1228,10 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                         </div>
                     </div>
 
-                    <p className="mt-4 inline-flex items-center gap-2 text-sm">
-                        <a
-                            href={SPIRE_DOCS_URL}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center text-[#e70000] underline decoration-[#e70000] underline-offset-2 hover:text-[#ff2a2a]"
-                        >
-                            View docs
-                        </a>
-                        <span className="text-zinc-600">·</span>
-                        <a
-                            href={SPIRE_GITHUB_URL}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-[#e70000] underline decoration-[#e70000] underline-offset-2 hover:text-[#ff2a2a]"
-                        >
-                            <Github className="h-3.5 w-3.5 align-middle" />
-                            View Spire source
-                        </a>
-                    </p>
+                    <DocsSourceLinkRow
+                        docsHref={SPIRE_DOCS_URL}
+                        sourceHref={SPIRE_GITHUB_URL}
+                    />
                 </div>
             </div>
         </section>
