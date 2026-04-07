@@ -1,6 +1,6 @@
-import formatDistanceToNowStrict from "date-fns/formatDistanceToNowStrict";
 import { useEffect, useState } from "preact/hooks";
 import { renderQuickMarkdown } from "../lib/quickMarkdown";
+import { formatRelativeTime } from "../lib/relativeTime";
 
 const PRIVACY_POLICY_URL =
     "https://raw.githubusercontent.com/vex-chat/privacy-policy/main/PrivacyPolicy.md";
@@ -19,10 +19,6 @@ type CommitInfo = {
         };
     };
 };
-
-function formatRelativeTime(value: string): string {
-    return formatDistanceToNowStrict(new Date(value), { addSuffix: true });
-}
 
 export function PrivacyPolicyPage(_: { path?: string }): JSX.Element {
     const [policyText, setPolicyText] = useState("");
