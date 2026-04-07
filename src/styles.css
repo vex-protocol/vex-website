@@ -1,3 +1,8 @@
+html {
+    /* ~match 90% browser zoom: scales rem-based Tailwind type + spacing site-wide */
+    font-size: 90%;
+}
+
 html,
 body,
 #root {
