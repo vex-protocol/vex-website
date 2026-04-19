@@ -1,6 +1,7 @@
 import type { JSX } from "preact";
 import { useClaSession } from "../ClaSessionContext";
 import { githubLoginUrl } from "../lib/githubAuth";
+import { renderQuickMarkdown } from "../lib/quickMarkdown";
 import { CheckCircle2Icon } from "../components/Icons";
 import { useEffect, useState } from "preact/hooks";
 
@@ -133,7 +134,6 @@ export function ClaPage(): JSX.Element {
     }
 
     const sourceRepo = status?.sourceRepo ?? "vex-protocol/clabot-config";
-    const clabotRepos = status?.clabotRepos ?? [];
     const claSourceHref = `https://github.com/${sourceRepo}/blob/main/CLA.md`;
 
     const showJustSignedFlash = submitOk && status?.eligibility === "pending";
@@ -144,75 +144,8 @@ export function ClaPage(): JSX.Element {
                 <h1 className="mt-0 text-3xl font-bold tracking-tight text-zinc-50">
                     Contributor License Agreement
                 </h1>
-                <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-950/35 px-4 py-3 text-sm leading-relaxed text-amber-100/95">
-                    This flow applies to the{" "}
-                    <strong className="font-semibold text-amber-50">
-                        {sourceRepo}
-                    </strong>{" "}
-                    CLA and{" "}
-                    {clabotRepos.length > 0 ? (
-                        <>
-                            <code className="rounded bg-black/30 px-1 py-0.5">
-                                .clabot
-                            </code>{" "}
-                            updates in{" "}
-                            <strong className="font-semibold text-amber-50">
-                                {clabotRepos.join(", ")}
-                            </strong>
-                            . For cla-bot, a single org repo named{" "}
-                            <code className="rounded bg-black/30 px-1 py-0.5">
-                                clabot-config
-                            </code>{" "}
-                            is usually enough (see cla-bot docs).
-                        </>
-                    ) : (
-                        <>
-                            <code className="rounded bg-black/30 px-1 py-0.5">
-                                .clabot
-                            </code>{" "}
-                            updates (configure{" "}
-                            <code className="rounded bg-black/30 px-1 py-0.5">
-                                CLA_BOT_REPOS
-                            </code>{" "}
-                            on the server — often{" "}
-                            <code className="rounded bg-black/30 px-1 py-0.5">
-                                vex-protocol/clabot-config
-                            </code>
-                            ).
-                        </>
-                    )}
-                </div>
-                <div className="mt-4 rounded-xl border border-white/10 bg-zinc-900/50 px-4 py-3 text-sm text-zinc-300">
-                    <p className="m-0 font-medium text-zinc-200">
-                        Scope (this site)
-                    </p>
-                    <ul className="mt-2 list-inside list-disc space-y-1 text-zinc-400">
-                        <li>
-                            <span className="text-zinc-300">CLA document</span> —{" "}
-                            <span className="font-mono text-zinc-200">
-                                {sourceRepo}
-                            </span>{" "}
-                            (<code className="text-zinc-300">CLA.md</code> on{" "}
-                            <code className="text-zinc-300">main</code>)
-                        </li>
-                        <li>
-                            <span className="text-zinc-300">
-                                Maintainer approval queue
-                            </span>{" "}
-                            — one shared queue; approvals add your GitHub username
-                            to the configured repo&apos;s{" "}
-                            <code className="text-zinc-300">.clabot</code>
-                            {clabotRepos.length === 0
-                                ? " (none configured yet)."
-                                : "."}
-                        </li>
-                    </ul>
-                </div>
                 <p className="mt-4 max-w-2xl text-zinc-400">
-                    Read the agreement below, sign in with GitHub, then confirm. Use
-                    the link from your PR comment from{" "}
-                    <strong className="text-zinc-300">cla-bot</strong> when
-                    applicable.
+                    Read the agreement below, sign in with GitHub, then confirm.
                 </p>
             </header>
 
@@ -225,9 +158,11 @@ export function ClaPage(): JSX.Element {
                         Loading CLA…
                     </div>
                 ) : (
-                    <pre className="max-h-[min(24rem,50vh)] overflow-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-zinc-300 sm:text-sm">
-                        {body}
-                    </pre>
+                    <div className="max-h-[min(28rem,55vh)] overflow-y-auto rounded-xl border border-white/10 bg-zinc-950/40 px-4 py-5 sm:px-6">
+                        <article className="[&_h1]:mt-0">
+                            {renderQuickMarkdown(body)}
+                        </article>
+                    </div>
                 )}
                 <p className="mt-4 text-xs text-zinc-500">
                     Source:{" "}
