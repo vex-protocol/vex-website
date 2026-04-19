@@ -130,7 +130,7 @@ export function App(): JSX.Element {
                         <HomePageLoading />
                     )}
                 </main>
-                <Footer isHome={currentPath === "/"} />
+                <Footer />
             </div>
         </ClaSessionProvider>
     );

@@ -169,14 +169,11 @@ export function ClaPage(): JSX.Element {
                             {submitting ? "Submitting…" : "Submit acceptance"}
                         </button>
                         <p className="text-xs text-zinc-500">
-                            Maintainers: manage the queue on{" "}
-                            <a
-                                href="/cla-admin"
-                                className="text-zinc-400 underline hover:text-zinc-200"
-                            >
-                                /cla-admin
-                            </a>
-                            .
+                            Maintainers: use{" "}
+                            <strong className="font-medium text-zinc-400">
+                                Admin → CLA approvals
+                            </strong>{" "}
+                            in the top navigation (when signed in with access).
                         </p>
                     </form>
                 )}
