@@ -10,10 +10,9 @@ import accept from "../api/gh/accept";
 import allowResubmit from "../api/gh/admin/allow-resubmit";
 import claMarkdown from "../api/gh/cla-markdown";
 import claStatus from "../api/gh/cla-status";
-import auditLog from "../api/gh/admin/audit-log";
 import adminApprove from "../api/gh/admin/approve";
+import adminContributors from "../api/gh/admin/contributors";
 import adminMe from "../api/gh/admin/me";
-import orgDebug from "../api/gh/admin/org-debug";
 import adminPending from "../api/gh/admin/pending";
 import adminReject from "../api/gh/admin/reject";
 import callback from "../api/gh/callback";
@@ -41,8 +40,7 @@ const routes: Array<{ method: string; path: string; handler: Handler }> = [
     { method: "GET", path: "/api/gh/cla-status", handler: claStatus },
     { method: "GET", path: "/api/gh/cla-markdown", handler: claMarkdown },
     { method: "GET", path: "/api/gh/admin/me", handler: adminMe },
-    { method: "GET", path: "/api/gh/admin/org-debug", handler: orgDebug },
-    { method: "GET", path: "/api/gh/admin/audit-log", handler: auditLog },
+    { method: "GET", path: "/api/gh/admin/contributors", handler: adminContributors },
     { method: "GET", path: "/api/gh/admin/pending", handler: adminPending },
     { method: "POST", path: "/api/gh/admin/approve", handler: adminApprove },
     { method: "POST", path: "/api/gh/admin/reject", handler: adminReject },
