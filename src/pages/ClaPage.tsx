@@ -55,9 +55,14 @@ export function ClaPage(): JSX.Element {
                 credentials: "include",
                 body: JSON.stringify({ agreed: true }),
             });
-            const data = (await res.json()) as { error?: string };
+            const data = (await res.json()) as {
+                error?: string;
+                message?: string;
+            };
             if (!res.ok) {
-                setSubmitErr(data.error ?? "Request failed");
+                setSubmitErr(
+                    data.message ?? data.error ?? "Request failed",
+                );
                 return;
             }
             setSubmitOk(true);

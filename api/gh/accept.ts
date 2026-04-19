@@ -1,6 +1,10 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { addPending } from "../lib/claQueue";
+import {
+    checkAuthorHasOpenPullRequest,
+    isPrCheckConfigured,
+} from "../lib/githubOpenPr";
 import { getSessionSecret } from "../lib/ghOAuthEnv";
 import { GH_SESSION_COOKIE, readGithubSession } from "../lib/ghSession";
 import { seal } from "../lib/siteSession";
@@ -80,6 +84,31 @@ export default async function handler(
     if (!session) {
         sendJson(res, 401, { error: "not_signed_in" });
         return;
+    }
+
+    if (isPrCheckConfigured()) {
+        const pr = await checkAuthorHasOpenPullRequest(session.login);
+        if (!pr.ok) {
+            console.error(
+                "cla_pr_check_github",
+                pr.status,
+                pr.detail ?? "",
+            );
+            sendJson(res, 503, {
+                error: "pr_check_failed",
+                message:
+                    "Could not verify open pull requests with GitHub. Try again later or contact maintainers.",
+            });
+            return;
+        }
+        if (pr.count < 1) {
+            sendJson(res, 403, {
+                error: "no_open_pr",
+                message:
+                    "Open a pull request in this organization’s repos first, then sign the CLA from the link in the PR comment.",
+            });
+            return;
+        }
     }
 
     const at = new Date().toISOString();
