@@ -23,6 +23,8 @@ type QueuePayload = {
 
 type OrgDebugPayload = {
     org: string | null;
+    /** True if `CLA_ADMIN_ORG` was set in env (else org is the default). */
+    orgFromEnv?: boolean;
     tokenConfigured: boolean;
     members: string[] | null;
     memberCount: number | null;
@@ -254,9 +256,22 @@ export function ClaAdminPage(): JSX.Element {
                     </h2>
                     <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                         <div>
-                            <dt className="text-zinc-500">CLA_ADMIN_ORG</dt>
+                            <dt className="text-zinc-500">Admin org</dt>
                             <dd className="font-mono text-zinc-200">
                                 {orgDebug.org ?? "—"}
+                                {orgDebug.orgFromEnv === false ? (
+                                    <span className="ml-2 text-xs font-normal text-zinc-500">
+                                        (default — set{" "}
+                                        <code className="text-zinc-400">
+                                            CLA_ADMIN_ORG
+                                        </code>{" "}
+                                        in{" "}
+                                        <code className="text-zinc-400">
+                                            vex.wtf/.env
+                                        </code>{" "}
+                                        to override)
+                                    </span>
+                                ) : null}
                             </dd>
                         </div>
                         <div>

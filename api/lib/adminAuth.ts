@@ -4,13 +4,13 @@
  * 1. **`CLA_ADMIN_LOGINS`** — If set (comma-separated GitHub usernames), **only** those
  *    users are admins (overrides everything else).
  * 2. Otherwise, any of the following (OR):
- *    - **`CLA_ADMIN_ORG` + `GITHUB_ORG_MEMBERSHIP_TOKEN`** — Paginate `GET /orgs/{org}/members`,
- *      cache ~5m, compare `login` (most robust).
- *    - **`CLA_ADMIN_ORG` + session `oauth_access_token`** — `GET /user/memberships/orgs/{org}`
- *      (`state === "active"`) when no org list token is configured.
+ *    - **Org membership** — org slug defaults to **`vex-protocol`**; override with `CLA_ADMIN_ORG`.
+ *      With `GITHUB_ORG_MEMBERSHIP_TOKEN`: paginate `GET /orgs/{org}/members`, cache ~5m.
+ *      Without that token: session `oauth_access_token` + `GET /user/memberships/orgs/{org}`.
  *    - **`CLA_ADMIN_REPO` + `GITHUB_CLA_ADMIN_TOKEN`** — user has **write+** on that repo.
  */
 
+import { getClaAdminOrgSlug } from "./claConfig";
 import { isLoginInOrgMemberList } from "./orgMembersList";
 
 /** Temporary: always grant CLA admin (remove when org token + list check is verified). */
@@ -92,22 +92,20 @@ export async function isClaAdmin(
         return set.has(login.toLowerCase());
     }
 
-    const org = process.env.CLA_ADMIN_ORG?.trim();
+    const org = getClaAdminOrgSlug();
     const orgToken = process.env.GITHUB_ORG_MEMBERSHIP_TOKEN?.trim();
 
-    if (org) {
-        if (orgToken) {
-            try {
-                if (await isLoginInOrgMemberList(login, org, orgToken)) {
-                    return true;
-                }
-            } catch (err: unknown) {
-                console.error("cla_admin_org_list_check", err);
-            }
-        } else if (oauthAccessToken) {
-            if (await userMembershipActive(oauthAccessToken, org)) {
+    if (orgToken) {
+        try {
+            if (await isLoginInOrgMemberList(login, org, orgToken)) {
                 return true;
             }
+        } catch (err: unknown) {
+            console.error("cla_admin_org_list_check", err);
+        }
+    } else if (oauthAccessToken) {
+        if (await userMembershipActive(oauthAccessToken, org)) {
+            return true;
         }
     }
 

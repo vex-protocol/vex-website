@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
+import { getClaAdminOrgSlug } from "../../lib/claConfig";
 import { isClaAdmin } from "../../lib/adminAuth";
 import { fetchOrgMemberLoginsSorted } from "../../lib/orgMembersList";
 import { getSessionSecret } from "../../lib/ghOAuthEnv";
@@ -34,29 +35,19 @@ export default async function handler(
         return;
     }
 
-    const org = process.env.CLA_ADMIN_ORG?.trim() ?? null;
+    const org = getClaAdminOrgSlug();
     const orgToken = process.env.GITHUB_ORG_MEMBERSHIP_TOKEN?.trim();
-
-    if (!org) {
-        sendJson(res, 200, {
-            org: null,
-            tokenConfigured: false,
-            members: null,
-            memberCount: null,
-            yourLoginInList: null,
-            error: "CLA_ADMIN_ORG is not set",
-        });
-        return;
-    }
 
     if (!orgToken) {
         sendJson(res, 200, {
             org,
+            orgFromEnv: Boolean(process.env.CLA_ADMIN_ORG?.trim()),
             tokenConfigured: false,
             members: null,
             memberCount: null,
             yourLoginInList: null,
-            error: "GITHUB_ORG_MEMBERSHIP_TOKEN is not set — cannot list members",
+            error:
+                "GITHUB_ORG_MEMBERSHIP_TOKEN is not set — add a PAT to vex.wtf/.env and restart the API server (see .env.example).",
         });
         return;
     }
@@ -68,6 +59,7 @@ export default async function handler(
         );
         sendJson(res, 200, {
             org,
+            orgFromEnv: Boolean(process.env.CLA_ADMIN_ORG?.trim()),
             tokenConfigured: true,
             members,
             memberCount: members.length,
@@ -78,6 +70,7 @@ export default async function handler(
         const msg = err instanceof Error ? err.message : String(err);
         sendJson(res, 200, {
             org,
+            orgFromEnv: Boolean(process.env.CLA_ADMIN_ORG?.trim()),
             tokenConfigured: true,
             members: null,
             memberCount: null,

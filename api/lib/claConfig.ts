@@ -22,3 +22,11 @@ export function getClabotRepoFullNames(): string[] {
 export function getClaSdkVersion(): string {
     return process.env.CLA_SDK_VERSION?.trim() ?? "1";
 }
+
+/**
+ * GitHub org slug for admin membership checks (`/orgs/{org}/members`, etc.).
+ * Defaults to `vex-protocol` for this project — override with `CLA_ADMIN_ORG` in `.env`.
+ */
+export function getClaAdminOrgSlug(): string {
+    return process.env.CLA_ADMIN_ORG?.trim() || "vex-protocol";
+}
