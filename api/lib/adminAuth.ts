@@ -2,7 +2,8 @@
  * Who can use `/cla-admin` and the Admin menu:
  *
  * 1. **`CLA_ADMIN_LOGINS`** — If set (comma-separated GitHub usernames), **only** those
- *    users are admins (overrides everything else).
+ *    users are admins (overrides everything else). Use when org membership is private or
+ *    the GitHub org member list API is not usable.
  * 2. Otherwise, any of the following (OR):
  *    - **Org membership** — org slug defaults to **`vex-protocol`**; override with `CLA_ADMIN_ORG`.
  *      With `GITHUB_ORG_MEMBERSHIP_TOKEN`: paginate `GET /orgs/{org}/members`, cache ~5m.
@@ -74,10 +75,6 @@ export async function isClaAdmin(
     login: string,
     oauthAccessToken?: string | null,
 ): Promise<boolean> {
-    if (HARDCODED_CLA_ADMIN_LOGINS.has(login.toLowerCase())) {
-        return true;
-    }
-
     const allow = process.env.CLA_ADMIN_LOGINS?.trim();
     if (allow) {
         const set = new Set(
