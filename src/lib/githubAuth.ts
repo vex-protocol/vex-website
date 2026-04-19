@@ -1,6 +1,14 @@
 /** GitHub OAuth entry (redirects to github.com). */
 export const GH_LOGIN_URL = "/api/gh/login";
 
+/** Same-origin path after OAuth, e.g. `/cla` (query `next=`). */
+export function githubLoginUrl(nextPath?: string): string {
+    if (!nextPath || nextPath === "/") {
+        return "/api/gh/login";
+    }
+    return `/api/gh/login?next=${encodeURIComponent(nextPath)}`;
+}
+
 /** Clears session cookies and redirects to `/`. */
 export const GH_LOGOUT_URL = "/api/gh/logout";
 

@@ -8,6 +8,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 
 import accept from "../api/gh/accept";
 import allowResubmit from "../api/gh/admin/allow-resubmit";
+import claMarkdown from "../api/gh/cla-markdown";
 import claStatus from "../api/gh/cla-status";
 import auditLog from "../api/gh/admin/audit-log";
 import adminApprove from "../api/gh/admin/approve";
@@ -38,6 +39,7 @@ const routes: Array<{ method: string; path: string; handler: Handler }> = [
     { method: "POST", path: "/api/gh/accept", handler: accept },
     { method: "OPTIONS", path: "/api/gh/accept", handler: accept },
     { method: "GET", path: "/api/gh/cla-status", handler: claStatus },
+    { method: "GET", path: "/api/gh/cla-markdown", handler: claMarkdown },
     { method: "GET", path: "/api/gh/admin/me", handler: adminMe },
     { method: "GET", path: "/api/gh/admin/org-debug", handler: orgDebug },
     { method: "GET", path: "/api/gh/admin/audit-log", handler: auditLog },

@@ -6,6 +6,7 @@ import {
     getSessionSecret,
 } from "../lib/ghOAuthEnv";
 import { GH_SESSION_COOKIE } from "../lib/ghSession";
+import { sanitizeNextPath } from "../lib/safeNextPath";
 import {
     open,
     parseCookies,
@@ -16,7 +17,7 @@ import { redirect, useSecureCookies } from "../lib/nodeHttp";
 
 const COOKIE_STATE = "gh_oauth_state";
 
-type StateCookie = { s: string; exp: number };
+type StateCookie = { s: string; exp: number; next?: string };
 type GithubSession = {
     v: number;
     login: string;
@@ -81,6 +82,8 @@ export default async function handler(
         redirect(res, `${homeUrl}?error=invalid_state`);
         return;
     }
+
+    const nextPath = sanitizeNextPath(parsed.next) ?? "/";
 
     const redirectUri = `${origin}/api/gh/callback`;
     const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
@@ -163,5 +166,10 @@ export default async function handler(
     ].join("; ");
 
     res.setHeader("Set-Cookie", [clearState, setSession]);
-    redirect(res, `${homeUrl}?signed_in=1`);
+
+    const dest =
+        nextPath === "/"
+            ? `${origin}/?signed_in=1`
+            : `${origin}${nextPath}?signed_in=1`;
+    redirect(res, dest);
 }

@@ -5,6 +5,7 @@ import {
     ghOAuthMissingForLogin,
     getSessionSecret,
 } from "../lib/ghOAuthEnv";
+import { sanitizeNextPath } from "../lib/safeNextPath";
 import {
     randomState,
     seal,
@@ -33,9 +34,22 @@ export default function handler(
     const secret = getSessionSecret()!;
     const clientId = process.env.GITHUB_OAUTH_CLIENT_ID!.trim();
 
+    const loginUrl = new URL(
+        req.url ?? "/",
+        `http://${req.headers.host ?? "localhost"}`,
+    );
+    const nextPath = sanitizeNextPath(
+        loginUrl.searchParams.get("next") ??
+            loginUrl.searchParams.get("return_to"),
+    );
+
     const state = randomState();
     const exp = Math.floor(Date.now() / 1000) + 600;
-    const sealed = seal(secret, { s: state, exp });
+    const sealed = seal(secret, {
+        s: state,
+        exp,
+        ...(nextPath && nextPath !== "/" ? { next: nextPath } : {}),
+    } as Record<string, unknown>);
 
     const origin = siteOrigin();
     const redirectUri = `${origin}/api/gh/callback`;

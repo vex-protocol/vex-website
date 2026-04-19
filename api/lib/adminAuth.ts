@@ -13,9 +13,6 @@
 import { getClaAdminOrgSlug } from "./claConfig";
 import { isLoginInOrgMemberList } from "./orgMembersList";
 
-/** Temporary: always grant CLA admin (remove when org token + list check is verified). */
-const HARDCODED_CLA_ADMIN_LOGINS = new Set(["yuki111888"]);
-
 async function hasRepoWriteAccess(
     login: string,
     token: string,
