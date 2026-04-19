@@ -7,10 +7,13 @@ import http from "node:http";
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import accept from "../api/gh/accept";
+import allowResubmit from "../api/gh/admin/allow-resubmit";
+import claStatus from "../api/gh/cla-status";
 import adminApprove from "../api/gh/admin/approve";
 import adminMe from "../api/gh/admin/me";
 import orgDebug from "../api/gh/admin/org-debug";
 import adminPending from "../api/gh/admin/pending";
+import adminReject from "../api/gh/admin/reject";
 import callback from "../api/gh/callback";
 import libvexGithub from "../api/gh/public/libvex-github";
 import privacyCommits from "../api/gh/public/privacy-commits";
@@ -33,10 +36,17 @@ const routes: Array<{ method: string; path: string; handler: Handler }> = [
     { method: "GET", path: "/api/gh/session", handler: session },
     { method: "POST", path: "/api/gh/accept", handler: accept },
     { method: "OPTIONS", path: "/api/gh/accept", handler: accept },
+    { method: "GET", path: "/api/gh/cla-status", handler: claStatus },
     { method: "GET", path: "/api/gh/admin/me", handler: adminMe },
     { method: "GET", path: "/api/gh/admin/org-debug", handler: orgDebug },
     { method: "GET", path: "/api/gh/admin/pending", handler: adminPending },
     { method: "POST", path: "/api/gh/admin/approve", handler: adminApprove },
+    { method: "POST", path: "/api/gh/admin/reject", handler: adminReject },
+    {
+        method: "POST",
+        path: "/api/gh/admin/allow-resubmit",
+        handler: allowResubmit,
+    },
     { method: "GET", path: "/api/gh/public/libvex-github", handler: libvexGithub },
     { method: "GET", path: "/api/gh/public/spire-github", handler: spireGithub },
     { method: "GET", path: "/api/gh/public/privacy-commits", handler: privacyCommits },

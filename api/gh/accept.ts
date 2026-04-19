@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import { addPending } from "../lib/claQueue";
+import { addPending, getClaEligibility } from "../lib/claQueue";
 import {
     checkAuthorHasOpenPullRequest,
     isPrCheckConfigured,
@@ -83,6 +83,32 @@ export default async function handler(
     const session = readGithubSession(req, secret);
     if (!session) {
         sendJson(res, 401, { error: "not_signed_in" });
+        return;
+    }
+
+    const eligibility = await getClaEligibility(session.login);
+    if (eligibility.state === "pending") {
+        sendJson(res, 409, {
+            error: "already_pending",
+            message:
+                "You already have a CLA submission waiting for maintainers. You cannot submit again until it is approved or rejected.",
+        });
+        return;
+    }
+    if (eligibility.state === "completed") {
+        sendJson(res, 409, {
+            error: "already_completed",
+            message:
+                "Your CLA was already approved for this program. Contact maintainers if you need changes.",
+        });
+        return;
+    }
+    if (eligibility.state === "rejected" && !eligibility.canResubmit) {
+        sendJson(res, 403, {
+            error: "rejected",
+            message:
+                "Your previous submission was rejected. A maintainer must allow you to submit again before you can sign.",
+        });
         return;
     }
 

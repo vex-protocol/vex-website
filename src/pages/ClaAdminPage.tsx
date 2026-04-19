@@ -5,6 +5,22 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 
 type PendingRow = { login: string; at: string; claVersion: string };
 
+type RejectedRow = {
+    login: string;
+    submittedAt: string;
+    rejectedAt: string;
+    claVersion: string;
+};
+
+type QueuePayload = {
+    pending: PendingRow[];
+    rejected: RejectedRow[];
+    resubmitAllowed: string[];
+    sourceRepo: string;
+    clabotRepos: string[];
+    claVersion: string;
+};
+
 type OrgDebugPayload = {
     org: string | null;
     tokenConfigured: boolean;
@@ -17,7 +33,7 @@ type OrgDebugPayload = {
 export function ClaAdminPage(): JSX.Element {
     const cla = useClaSession();
     const [admin, setAdmin] = useState<boolean | null>(null);
-    const [pending, setPending] = useState<PendingRow[] | null>(null);
+    const [queue, setQueue] = useState<QueuePayload | null>(null);
     const [err, setErr] = useState<string | null>(null);
     const [busyKey, setBusyKey] = useState<string | null>(null);
     const [orgDebug, setOrgDebug] = useState<OrgDebugPayload | null>(null);
@@ -51,8 +67,15 @@ export function ClaAdminPage(): JSX.Element {
             setErr("Could not load queue");
             return;
         }
-        const data = (await pRes.json()) as { pending?: PendingRow[] };
-        setPending(data.pending ?? []);
+        const data = (await pRes.json()) as QueuePayload;
+        setQueue({
+            pending: data.pending ?? [],
+            rejected: data.rejected ?? [],
+            resubmitAllowed: data.resubmitAllowed ?? [],
+            sourceRepo: data.sourceRepo ?? "vex-protocol/spire-js",
+            clabotRepos: data.clabotRepos ?? [],
+            claVersion: data.claVersion ?? "1",
+        });
         if (oRes.ok) {
             setOrgDebug((await oRes.json()) as OrgDebugPayload);
         } else {
@@ -67,11 +90,15 @@ export function ClaAdminPage(): JSX.Element {
         void load();
     }, [cla.loading, load]);
 
-    async function approve(login: string): Promise<void> {
-        setBusyKey(login);
+    async function postAction(
+        path: string,
+        login: string,
+        busy: string,
+    ): Promise<void> {
+        setBusyKey(busy);
         setErr(null);
         try {
-            const res = await fetch("/api/gh/admin/approve", {
+            const res = await fetch(path, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -79,7 +106,7 @@ export function ClaAdminPage(): JSX.Element {
             });
             const data = (await res.json()) as { error?: string };
             if (!res.ok) {
-                setErr(data.error ?? "Approve failed");
+                setErr(data.error ?? "Request failed");
                 return;
             }
             await load();
@@ -88,6 +115,22 @@ export function ClaAdminPage(): JSX.Element {
         } finally {
             setBusyKey(null);
         }
+    }
+
+    function approve(login: string): void {
+        void postAction("/api/gh/admin/approve", login, `approve:${login}`);
+    }
+
+    function reject(login: string): void {
+        void postAction("/api/gh/admin/reject", login, `reject:${login}`);
+    }
+
+    function allowResubmit(login: string): void {
+        void postAction(
+            "/api/gh/admin/allow-resubmit",
+            login,
+            `allow:${login}`,
+        );
     }
 
     if (cla.loading || admin === null) {
@@ -136,20 +179,65 @@ export function ClaAdminPage(): JSX.Element {
         );
     }
 
+    const sourceRepo = queue?.sourceRepo ?? "vex-protocol/spire-js";
+    const clabotRepos = queue?.clabotRepos ?? [];
+
     return (
         <article className="space-y-6">
             <header>
                 <h1 className="mt-0 text-3xl font-bold tracking-tight text-zinc-50">
                     CLA queue
                 </h1>
-                <p className="mt-2 max-w-2xl text-zinc-400">
-                    Contributors who submitted acceptance on{" "}
+                <div className="mt-3 max-w-3xl rounded-xl border border-white/10 bg-zinc-950/60 px-4 py-3 text-sm text-zinc-300">
+                    <p className="m-0 font-medium text-zinc-200">
+                        Repository scope
+                    </p>
+                    <ul className="mt-2 list-inside list-disc space-y-1 text-zinc-400">
+                        <li>
+                            <span className="text-zinc-300">CLA text</span> —{" "}
+                            <span className="font-mono text-zinc-200">
+                                {sourceRepo}
+                            </span>{" "}
+                            (<code className="text-zinc-300">CLA.md</code>, branch{" "}
+                            <code className="text-zinc-300">main</code>; override with{" "}
+                            <code className="text-zinc-300">CLA_SOURCE_REPO</code>)
+                        </li>
+                        <li>
+                            <span className="text-zinc-300">
+                                <code className="text-zinc-300">.clabot</code> targets
+                            </span>{" "}
+                            —{" "}
+                            {clabotRepos.length > 0 ? (
+                                <span className="font-mono text-zinc-200">
+                                    {clabotRepos.join(", ")}
+                                </span>
+                            ) : (
+                                <span className="text-amber-200/90">
+                                    none configured (
+                                    <code className="text-zinc-300">
+                                        CLA_BOT_REPOS
+                                    </code>
+                                    )
+                                </span>
+                            )}
+                        </li>
+                        <li>
+                            <span className="text-zinc-300">Queue version</span> —{" "}
+                            <span className="font-mono text-zinc-200">
+                                {queue?.claVersion ?? "—"}
+                            </span>{" "}
+                            (<code className="text-zinc-300">CLA_SDK_VERSION</code>)
+                        </li>
+                    </ul>
+                </div>
+                <p className="mt-3 max-w-2xl text-zinc-400">
+                    Contributors who submitted on{" "}
                     <a href="/cla" className="text-red-300/90 underline">
                         /cla
                     </a>
-                    . Approve to remove them from the queue and (if configured) add
-                    their username to{" "}
-                    <code className="text-zinc-300">.clabot</code> on GitHub.
+                    . Approve adds them to each listed repo&apos;s{" "}
+                    <code className="text-zinc-300">.clabot</code> (when the bot token
+                    is configured). Reject blocks resubmission until you allow it.
                 </p>
             </header>
 
@@ -240,61 +328,169 @@ export function ClaAdminPage(): JSX.Element {
                 </section>
             ) : null}
 
-            {pending === null ? (
+            {queue === null ? (
                 <p className="text-zinc-500">Loading queue…</p>
-            ) : pending.length === 0 ? (
-                <p className="text-zinc-500">No pending signers.</p>
             ) : (
-                <div className="overflow-hidden rounded-xl border border-white/10">
-                    <table className="w-full border-collapse text-left text-sm">
-                        <thead>
-                            <tr className="border-b border-white/10 bg-zinc-900/80">
-                                <th className="px-4 py-3 font-medium text-zinc-300">
-                                    GitHub
-                                </th>
-                                <th className="px-4 py-3 font-medium text-zinc-300">
-                                    Submitted
-                                </th>
-                                <th className="px-4 py-3 font-medium text-zinc-300">
-                                    CLA ver
-                                </th>
-                                <th className="px-4 py-3 font-medium text-zinc-300">
-                                    Action
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {pending.map((row) => (
-                                <tr
-                                    key={row.login}
-                                    className="border-b border-white/5 last:border-0"
-                                >
-                                    <td className="px-4 py-3 font-mono text-zinc-200">
-                                        @{row.login}
-                                    </td>
-                                    <td className="px-4 py-3 text-zinc-500">
-                                        {row.at}
-                                    </td>
-                                    <td className="px-4 py-3 text-zinc-500">
-                                        {row.claVersion}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <button
-                                            type="button"
-                                            disabled={busyKey === row.login}
-                                            onClick={() => void approve(row.login)}
-                                            className="rounded-md border border-emerald-500/40 bg-emerald-950/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-emerald-300/95 hover:bg-emerald-900/40 disabled:opacity-50"
+                <>
+                    {queue.pending.length === 0 ? (
+                        <p className="text-zinc-500">No pending signers.</p>
+                    ) : (
+                        <div className="overflow-hidden rounded-xl border border-white/10">
+                            <p className="border-b border-white/10 bg-zinc-900/80 px-4 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
+                                Pending approval
+                            </p>
+                            <table className="w-full border-collapse text-left text-sm">
+                                <thead>
+                                    <tr className="border-b border-white/10 bg-zinc-900/80">
+                                        <th className="px-4 py-3 font-medium text-zinc-300">
+                                            GitHub
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-zinc-300">
+                                            Submitted
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-zinc-300">
+                                            CLA ver
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-zinc-300">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {queue.pending.map((row) => (
+                                        <tr
+                                            key={row.login}
+                                            className="border-b border-white/5 last:border-0"
                                         >
-                                            {busyKey === row.login
-                                                ? "…"
-                                                : "Approve"}
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                            <td className="px-4 py-3 font-mono text-zinc-200">
+                                                @{row.login}
+                                            </td>
+                                            <td className="px-4 py-3 text-zinc-500">
+                                                {row.at}
+                                            </td>
+                                            <td className="px-4 py-3 text-zinc-500">
+                                                {row.claVersion}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex flex-wrap gap-2">
+                                                    <button
+                                                        type="button"
+                                                        disabled={
+                                                            busyKey ===
+                                                            `approve:${row.login}`
+                                                        }
+                                                        onClick={() =>
+                                                            approve(row.login)
+                                                        }
+                                                        className="rounded-md border border-emerald-500/40 bg-emerald-950/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-emerald-300/95 hover:bg-emerald-900/40 disabled:opacity-50"
+                                                    >
+                                                        {busyKey ===
+                                                        `approve:${row.login}`
+                                                            ? "…"
+                                                            : "Approve"}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        disabled={
+                                                            busyKey ===
+                                                            `reject:${row.login}`
+                                                        }
+                                                        onClick={() =>
+                                                            reject(row.login)
+                                                        }
+                                                        className="rounded-md border border-red-500/35 bg-red-950/25 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-red-300/95 hover:bg-red-900/35 disabled:opacity-50"
+                                                    >
+                                                        {busyKey ===
+                                                        `reject:${row.login}`
+                                                            ? "…"
+                                                            : "Reject"}
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {queue.rejected.length > 0 ? (
+                        <div className="overflow-hidden rounded-xl border border-white/10">
+                            <p className="border-b border-white/10 bg-zinc-900/80 px-4 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
+                                Rejected — cannot resubmit until allowed
+                            </p>
+                            <table className="w-full border-collapse text-left text-sm">
+                                <thead>
+                                    <tr className="border-b border-white/10 bg-zinc-900/80">
+                                        <th className="px-4 py-3 font-medium text-zinc-300">
+                                            GitHub
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-zinc-300">
+                                            Rejected
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-zinc-300">
+                                            CLA ver
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-zinc-300">
+                                            Resubmit
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {queue.rejected.map((row) => {
+                                        const allowed =
+                                            queue.resubmitAllowed.includes(
+                                                row.login.toLowerCase(),
+                                            );
+                                        return (
+                                            <tr
+                                                key={row.login}
+                                                className="border-b border-white/5 last:border-0"
+                                            >
+                                                <td className="px-4 py-3 font-mono text-zinc-200">
+                                                    @{row.login}
+                                                </td>
+                                                <td className="px-4 py-3 text-zinc-500">
+                                                    {row.rejectedAt}
+                                                </td>
+                                                <td className="px-4 py-3 text-zinc-500">
+                                                    {row.claVersion}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {allowed ? (
+                                                        <span className="text-xs text-emerald-300/95">
+                                                            Allowed — user can
+                                                            submit again
+                                                        </span>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            disabled={
+                                                                busyKey ===
+                                                                `allow:${row.login}`
+                                                            }
+                                                            onClick={() =>
+                                                                allowResubmit(
+                                                                    row.login,
+                                                                )
+                                                            }
+                                                            className="rounded-md border border-amber-500/35 bg-amber-950/25 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-amber-200/95 hover:bg-amber-900/35 disabled:opacity-50"
+                                                        >
+                                                            {busyKey ===
+                                                            `allow:${row.login}`
+                                                                ? "…"
+                                                                : "Allow resubmit"}
+                                                        </button>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : null}
+                </>
             )}
         </article>
     );

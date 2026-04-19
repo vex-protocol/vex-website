@@ -1,5 +1,10 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
+import {
+    getClabotRepoFullNames,
+    getClaSdkVersion,
+    getClaSourceRepoFullName,
+} from "../../lib/claConfig";
 import { isClaAdmin } from "../../lib/adminAuth";
 import { readQueue } from "../../lib/claQueue";
 import { getSessionSecret } from "../../lib/ghOAuthEnv";
@@ -35,5 +40,12 @@ export default async function handler(
     }
 
     const q = await readQueue();
-    sendJson(res, 200, { pending: q.pending });
+    sendJson(res, 200, {
+        pending: q.pending,
+        rejected: q.rejected,
+        resubmitAllowed: q.resubmitAllowed,
+        sourceRepo: getClaSourceRepoFullName(),
+        clabotRepos: getClabotRepoFullNames(),
+        claVersion: getClaSdkVersion(),
+    });
 }

@@ -1,7 +1,11 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { isClaAdmin } from "../../lib/adminAuth";
-import { readQueue, removePending } from "../../lib/claQueue";
+import {
+    addCompleted,
+    readQueue,
+    removePending,
+} from "../../lib/claQueue";
 import { getSessionSecret } from "../../lib/ghOAuthEnv";
 import { readGithubSession } from "../../lib/ghSession";
 import {
@@ -60,10 +64,10 @@ export default async function handler(
     }
 
     const q = await readQueue();
-    const inQueue = q.pending.some(
+    const row = q.pending.find(
         (p) => p.login.toLowerCase() === login.toLowerCase(),
     );
-    if (!inQueue) {
+    if (!row) {
         sendJson(res, 404, { error: "not_in_queue" });
         return;
     }
@@ -116,6 +120,12 @@ export default async function handler(
         sendJson(res, 409, { error: "queue_race" });
         return;
     }
+
+    await addCompleted({
+        login: row.login,
+        at: row.at,
+        claVersion: row.claVersion,
+    });
 
     sendJson(res, 200, {
         ok: true,
