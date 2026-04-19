@@ -34,6 +34,29 @@ function formatDateTime(iso: string): string {
     }).format(d);
 }
 
+/** Pending first; rejected last; middle: cleared → approved. */
+const CONTRIBUTOR_STATUS_RANK: Record<ContributorRow["status"], number> = {
+    pending_review: 0,
+    cleared_to_resubmit: 1,
+    approved: 2,
+    rejected: 3,
+};
+
+function sortContributorRows(rows: ContributorRow[]): ContributorRow[] {
+    return [...rows].sort((a, b) => {
+        const rank =
+            CONTRIBUTOR_STATUS_RANK[a.status] -
+            CONTRIBUTOR_STATUS_RANK[b.status];
+        if (rank !== 0) {
+            return rank;
+        }
+        return (
+            new Date(a.submittedAt).getTime() -
+            new Date(b.submittedAt).getTime()
+        );
+    });
+}
+
 function statusBadgeClass(
     status: ContributorRow["status"],
 ): string {
@@ -186,9 +209,8 @@ export function ClaAdminPage(): JSX.Element {
         );
     }
 
-    const sourceRepo = data?.sourceRepo ?? "vex-protocol/spire-js";
-    const clabotRepos = data?.clabotRepos ?? [];
     const rows = data?.contributors ?? [];
+    const sortedRows = sortContributorRows(rows);
 
     return (
         <article className="space-y-6">
@@ -196,56 +218,6 @@ export function ClaAdminPage(): JSX.Element {
                 <h1 className="mt-0 text-3xl font-bold tracking-tight text-zinc-50">
                     CLA queue
                 </h1>
-                <div className="mt-3 max-w-3xl rounded-xl border border-white/10 bg-zinc-950/60 px-4 py-3 text-sm text-zinc-300">
-                    <p className="m-0 font-medium text-zinc-200">
-                        Repository scope
-                    </p>
-                    <ul className="mt-2 list-inside list-disc space-y-1 text-zinc-400">
-                        <li>
-                            <span className="text-zinc-300">CLA text</span> —{" "}
-                            <span className="font-mono text-zinc-200">
-                                {sourceRepo}
-                            </span>{" "}
-                            (<code className="text-zinc-300">CLA.md</code>, branch{" "}
-                            <code className="text-zinc-300">main</code>)
-                        </li>
-                        <li>
-                            <span className="text-zinc-300">
-                                <code className="text-zinc-300">.clabot</code> targets
-                            </span>{" "}
-                            —{" "}
-                            {clabotRepos.length > 0 ? (
-                                <span className="font-mono text-zinc-200">
-                                    {clabotRepos.join(", ")}
-                                </span>
-                            ) : (
-                                <span className="text-amber-200/90">
-                                    none configured (
-                                    <code className="text-zinc-300">
-                                        CLA_BOT_REPOS
-                                    </code>
-                                    )
-                                </span>
-                            )}
-                        </li>
-                        <li>
-                            <span className="text-zinc-300">Queue version</span> —{" "}
-                            <span className="font-mono text-zinc-200">
-                                {data?.claSdkVersion ?? "—"}
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-                <p className="mt-3 max-w-2xl text-zinc-400">
-                    Contributors who submitted on{" "}
-                    <a href="/cla" className="text-red-300/90 underline">
-                        /cla
-                    </a>
-                    . Approve adds them to the configured repo&apos;s{" "}
-                    <code className="text-zinc-300">.clabot</code> (often a single{" "}
-                    <code className="text-zinc-300">clabot-config</code> repo) when the
-                    bot token is set.
-                </p>
             </header>
 
             {err ? (
@@ -256,7 +228,7 @@ export function ClaAdminPage(): JSX.Element {
 
             {data === null ? (
                 <p className="text-zinc-500">Loading contributors…</p>
-            ) : rows.length === 0 ? (
+            ) : sortedRows.length === 0 ? (
                 <p className="rounded-xl border border-white/10 bg-zinc-950/50 px-4 py-8 text-center text-zinc-500">
                     No contributors yet. When people sign on{" "}
                     <a href="/cla" className="text-red-300/90 underline">
@@ -266,11 +238,8 @@ export function ClaAdminPage(): JSX.Element {
                 </p>
             ) : (
                 <section>
-                    <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">
-                        Contributors
-                    </h2>
                     <div className="grid gap-3">
-                        {rows.map((row) => (
+                        {sortedRows.map((row) => (
                             <div
                                 key={`${row.login}-${row.status}-${row.submittedAt}`}
                                 className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 p-4 sm:flex-row sm:items-start"

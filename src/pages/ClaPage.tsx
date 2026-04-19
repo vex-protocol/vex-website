@@ -309,17 +309,27 @@ export function ClaPage(): JSX.Element {
                         ) : null}
 
                         {status?.eligibility === "completed" ? (
-                            <div className="rounded-xl border border-sky-500/25 bg-sky-950/30 px-4 py-3 text-sm text-sky-100/95">
-                                <p className="m-0 font-semibold text-sky-50">
-                                    Already approved
-                                </p>
-                                <p className="mt-1 text-sky-100/85">
-                                    Your GitHub account is on the approved
-                                    contributors list for this program (CLA version{" "}
-                                    {status.completedClaVersion ?? "—"}). You
-                                    don&apos;t need to sign again unless maintainers
-                                    ask you to.
-                                </p>
+                            <div className="rounded-xl border-2 border-emerald-400/50 bg-emerald-950/45 px-4 py-4 text-sm shadow-[inset_0_1px_0_0_rgba(52,211,153,0.12)] ring-1 ring-emerald-400/20">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+                                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-emerald-400/50 bg-emerald-500/20 text-emerald-300 shadow-[0_0_20px_-4px_rgba(52,211,153,0.5)]">
+                                        <CheckCircle2Icon className="h-7 w-7" />
+                                    </span>
+                                    <div>
+                                        <p className="m-0 text-base font-bold tracking-tight text-emerald-50">
+                                            Already approved
+                                        </p>
+                                        <p className="mt-2 leading-relaxed text-emerald-100/95">
+                                            Your GitHub account is on the{" "}
+                                            <strong className="font-semibold text-emerald-50">
+                                                approved contributors
+                                            </strong>{" "}
+                                            list for this program (CLA version{" "}
+                                            {status.completedClaVersion ?? "—"}). You
+                                            don&apos;t need to sign again unless
+                                            maintainers ask you to.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         ) : null}
 
