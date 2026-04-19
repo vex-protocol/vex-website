@@ -1,13 +1,14 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import { getSessionSecret } from "../lib/ghOAuthEnv";
-import { readGithubSession } from "../lib/ghSession";
-import { sendJson } from "../lib/nodeHttp";
+import { isClaAdmin } from "../../lib/adminAuth";
+import { getSessionSecret } from "../../lib/ghOAuthEnv";
+import { readGithubSession } from "../../lib/ghSession";
+import { sendJson } from "../../lib/nodeHttp";
 
-export default function handler(
+export default async function handler(
     req: IncomingMessage,
     res: ServerResponse,
-): void {
+): Promise<void> {
     if (req.method !== "GET") {
         res.statusCode = 405;
         res.setHeader("Allow", "GET");
@@ -23,13 +24,17 @@ export default function handler(
 
     const session = readGithubSession(req, secret);
     if (!session) {
-        sendJson(res, 200, { authenticated: false });
+        sendJson(res, 200, {
+            authenticated: false,
+            admin: false,
+        });
         return;
     }
 
+    const admin = await isClaAdmin(session.login);
     sendJson(res, 200, {
         authenticated: true,
         login: session.login,
-        id: session.id,
+        admin,
     });
 }

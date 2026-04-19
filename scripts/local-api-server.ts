@@ -7,8 +7,12 @@ import http from "node:http";
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import accept from "../api/gh/accept";
+import adminApprove from "../api/gh/admin/approve";
+import adminMe from "../api/gh/admin/me";
+import adminPending from "../api/gh/admin/pending";
 import callback from "../api/gh/callback";
 import login from "../api/gh/login";
+import logout from "../api/gh/logout";
 import session from "../api/gh/session";
 import { ghOAuthMissingForCallback } from "../api/lib/ghOAuthEnv";
 
@@ -19,10 +23,15 @@ type Handler = (
 
 const routes: Array<{ method: string; path: string; handler: Handler }> = [
     { method: "GET", path: "/api/gh/login", handler: login },
+    { method: "GET", path: "/api/gh/logout", handler: logout },
+    { method: "POST", path: "/api/gh/logout", handler: logout },
     { method: "GET", path: "/api/gh/callback", handler: callback },
     { method: "GET", path: "/api/gh/session", handler: session },
     { method: "POST", path: "/api/gh/accept", handler: accept },
     { method: "OPTIONS", path: "/api/gh/accept", handler: accept },
+    { method: "GET", path: "/api/gh/admin/me", handler: adminMe },
+    { method: "GET", path: "/api/gh/admin/pending", handler: adminPending },
+    { method: "POST", path: "/api/gh/admin/approve", handler: adminApprove },
 ];
 
 const PORT = Number(process.env.CLA_API_PORT ?? "8787");

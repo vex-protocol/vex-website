@@ -1,6 +1,9 @@
 /** GitHub OAuth entry (redirects to github.com). */
 export const GH_LOGIN_URL = "/api/gh/login";
 
+/** Clears session cookies and redirects to `/`. */
+export const GH_LOGOUT_URL = "/api/gh/logout";
+
 export async function fetchGithubSession(): Promise<
     | { authenticated: false }
     | { authenticated: true; login: string; id: number }

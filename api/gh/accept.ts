@@ -1,24 +1,18 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
+import { addPending } from "../lib/claQueue";
 import { getSessionSecret } from "../lib/ghOAuthEnv";
-import { open, parseCookies, seal } from "../lib/siteSession";
+import { GH_SESSION_COOKIE, readGithubSession } from "../lib/ghSession";
+import { seal } from "../lib/siteSession";
 import {
     readJsonBody,
     sendJson,
     useSecureCookies,
 } from "../lib/nodeHttp";
 
-const COOKIE_SESSION = "gh_session";
 const COOKIE_ACCEPTED = "cla_sdk_accepted";
 
 const CLA_SDK_VERSION = process.env.CLA_SDK_VERSION?.trim() ?? "1";
-
-type GithubSession = {
-    v: number;
-    login: string;
-    id: number;
-    exp: number;
-};
 
 type AcceptedCookie = {
     v: number;
@@ -82,23 +76,9 @@ export default async function handler(
         return;
     }
 
-    const cookies = parseCookies(req.headers.cookie);
-    const raw = cookies[COOKIE_SESSION];
-    if (!raw) {
+    const session = readGithubSession(req, secret);
+    if (!session) {
         sendJson(res, 401, { error: "not_signed_in" });
-        return;
-    }
-
-    const session = open<GithubSession>(secret, raw);
-    if (
-        !session ||
-        session.v !== 1 ||
-        typeof session.login !== "string" ||
-        typeof session.id !== "number" ||
-        typeof session.exp !== "number" ||
-        session.exp < Date.now() / 1000
-    ) {
-        sendJson(res, 401, { error: "session_expired" });
         return;
     }
 
@@ -121,7 +101,7 @@ export default async function handler(
 
     const secure = useSecureCookies();
 
-    const clearSession = `${COOKIE_SESSION}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? "; Secure" : ""}`;
+    const clearSession = `${GH_SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? "; Secure" : ""}`;
     const setAccepted = [
         `${COOKIE_ACCEPTED}=${encodeURIComponent(sealedAccepted)}`,
         "Path=/",
@@ -142,6 +122,14 @@ export default async function handler(
             at,
         }),
     );
+
+    void addPending({
+        login: session.login,
+        at,
+        claVersion: CLA_SDK_VERSION,
+    }).catch((err: unknown) => {
+        console.error("cla_pending_queue", err);
+    });
 
     sendJson(res, 200, {
         ok: true,

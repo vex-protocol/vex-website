@@ -16,9 +16,21 @@ export function App(): JSX.Element {
     const [LicensingPage, setLicensingPage] = useState<ComponentType<{
         path?: string;
     }> | null>(null);
+    const [ClaPage, setClaPage] = useState<ComponentType<{
+        path?: string;
+    }> | null>(null);
+    const [ClaAdminPage, setClaAdminPage] = useState<ComponentType<{
+        path?: string;
+    }> | null>(null);
 
     useEffect(() => {
-        if (HomePage || currentPath === "/privacy-policy" || currentPath === "/licensing")
+        if (
+            HomePage ||
+            currentPath === "/privacy-policy" ||
+            currentPath === "/licensing" ||
+            currentPath === "/cla" ||
+            currentPath === "/cla-admin"
+        )
             return;
         let cancelled = false;
         void import("./pages/HomePage").then((module) => {
@@ -57,6 +69,32 @@ export function App(): JSX.Element {
         };
     }, [LicensingPage, currentPath]);
 
+    useEffect(() => {
+        if (ClaPage || currentPath !== "/cla") return;
+        let cancelled = false;
+        void import("./pages/ClaPage").then((module) => {
+            if (!cancelled) {
+                setClaPage(() => module.ClaPage);
+            }
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [ClaPage, currentPath]);
+
+    useEffect(() => {
+        if (ClaAdminPage || currentPath !== "/cla-admin") return;
+        let cancelled = false;
+        void import("./pages/ClaAdminPage").then((module) => {
+            if (!cancelled) {
+                setClaAdminPage(() => module.ClaAdminPage);
+            }
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [ClaAdminPage, currentPath]);
+
     return (
         <ClaSessionProvider>
             <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -73,6 +111,18 @@ export function App(): JSX.Element {
                             <LicensingPage />
                         ) : (
                             <LicensingPageLoading />
+                        )
+                    ) : currentPath === "/cla" ? (
+                        ClaPage ? (
+                            <ClaPage />
+                        ) : (
+                            <ClaPageLoading />
+                        )
+                    ) : currentPath === "/cla-admin" ? (
+                        ClaAdminPage ? (
+                            <ClaAdminPage />
+                        ) : (
+                            <ClaAdminPageLoading />
                         )
                     ) : HomePage ? (
                         <HomePage />
@@ -114,6 +164,28 @@ function HomePageLoading(): JSX.Element {
             <div className="inline-flex items-center gap-2">
                 <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
                 <span>Loading...</span>
+            </div>
+        </section>
+    );
+}
+
+function ClaPageLoading(): JSX.Element {
+    return (
+        <section className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 text-zinc-300">
+            <div className="inline-flex items-center gap-2">
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
+                <span>Loading CLA…</span>
+            </div>
+        </section>
+    );
+}
+
+function ClaAdminPageLoading(): JSX.Element {
+    return (
+        <section className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 text-zinc-300">
+            <div className="inline-flex items-center gap-2">
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
+                <span>Loading admin…</span>
             </div>
         </section>
     );

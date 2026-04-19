@@ -1,21 +1,53 @@
 import { GithubIcon, TwitterIcon } from "./Icons";
+import { useClaSession } from "../ClaSessionContext";
 import { COMPANY_NAME } from "../lib/brand";
-import { GH_LOGIN_URL } from "../lib/githubAuth";
+import { GH_LOGIN_URL, GH_LOGOUT_URL } from "../lib/githubAuth";
 
 export function Footer(props: { isHome?: boolean }): JSX.Element {
     const { isHome } = props;
+    const cla = useClaSession();
+
     return (
         <footer className="border-t border-white/10 py-6">
             <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-4 text-xs uppercase tracking-[0.16em] text-zinc-500 sm:px-6 lg:px-8">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <span>{COMPANY_NAME}</span>
+                    {cla.loading ? (
+                        <span className="inline-block h-3 w-3 animate-spin rounded-full border border-zinc-600 border-t-zinc-400" />
+                    ) : cla.authenticated && cla.login ? (
+                        <>
+                            <span className="text-zinc-600">·</span>
+                            <span className="normal-case tracking-normal text-zinc-500">
+                                @{cla.login}
+                            </span>
+                            <a
+                                href={GH_LOGOUT_URL}
+                                className="text-zinc-400 no-underline transition-colors hover:text-zinc-200"
+                            >
+                                Log out
+                            </a>
+                        </>
+                    ) : (
+                        <>
+                            <a
+                                href={GH_LOGIN_URL}
+                                className="text-zinc-400 no-underline transition-colors hover:text-zinc-200"
+                                title="Staff & contributor sign-in (GitHub)"
+                            >
+                                Sign in
+                            </a>
+                        </>
+                    )}
                     {isHome ? (
-                        <a
-                            href={GH_LOGIN_URL}
-                            className="text-zinc-400 no-underline transition-colors hover:text-zinc-200"
-                        >
-                            Staff sign-in
-                        </a>
+                        <>
+                            <span className="text-zinc-600">·</span>
+                            <a
+                                href="/cla-admin"
+                                className="text-zinc-400 no-underline transition-colors hover:text-zinc-200"
+                            >
+                                CLA admin
+                            </a>
+                        </>
                     ) : null}
                 </div>
                 <div className="flex items-center gap-2">

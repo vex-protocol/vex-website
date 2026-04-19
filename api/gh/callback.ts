@@ -5,6 +5,7 @@ import {
     ghOAuthMissingForCallback,
     getSessionSecret,
 } from "../lib/ghOAuthEnv";
+import { GH_SESSION_COOKIE } from "../lib/ghSession";
 import {
     open,
     parseCookies,
@@ -14,7 +15,6 @@ import {
 import { redirect, useSecureCookies } from "../lib/nodeHttp";
 
 const COOKIE_STATE = "gh_oauth_state";
-const COOKIE_SESSION = "gh_session";
 
 type StateCookie = { s: string; exp: number };
 type GithubSession = {
@@ -146,7 +146,7 @@ export default async function handler(
 
     const clearState = `${COOKIE_STATE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? "; Secure" : ""}`;
     const setSession = [
-        `${COOKIE_SESSION}=${encodeURIComponent(sealedSession)}`,
+        `${GH_SESSION_COOKIE}=${encodeURIComponent(sealedSession)}`,
         "Path=/",
         "HttpOnly",
         "SameSite=Lax",

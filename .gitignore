@@ -19,6 +19,9 @@
 .DS_Store
 .env
 .env.local
+
+# CLA approval queue (vex.wtf API)
+/data/
 .env.development.local
 .env.test.local
 .env.production.local
