@@ -2,6 +2,7 @@ type ClabotJson = {
     contributors: string[];
     label?: string;
     message?: string;
+    recheckComment?: string;
 };
 
 export type ClabotUpdateResult =

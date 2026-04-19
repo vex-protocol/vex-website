@@ -152,15 +152,18 @@ export function ClaPage(): JSX.Element {
                     CLA and{" "}
                     {clabotRepos.length > 0 ? (
                         <>
-                            separate{" "}
                             <code className="rounded bg-black/30 px-1 py-0.5">
                                 .clabot
                             </code>{" "}
-                            files in{" "}
+                            updates in{" "}
                             <strong className="font-semibold text-amber-50">
                                 {clabotRepos.join(", ")}
                             </strong>
-                            . Each repo may have its own bot list.
+                            . For cla-bot, a single org repo named{" "}
+                            <code className="rounded bg-black/30 px-1 py-0.5">
+                                clabot-config
+                            </code>{" "}
+                            is usually enough (see cla-bot docs).
                         </>
                     ) : (
                         <>
@@ -171,7 +174,11 @@ export function ClaPage(): JSX.Element {
                             <code className="rounded bg-black/30 px-1 py-0.5">
                                 CLA_BOT_REPOS
                             </code>{" "}
-                            on the server to list repos).
+                            on the server — often{" "}
+                            <code className="rounded bg-black/30 px-1 py-0.5">
+                                vex-protocol/clabot-config
+                            </code>
+                            ).
                         </>
                     )}
                 </div>
@@ -193,7 +200,7 @@ export function ClaPage(): JSX.Element {
                                 Maintainer approval queue
                             </span>{" "}
                             — one shared queue; approvals add your GitHub username
-                            to each configured repo&apos;s{" "}
+                            to the configured repo&apos;s{" "}
                             <code className="text-zinc-300">.clabot</code>
                             {clabotRepos.length === 0
                                 ? " (none configured yet)."

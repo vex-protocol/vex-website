@@ -241,9 +241,10 @@ export function ClaAdminPage(): JSX.Element {
                     <a href="/cla" className="text-red-300/90 underline">
                         /cla
                     </a>
-                    . Approve adds them to each listed repo&apos;s{" "}
-                    <code className="text-zinc-300">.clabot</code> when the bot token
-                    is configured.
+                    . Approve adds them to the configured repo&apos;s{" "}
+                    <code className="text-zinc-300">.clabot</code> (often a single{" "}
+                    <code className="text-zinc-300">clabot-config</code> repo) when the
+                    bot token is set.
                 </p>
             </header>
 
