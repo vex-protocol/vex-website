@@ -75,7 +75,14 @@ export function ClaPage(): JSX.Element {
                 <h1 className="mt-0 text-3xl font-bold tracking-tight text-zinc-50">
                     Contributor License Agreement
                 </h1>
-                <p className="mt-2 max-w-2xl text-zinc-400">
+                <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-950/35 px-4 py-3 text-sm leading-relaxed text-amber-100/95">
+                    This page is for contributors who need to sign in response to a{" "}
+                    <strong className="font-semibold text-amber-50">pull request</strong>
+                    . Use the link from your PR comment from{" "}
+                    <strong className="font-semibold">cla-bot</strong> — the CLA signing
+                    flow is not linked from the public site navigation.
+                </div>
+                <p className="mt-4 max-w-2xl text-zinc-400">
                     Read the agreement below, sign in with GitHub, then confirm. Your
                     request is queued for maintainers to add you to the{" "}
                     <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-sm text-zinc-200">
