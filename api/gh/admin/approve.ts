@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { isClaAdmin } from "../../lib/adminAuth";
+import { appendClaAuditEvent } from "../../lib/claAudit";
 import {
     addCompleted,
     readQueue,
@@ -125,6 +126,17 @@ export default async function handler(
         login: row.login,
         at: row.at,
         claVersion: row.claVersion,
+    });
+
+    const approvedAt = new Date().toISOString();
+    void appendClaAuditEvent({
+        kind: "approve",
+        at: approvedAt,
+        login: row.login,
+        actor: session.login,
+        claVersion: row.claVersion,
+    }).catch((err: unknown) => {
+        console.error("cla_audit", err);
     });
 
     sendJson(res, 200, {

@@ -232,12 +232,13 @@ export async function removePending(login: string): Promise<boolean> {
     return true;
 }
 
-export async function rejectPending(login: string): Promise<boolean> {
+/** Returns the removed pending row when rejected (for audit logging). */
+export async function rejectPending(login: string): Promise<PendingCla | null> {
     const q = await readQueue();
     const lower = login.toLowerCase();
     const idx = q.pending.findIndex((p) => p.login.toLowerCase() === lower);
     if (idx < 0) {
-        return false;
+        return null;
     }
     const row = q.pending[idx];
     q.pending.splice(idx, 1);
@@ -248,7 +249,7 @@ export async function rejectPending(login: string): Promise<boolean> {
         claVersion: row.claVersion,
     });
     await writeQueue(q);
-    return true;
+    return row;
 }
 
 export async function allowResubmit(login: string): Promise<boolean> {

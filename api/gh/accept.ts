@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
+import { appendClaAuditEvent } from "../lib/claAudit";
 import { addPending, getClaEligibility } from "../lib/claQueue";
 import {
     checkAuthorHasOpenPullRequest,
@@ -177,6 +178,15 @@ export default async function handler(
             at,
         }),
     );
+
+    void appendClaAuditEvent({
+        kind: "submit",
+        at,
+        login: session.login,
+        claVersion: CLA_SDK_VERSION,
+    }).catch((err: unknown) => {
+        console.error("cla_audit", err);
+    });
 
     void addPending({
         login: session.login,

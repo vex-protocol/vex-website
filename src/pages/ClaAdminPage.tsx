@@ -28,8 +28,49 @@ type OrgDebugPayload = {
     tokenConfigured: boolean;
     members: string[] | null;
     memberCount: number | null;
+    publicMemberCount?: number | null;
+    patOwnerLogin?: string | null;
+    hint?: string | null;
     yourLoginInList: boolean | null;
     error: string | null;
+};
+
+type ClaAuditEvent =
+    | {
+          kind: "submit";
+          at: string;
+          login: string;
+          claVersion: string;
+      }
+    | {
+          kind: "approve";
+          at: string;
+          login: string;
+          actor: string;
+          claVersion: string;
+      }
+    | {
+          kind: "reject";
+          at: string;
+          login: string;
+          actor: string;
+          claVersion: string;
+      }
+    | {
+          kind: "allow_resubmit";
+          at: string;
+          login: string;
+          actor: string;
+      };
+
+type AuditLogPayload = {
+    events: ClaAuditEvent[];
+    completedSnapshot: Array<{
+        login: string;
+        at: string;
+        claVersion: string;
+    }>;
+    note?: string;
 };
 
 export function ClaAdminPage(): JSX.Element {
@@ -39,6 +80,7 @@ export function ClaAdminPage(): JSX.Element {
     const [err, setErr] = useState<string | null>(null);
     const [busyKey, setBusyKey] = useState<string | null>(null);
     const [orgDebug, setOrgDebug] = useState<OrgDebugPayload | null>(null);
+    const [audit, setAudit] = useState<AuditLogPayload | null>(null);
 
     const load = useCallback(async () => {
         setErr(null);
@@ -61,9 +103,10 @@ export function ClaAdminPage(): JSX.Element {
             return;
         }
         setAdmin(true);
-        const [pRes, oRes] = await Promise.all([
+        const [pRes, oRes, aRes] = await Promise.all([
             fetch("/api/gh/admin/pending", { credentials: "include" }),
             fetch("/api/gh/admin/org-debug", { credentials: "include" }),
+            fetch("/api/gh/admin/audit-log", { credentials: "include" }),
         ]);
         if (!pRes.ok) {
             setErr("Could not load queue");
@@ -82,6 +125,11 @@ export function ClaAdminPage(): JSX.Element {
             setOrgDebug((await oRes.json()) as OrgDebugPayload);
         } else {
             setOrgDebug(null);
+        }
+        if (aRes.ok) {
+            setAudit((await aRes.json()) as AuditLogPayload);
+        } else {
+            setAudit(null);
         }
     }, []);
 
@@ -309,12 +357,37 @@ export function ClaAdminPage(): JSX.Element {
                             </dd>
                         </div>
                         <div>
-                            <dt className="text-zinc-500">Member count</dt>
+                            <dt className="text-zinc-500">
+                                Member count (full list API)
+                            </dt>
                             <dd className="font-mono text-zinc-200">
                                 {orgDebug.memberCount ?? "—"}
                             </dd>
                         </div>
+                        <div>
+                            <dt className="text-zinc-500">
+                                Public members (API)
+                            </dt>
+                            <dd className="font-mono text-zinc-200">
+                                {orgDebug.publicMemberCount ?? "—"}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt className="text-zinc-500">PAT owner (GET /user)</dt>
+                            <dd className="font-mono text-zinc-200">
+                                {orgDebug.patOwnerLogin ? (
+                                    <>@{orgDebug.patOwnerLogin}</>
+                                ) : (
+                                    "—"
+                                )}
+                            </dd>
+                        </div>
                     </dl>
+                    {orgDebug.hint ? (
+                        <p className="mt-3 rounded-lg border border-sky-500/25 bg-sky-950/30 px-3 py-2 text-xs leading-relaxed text-sky-100/95">
+                            {orgDebug.hint}
+                        </p>
+                    ) : null}
                     {orgDebug.error ? (
                         <p className="mt-3 rounded-lg border border-amber-500/25 bg-amber-950/30 px-3 py-2 font-mono text-xs text-amber-100/95">
                             {orgDebug.error}
@@ -335,6 +408,90 @@ export function ClaAdminPage(): JSX.Element {
                                         }`}
                                     >
                                         @{login}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : null}
+                </section>
+            ) : null}
+
+            {audit ? (
+                <section className="rounded-xl border border-white/10 bg-zinc-950/50 p-4">
+                    <h2 className="mt-0 text-sm font-semibold uppercase tracking-wide text-zinc-400">
+                        CLA audit log
+                    </h2>
+                    <p className="mt-2 text-xs text-zinc-500">
+                        Append-only record on the API server (
+                        <code className="text-zinc-400">data/cla-audit.jsonl</code>
+                        ). New events appear after submits and admin actions.
+                    </p>
+                    {audit.note ? (
+                        <p className="mt-2 text-sm text-amber-200/90">{audit.note}</p>
+                    ) : null}
+                    {audit.events.length > 0 ? (
+                        <div className="mt-3 overflow-x-auto rounded-lg border border-white/10">
+                            <table className="w-full min-w-[36rem] border-collapse text-left text-xs">
+                                <thead>
+                                    <tr className="border-b border-white/10 bg-zinc-900/80">
+                                        <th className="px-3 py-2 font-medium text-zinc-400">
+                                            Event
+                                        </th>
+                                        <th className="px-3 py-2 font-medium text-zinc-400">
+                                            When
+                                        </th>
+                                        <th className="px-3 py-2 font-medium text-zinc-400">
+                                            Login
+                                        </th>
+                                        <th className="px-3 py-2 font-medium text-zinc-400">
+                                            Actor
+                                        </th>
+                                        <th className="px-3 py-2 font-medium text-zinc-400">
+                                            CLA
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {audit.events.map((ev, i) => (
+                                        <tr
+                                            key={`${ev.kind}-${ev.at}-${String(i)}`}
+                                            className="border-b border-white/5"
+                                        >
+                                            <td className="px-3 py-2 font-mono text-zinc-200">
+                                                {ev.kind}
+                                            </td>
+                                            <td className="px-3 py-2 text-zinc-500">
+                                                {ev.at}
+                                            </td>
+                                            <td className="px-3 py-2 font-mono text-zinc-200">
+                                                @{ev.login}
+                                            </td>
+                                            <td className="px-3 py-2 font-mono text-zinc-400">
+                                                {"actor" in ev
+                                                    ? `@${ev.actor}`
+                                                    : "—"}
+                                            </td>
+                                            <td className="px-3 py-2 text-zinc-500">
+                                                {"claVersion" in ev
+                                                    ? ev.claVersion
+                                                    : "—"}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : null}
+                    {audit.completedSnapshot.length > 0 ? (
+                        <div className="mt-4">
+                            <p className="text-xs font-medium text-zinc-500">
+                                Approved contributors (from queue file)
+                            </p>
+                            <ul className="mt-2 space-y-1 font-mono text-xs text-zinc-400">
+                                {audit.completedSnapshot.map((c) => (
+                                    <li key={`${c.login}-${c.at}`}>
+                                        @{c.login} · submitted {c.at} · CLA{" "}
+                                        {c.claVersion}
                                     </li>
                                 ))}
                             </ul>

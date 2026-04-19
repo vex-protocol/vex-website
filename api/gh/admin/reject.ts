@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { isClaAdmin } from "../../lib/adminAuth";
+import { appendClaAuditEvent } from "../../lib/claAudit";
 import { rejectPending } from "../../lib/claQueue";
 import { getSessionSecret } from "../../lib/ghOAuthEnv";
 import { readGithubSession } from "../../lib/ghSession";
@@ -55,11 +56,22 @@ export default async function handler(
         return;
     }
 
-    const ok = await rejectPending(login);
-    if (!ok) {
+    const row = await rejectPending(login);
+    if (!row) {
         sendJson(res, 404, { error: "not_in_queue" });
         return;
     }
+
+    const at = new Date().toISOString();
+    void appendClaAuditEvent({
+        kind: "reject",
+        at,
+        login: row.login,
+        actor: session.login,
+        claVersion: row.claVersion,
+    }).catch((err: unknown) => {
+        console.error("cla_audit", err);
+    });
 
     sendJson(res, 200, { ok: true, login });
 }
