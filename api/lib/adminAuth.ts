@@ -3,13 +3,11 @@
  *
  * 1. **`CLA_ADMIN_LOGINS`** — If set (comma-separated GitHub usernames), **only** those
  *    users are admins (overrides everything else).
- * 2. Otherwise, any of the following (combined with OR):
- *    - **`CLA_ADMIN_ORG` + `GITHUB_ORG_MEMBERSHIP_TOKEN`** — user is a member of that
- *      org (`GET /orgs/{org}/members/{username}` → 204). The token must be a PAT from an
- *      account that is allowed to query org membership (typically `read:org` on a user/bot
- *      that belongs to the org).
- *    - **`GITHUB_CLA_ADMIN_TOKEN` + `CLA_ADMIN_REPO`** — user has **write**, **maintain**,
- *      or **admin** on that `owner/repo`.
+ * 2. Otherwise, any of the following (OR):
+ *    - **`CLA_ADMIN_ORG`** + the signed-in user’s OAuth token (stored in session; requires
+ *      `read:org` and `GET /user/orgs`) — **no server PAT needed** for org membership.
+ *    - **`CLA_ADMIN_ORG` + `GITHUB_ORG_MEMBERSHIP_TOKEN`** — `GET /orgs/{org}/members/{username}`.
+ *    - **`CLA_ADMIN_REPO` + `GITHUB_CLA_ADMIN_TOKEN`** — user has **write+** on that repo.
  */
 
 async function hasRepoWriteAccess(
@@ -56,7 +54,54 @@ async function isOrgMember(
     return res.status === 204;
 }
 
-export async function isClaAdmin(login: string): Promise<boolean> {
+/** Whether the OAuth user’s token lists `org` in `GET /user/orgs` (paginated). */
+async function userBelongsToOrg(
+    oauthAccessToken: string,
+    orgSlug: string,
+): Promise<boolean> {
+    const want = orgSlug.toLowerCase();
+    let page = 1;
+    const perPage = 100;
+    for (;;) {
+        const res = await fetch(
+            `https://api.github.com/user/orgs?per_page=${String(perPage)}&page=${String(page)}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${oauthAccessToken}`,
+                    Accept: "application/vnd.github+json",
+                    "User-Agent": "vex.wtf-cla-admin",
+                },
+            },
+        );
+        if (!res.ok) {
+            return false;
+        }
+        const orgs = (await res.json()) as unknown;
+        if (!Array.isArray(orgs) || orgs.length === 0) {
+            return false;
+        }
+        for (const o of orgs) {
+            if (
+                typeof o === "object" &&
+                o !== null &&
+                "login" in o &&
+                typeof (o as { login: string }).login === "string" &&
+                (o as { login: string }).login.toLowerCase() === want
+            ) {
+                return true;
+            }
+        }
+        if (orgs.length < perPage) {
+            return false;
+        }
+        page += 1;
+    }
+}
+
+export async function isClaAdmin(
+    login: string,
+    oauthAccessToken?: string | null,
+): Promise<boolean> {
     const allow = process.env.CLA_ADMIN_LOGINS?.trim();
     if (allow) {
         const set = new Set(
@@ -69,9 +114,12 @@ export async function isClaAdmin(login: string): Promise<boolean> {
     }
 
     const org = process.env.CLA_ADMIN_ORG?.trim();
-    const orgToken = process.env.GITHUB_ORG_MEMBERSHIP_TOKEN?.trim();
-    if (org && orgToken) {
-        if (await isOrgMember(org, login, orgToken)) {
+    if (org) {
+        if (oauthAccessToken && (await userBelongsToOrg(oauthAccessToken, org))) {
+            return true;
+        }
+        const orgToken = process.env.GITHUB_ORG_MEMBERSHIP_TOKEN?.trim();
+        if (orgToken && (await isOrgMember(org, login, orgToken))) {
             return true;
         }
     }

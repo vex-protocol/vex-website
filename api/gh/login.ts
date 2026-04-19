@@ -54,7 +54,7 @@ export default function handler(
     const params = new URLSearchParams({
         client_id: clientId,
         redirect_uri: redirectUri,
-        scope: "read:user",
+        scope: "read:user read:org",
         state,
     });
     redirect(

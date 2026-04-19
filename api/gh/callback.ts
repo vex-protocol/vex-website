@@ -22,6 +22,8 @@ type GithubSession = {
     login: string;
     id: number;
     exp: number;
+    /** Used server-side only (admin org check); never exposed via /api/gh/session */
+    oauth_access_token?: string;
 };
 
 export default async function handler(
@@ -139,7 +141,13 @@ export default async function handler(
     }
 
     const exp = Math.floor(Date.now() / 1000) + 3600;
-    const session: GithubSession = { v: 1, login, id, exp };
+    const session: GithubSession = {
+        v: 1,
+        login,
+        id,
+        exp,
+        oauth_access_token: accessToken,
+    };
     const sealedSession = seal(secret, session as unknown as Record<string, unknown>);
 
     const secure = useSecureCookies();

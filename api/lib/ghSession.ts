@@ -9,6 +9,8 @@ export type GithubSessionPayload = {
     login: string;
     id: number;
     exp: number;
+    /** Present when user signed in with `read:org`; server-side only */
+    oauth_access_token?: string;
 };
 
 export function readGithubSession(
@@ -28,6 +30,12 @@ export function readGithubSession(
         typeof session.id !== "number" ||
         typeof session.exp !== "number" ||
         session.exp < Date.now() / 1000
+    ) {
+        return null;
+    }
+    if (
+        session.oauth_access_token !== undefined &&
+        typeof session.oauth_access_token !== "string"
     ) {
         return null;
     }

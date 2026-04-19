@@ -29,7 +29,7 @@ export default async function handler(
         return;
     }
 
-    if (!(await isClaAdmin(session.login))) {
+    if (!(await isClaAdmin(session.login, session.oauth_access_token))) {
         sendJson(res, 403, { error: "forbidden" });
         return;
     }

@@ -31,7 +31,10 @@ export default async function handler(
         return;
     }
 
-    const admin = await isClaAdmin(session.login);
+    const admin = await isClaAdmin(
+        session.login,
+        session.oauth_access_token,
+    );
     sendJson(res, 200, {
         authenticated: true,
         login: session.login,
