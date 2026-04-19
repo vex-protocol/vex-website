@@ -91,5 +91,7 @@ export default async function handler(
         eligibility: "completed",
         completedAt: eligibility.completedAt,
         completedClaVersion: eligibility.claVersion,
+        approvedByLogin: eligibility.approvedByLogin,
+        approvedAt: eligibility.approvedAt,
     });
 }

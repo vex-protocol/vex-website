@@ -3,6 +3,7 @@ import { useClaSession } from "../ClaSessionContext";
 import { githubLoginUrl } from "../lib/githubAuth";
 import { renderQuickMarkdown } from "../lib/quickMarkdown";
 import { CheckCircle2Icon } from "../components/Icons";
+import { formatRelativeTime } from "../lib/relativeTime";
 import { useEffect, useState } from "preact/hooks";
 
 type ClaStatusOk = {
@@ -22,6 +23,9 @@ type ClaStatusOk = {
     canResubmit?: boolean;
     completedAt?: string;
     completedClaVersion?: string;
+    /** Maintainer who approved (from audit log). */
+    approvedByLogin?: string | null;
+    approvedAt?: string | null;
 };
 
 export function ClaPage(): JSX.Element {
@@ -137,6 +141,17 @@ export function ClaPage(): JSX.Element {
     const claSourceHref = `https://github.com/${sourceRepo}/blob/main/CLA.md`;
 
     const showJustSignedFlash = submitOk && status?.eligibility === "pending";
+
+    function formatApprovedWhen(iso: string): string {
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) {
+            return iso;
+        }
+        return new Intl.DateTimeFormat(undefined, {
+            dateStyle: "medium",
+            timeStyle: "short",
+        }).format(d);
+    }
 
     return (
         <article className="space-y-8">
@@ -263,6 +278,45 @@ export function ClaPage(): JSX.Element {
                                             don&apos;t need to sign again unless
                                             maintainers ask you to.
                                         </p>
+                                        {status.approvedByLogin ? (
+                                            <div className="mt-4 flex flex-col gap-2 border-t border-emerald-500/25 pt-4 sm:flex-row sm:items-center sm:gap-3">
+                                                <img
+                                                    src={`https://github.com/${encodeURIComponent(status.approvedByLogin)}.png`}
+                                                    alt=""
+                                                    width={40}
+                                                    height={40}
+                                                    className="h-10 w-10 shrink-0 rounded-full border border-emerald-400/30 bg-zinc-900"
+                                                    loading="lazy"
+                                                />
+                                                <div className="min-w-0 text-sm">
+                                                    <p className="m-0 font-medium text-emerald-100/95">
+                                                        Approved by{" "}
+                                                        <a
+                                                            href={`https://github.com/${encodeURIComponent(status.approvedByLogin)}`}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="font-mono font-semibold text-emerald-50 underline decoration-emerald-400/50 underline-offset-2 hover:text-white"
+                                                        >
+                                                            @{status.approvedByLogin}
+                                                        </a>
+                                                    </p>
+                                                    {status.approvedAt ? (
+                                                        <p className="m-0 mt-1 text-emerald-200/75">
+                                                            {formatApprovedWhen(
+                                                                status.approvedAt,
+                                                            )}{" "}
+                                                            <span className="text-emerald-300/60">
+                                                                (
+                                                                {formatRelativeTime(
+                                                                    status.approvedAt,
+                                                                )}
+                                                                )
+                                                            </span>
+                                                        </p>
+                                                    ) : null}
+                                                </div>
+                                            </div>
+                                        ) : null}
                                     </div>
                                 </div>
                             </div>

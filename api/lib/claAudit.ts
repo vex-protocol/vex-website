@@ -48,6 +48,23 @@ export async function appendClaAuditEvent(event: ClaAuditEvent): Promise<void> {
     await fs.appendFile(fp, line, "utf8");
 }
 
+/**
+ * Latest approve event for this contributor (audit is newest-first).
+ * Returns null if missing (e.g. approved before audit existed).
+ */
+export async function getLatestApproveForLogin(
+    login: string,
+): Promise<{ actor: string; at: string } | null> {
+    const lower = login.toLowerCase();
+    const events = await readClaAuditEvents();
+    for (const ev of events) {
+        if (ev.kind === "approve" && ev.login.toLowerCase() === lower) {
+            return { actor: ev.actor, at: ev.at };
+        }
+    }
+    return null;
+}
+
 /** Newest first. */
 export async function readClaAuditEvents(): Promise<ClaAuditEvent[]> {
     const fp = auditPath();

@@ -1,6 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
+import { getLatestApproveForLogin } from "./claAudit";
+
 export type PendingCla = {
     login: string;
     at: string;
@@ -160,7 +162,14 @@ export type ClaEligibility =
           rejectedAt: string;
           canResubmit: boolean;
       }
-    | { state: "completed"; completedAt: string; claVersion: string };
+    | {
+          state: "completed";
+          completedAt: string;
+          claVersion: string;
+          /** From audit log when available. */
+          approvedByLogin: string | null;
+          approvedAt: string | null;
+      };
 
 export async function getClaEligibility(login: string): Promise<ClaEligibility> {
     const q = await readQueue();
@@ -184,10 +193,13 @@ export async function getClaEligibility(login: string): Promise<ClaEligibility> 
 
     const done = q.completed.find((c) => c.login.toLowerCase() === lower);
     if (done) {
+        const approval = await getLatestApproveForLogin(done.login);
         return {
             state: "completed",
             completedAt: done.at,
             claVersion: done.claVersion,
+            approvedByLogin: approval?.actor ?? null,
+            approvedAt: approval?.at ?? null,
         };
     }
 
