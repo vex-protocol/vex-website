@@ -1,0 +1,77 @@
+/**
+ * Local dev only: serves `api/gh/*` on a plain Node HTTP port so Vite can proxy `/api`.
+ * `bootstrap-env` must stay the first import so `.env` loads before handler modules.
+ */
+import "./bootstrap-env";
+import http from "node:http";
+import type { IncomingMessage, ServerResponse } from "node:http";
+
+import accept from "../api/gh/accept";
+import callback from "../api/gh/callback";
+import login from "../api/gh/login";
+import session from "../api/gh/session";
+import { ghOAuthMissingForCallback } from "../api/lib/ghOAuthEnv";
+
+type Handler = (
+    req: IncomingMessage,
+    res: ServerResponse,
+) => void | Promise<void>;
+
+const routes: Array<{ method: string; path: string; handler: Handler }> = [
+    { method: "GET", path: "/api/gh/login", handler: login },
+    { method: "GET", path: "/api/gh/callback", handler: callback },
+    { method: "GET", path: "/api/gh/session", handler: session },
+    { method: "POST", path: "/api/gh/accept", handler: accept },
+    { method: "OPTIONS", path: "/api/gh/accept", handler: accept },
+];
+
+const PORT = Number(process.env.CLA_API_PORT ?? "8787");
+
+const server = http.createServer((req, res) => {
+    const url = new URL(
+        req.url ?? "/",
+        `http://${req.headers.host ?? "localhost"}`,
+    );
+    const route = routes.find(
+        (r) => r.method === req.method && r.path === url.pathname,
+    );
+    if (!route) {
+        res.statusCode = 404;
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        res.end("Not found");
+        return;
+    }
+    void Promise.resolve(route.handler(req, res)).catch((err: unknown) => {
+        console.error(err);
+        if (!res.headersSent) {
+            res.statusCode = 500;
+            res.end("Internal error");
+        }
+    });
+});
+
+server.on("error", (err: NodeJS.ErrnoException) => {
+    if (err.code === "EADDRINUSE") {
+        process.stderr.write(
+            `Port ${String(PORT)} is already in use (often a leftover dev:api).\n` +
+                `  • Quit the other process, or\n` +
+                `  • Set CLA_API_PORT=8788 in .env (Vite reads the same var for the /api proxy).\n` +
+                `  • macOS: lsof -i :${String(PORT)}  then kill <pid>\n`,
+        );
+        process.exit(1);
+    }
+    throw err;
+});
+
+server.listen(PORT, () => {
+    process.stdout.write(
+        `GitHub OAuth API (local) http://127.0.0.1:${String(PORT)}  (Vite proxies /api here)\n`,
+    );
+    const missing = ghOAuthMissingForCallback();
+    if (missing.length > 0) {
+        process.stderr.write(
+            `[gh-oauth] Env incomplete (missing ${missing.join(", ")}). ` +
+                `Fill vex.wtf/.env (see .env.example), then restart.\n`,
+        );
+    }
+});

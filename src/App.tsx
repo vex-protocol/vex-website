@@ -1,5 +1,6 @@
 import type { ComponentType } from "preact";
 import { useEffect, useState } from "preact/hooks";
+import { ClaSessionProvider } from "./ClaSessionContext";
 import { Footer } from "./components/Footer";
 import { Navbar } from "./components/Navbar";
 
@@ -12,9 +13,13 @@ export function App(): JSX.Element {
     const [PrivacyPolicyPage, setPrivacyPolicyPage] = useState<ComponentType<{
         path?: string;
     }> | null>(null);
+    const [LicensingPage, setLicensingPage] = useState<ComponentType<{
+        path?: string;
+    }> | null>(null);
 
     useEffect(() => {
-        if (HomePage || currentPath === "/privacy-policy") return;
+        if (HomePage || currentPath === "/privacy-policy" || currentPath === "/licensing")
+            return;
         let cancelled = false;
         void import("./pages/HomePage").then((module) => {
             if (!cancelled) {
@@ -39,24 +44,45 @@ export function App(): JSX.Element {
         };
     }, [PrivacyPolicyPage, currentPath]);
 
+    useEffect(() => {
+        if (LicensingPage || currentPath !== "/licensing") return;
+        let cancelled = false;
+        void import("./pages/LicensingPage").then((module) => {
+            if (!cancelled) {
+                setLicensingPage(() => module.LicensingPage);
+            }
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [LicensingPage, currentPath]);
+
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100">
-            <Navbar currentPath={currentPath} />
-            <main className="mx-auto w-full max-w-5xl px-4 pb-16 pt-28 sm:px-6 lg:px-8">
-                {currentPath === "/privacy-policy" ? (
-                    PrivacyPolicyPage ? (
-                        <PrivacyPolicyPage />
+        <ClaSessionProvider>
+            <div className="min-h-screen bg-zinc-950 text-zinc-100">
+                <Navbar currentPath={currentPath} />
+                <main className="mx-auto w-full max-w-5xl px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+                    {currentPath === "/privacy-policy" ? (
+                        PrivacyPolicyPage ? (
+                            <PrivacyPolicyPage />
+                        ) : (
+                            <PrivacyPolicyLoading />
+                        )
+                    ) : currentPath === "/licensing" ? (
+                        LicensingPage ? (
+                            <LicensingPage />
+                        ) : (
+                            <LicensingPageLoading />
+                        )
+                    ) : HomePage ? (
+                        <HomePage />
                     ) : (
-                        <PrivacyPolicyLoading />
-                    )
-                ) : HomePage ? (
-                    <HomePage />
-                ) : (
-                    <HomePageLoading />
-                )}
-            </main>
-            <Footer />
-        </div>
+                        <HomePageLoading />
+                    )}
+                </main>
+                <Footer isHome={currentPath === "/"} />
+            </div>
+        </ClaSessionProvider>
     );
 }
 
@@ -66,6 +92,17 @@ function PrivacyPolicyLoading(): JSX.Element {
             <div className="inline-flex items-center gap-2">
                 <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
                 <span>Loading privacy policy...</span>
+            </div>
+        </section>
+    );
+}
+
+function LicensingPageLoading(): JSX.Element {
+    return (
+        <section className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 text-zinc-300">
+            <div className="inline-flex items-center gap-2">
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
+                <span>Loading…</span>
             </div>
         </section>
     );

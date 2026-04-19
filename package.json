@@ -7,6 +7,8 @@
     },
     "scripts": {
         "dev": "vite",
+        "dev:api": "tsx scripts/local-api-server.ts",
+        "dev:all": "npx concurrently -n site,api -c blue,magenta \"vite\" \"npm run dev:api\"",
         "start": "vite",
         "build": "vite build",
         "preview": "vite preview",
@@ -26,10 +28,14 @@
         ]
     },
     "devDependencies": {
+        "@types/node": "^22.19.3",
         "autoprefixer": "^10.4.24",
+        "concurrently": "^9.2.1",
+        "dotenv": "^16.6.1",
         "postcss": "^8.5.6",
         "prettier": "^2.2.1",
         "tailwindcss": "^3.4.19",
+        "tsx": "^4.21.0",
         "typescript": "^5.9.3",
         "vite": "^7.1.10",
         "vitest": "^3.2.4"
