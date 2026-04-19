@@ -9,7 +9,7 @@ export function getClaSourceRepoFullName(): string {
             return `${parts[0]}/${parts[1]}`;
         }
     }
-    return "vex-protocol/spire-js";
+    return "vex-protocol/clabot-config";
 }
 
 /** Repos where approving updates `.clabot` (from env). */

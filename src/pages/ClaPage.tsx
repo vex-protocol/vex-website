@@ -132,7 +132,7 @@ export function ClaPage(): JSX.Element {
         }
     }
 
-    const sourceRepo = status?.sourceRepo ?? "vex-protocol/spire-js";
+    const sourceRepo = status?.sourceRepo ?? "vex-protocol/clabot-config";
     const clabotRepos = status?.clabotRepos ?? [];
     const claSourceHref = `https://github.com/${sourceRepo}/blob/main/CLA.md`;
 
