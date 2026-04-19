@@ -148,14 +148,9 @@ type SpireMeta = {
 };
 
 const NPM_PACKAGE_URL = "https://registry.npmjs.org/@vex-chat/libvex";
-const LIBVEX_COMMITS_API_URL =
-    "https://api.github.com/repos/vex-protocol/libvex-js/commits?per_page=1";
-const LIBVEX_RUNS_API_URL =
-    "https://api.github.com/repos/vex-protocol/libvex-js/actions/runs?per_page=1";
-const SPIRE_RUNS_API_URL =
-    "https://api.github.com/repos/vex-protocol/spire/actions/runs?per_page=1";
-const SPIRE_COMMITS_API_URL =
-    "https://api.github.com/repos/vex-protocol/spire/commits?per_page=1";
+/** Cached GitHub metadata via `api/gh/public/*` (see `api/lib/githubPublicCache.ts`). */
+const LIBVEX_GITHUB_API_URL = "/api/gh/public/libvex-github";
+const SPIRE_GITHUB_API_URL = "/api/gh/public/spire-github";
 const SPIRE_UPTIME_SUMMARY_URL = "https://monitor.vex.wtf/spire/summary";
 const SPIRE_UPTIME_TIMESERIES_URL = "https://monitor.vex.wtf/spire/timeseries";
 const SPIRE_DOCS_URL = "https://spire.vex.wtf";
@@ -1043,21 +1038,19 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
 
         async function loadLibvexMeta() {
             try {
-                const [
-                    npmResponse,
-                    runsResponse,
-                    commitsResponse,
-                ] = await Promise.all([
+                const [npmResponse, ghResponse] = await Promise.all([
                     fetch(NPM_PACKAGE_URL),
-                    fetch(LIBVEX_RUNS_API_URL),
-                    fetch(LIBVEX_COMMITS_API_URL),
+                    fetch(LIBVEX_GITHUB_API_URL),
                 ]);
-                if (!npmResponse.ok || !runsResponse.ok || !commitsResponse.ok)
-                    return;
+                if (!npmResponse.ok || !ghResponse.ok) return;
 
                 const npmData = (await npmResponse.json()) as NpmPackageResponse;
-                const runsData = (await runsResponse.json()) as GitHubWorkflowRunsResponse;
-                const commitsData = (await commitsResponse.json()) as GitHubCommitApiResponse[];
+                const ghJson = (await ghResponse.json()) as {
+                    runs: GitHubWorkflowRunsResponse;
+                    commits: GitHubCommitApiResponse[];
+                };
+                const runsData = ghJson.runs;
+                const commitsData = ghJson.commits;
                 const latestRun = runsData.workflow_runs?.[0];
                 const latestCommit = commitsData[0];
                 const rcVersion = npmData["dist-tags"]?.rc ?? "n/a";
@@ -1171,20 +1164,14 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                 let latestCommit: GitHubCommitApiResponse | undefined;
                 if (includeGithubMeta) {
                     try {
-                        const [
-                            runsResponse,
-                            commitsResponse,
-                        ] = await Promise.all([
-                            fetch(SPIRE_RUNS_API_URL),
-                            fetch(SPIRE_COMMITS_API_URL),
-                        ]);
-                        if (runsResponse.ok) {
-                            const runsData = (await runsResponse.json()) as GitHubWorkflowRunsResponse;
-                            latestRun = runsData.workflow_runs?.[0];
-                        }
-                        if (commitsResponse.ok) {
-                            const commitsData = (await commitsResponse.json()) as GitHubCommitApiResponse[];
-                            latestCommit = commitsData[0];
+                        const ghResponse = await fetch(SPIRE_GITHUB_API_URL);
+                        if (ghResponse.ok) {
+                            const ghJson = (await ghResponse.json()) as {
+                                runs: GitHubWorkflowRunsResponse;
+                                commits: GitHubCommitApiResponse[];
+                            };
+                            latestRun = ghJson.runs.workflow_runs?.[0];
+                            latestCommit = ghJson.commits[0];
                         }
                     } catch {
                         // keep previous build metadata when GitHub is unavailable/rate-limited

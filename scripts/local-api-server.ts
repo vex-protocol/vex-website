@@ -11,6 +11,9 @@ import adminApprove from "../api/gh/admin/approve";
 import adminMe from "../api/gh/admin/me";
 import adminPending from "../api/gh/admin/pending";
 import callback from "../api/gh/callback";
+import libvexGithub from "../api/gh/public/libvex-github";
+import privacyCommits from "../api/gh/public/privacy-commits";
+import spireGithub from "../api/gh/public/spire-github";
 import login from "../api/gh/login";
 import logout from "../api/gh/logout";
 import session from "../api/gh/session";
@@ -32,6 +35,9 @@ const routes: Array<{ method: string; path: string; handler: Handler }> = [
     { method: "GET", path: "/api/gh/admin/me", handler: adminMe },
     { method: "GET", path: "/api/gh/admin/pending", handler: adminPending },
     { method: "POST", path: "/api/gh/admin/approve", handler: adminApprove },
+    { method: "GET", path: "/api/gh/public/libvex-github", handler: libvexGithub },
+    { method: "GET", path: "/api/gh/public/spire-github", handler: spireGithub },
+    { method: "GET", path: "/api/gh/public/privacy-commits", handler: privacyCommits },
 ];
 
 const PORT = Number(process.env.CLA_API_PORT ?? "8787");

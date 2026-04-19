@@ -4,8 +4,8 @@ import { formatRelativeTime } from "../lib/relativeTime";
 
 const PRIVACY_POLICY_URL =
     "https://raw.githubusercontent.com/vex-chat/privacy-policy/main/PrivacyPolicy.md";
-const PRIVACY_POLICY_COMMITS_URL =
-    "https://api.github.com/repos/vex-chat/privacy-policy/commits?sha=main&per_page=3";
+/** Cached via `api/gh/public/privacy-commits`. */
+const PRIVACY_POLICY_COMMITS_URL = "/api/gh/public/privacy-commits";
 const PRIVACY_POLICY_HISTORY_URL =
     "https://github.com/vex-chat/privacy-policy/commits/main";
 
