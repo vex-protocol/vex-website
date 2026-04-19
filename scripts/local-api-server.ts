@@ -9,6 +9,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import accept from "../api/gh/accept";
 import adminApprove from "../api/gh/admin/approve";
 import adminMe from "../api/gh/admin/me";
+import orgDebug from "../api/gh/admin/org-debug";
 import adminPending from "../api/gh/admin/pending";
 import callback from "../api/gh/callback";
 import libvexGithub from "../api/gh/public/libvex-github";
@@ -33,6 +34,7 @@ const routes: Array<{ method: string; path: string; handler: Handler }> = [
     { method: "POST", path: "/api/gh/accept", handler: accept },
     { method: "OPTIONS", path: "/api/gh/accept", handler: accept },
     { method: "GET", path: "/api/gh/admin/me", handler: adminMe },
+    { method: "GET", path: "/api/gh/admin/org-debug", handler: orgDebug },
     { method: "GET", path: "/api/gh/admin/pending", handler: adminPending },
     { method: "POST", path: "/api/gh/admin/approve", handler: adminApprove },
     { method: "GET", path: "/api/gh/public/libvex-github", handler: libvexGithub },

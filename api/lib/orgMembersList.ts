@@ -5,7 +5,12 @@
 
 const TTL_MS = 5 * 60 * 1000;
 
-type CacheEntry = { logins: Set<string>; expiresAt: number };
+type CacheEntry = {
+    /** Sorted for display (locale, case-insensitive). */
+    members: string[];
+    loginsLower: Set<string>;
+    expiresAt: number;
+};
 
 const cache = new Map<string, CacheEntry>();
 
@@ -13,26 +18,29 @@ function cacheKey(org: string, token: string): string {
     return `${org.toLowerCase()}:${token.slice(0, 12)}`;
 }
 
+function sortMemberLogins(logins: string[]): string[] {
+    return [...logins].sort((a, b) =>
+        a.localeCompare(b, undefined, { sensitivity: "base" }),
+    );
+}
+
 /** Clear cache (e.g. for tests). */
 export function clearOrgMembersCache(): void {
     cache.clear();
 }
 
-/**
- * Fetches all member logins for the org (paginated), with in-memory TTL cache.
- */
-export async function fetchOrgMemberLogins(
+async function getOrgMembersEntry(
     org: string,
     token: string,
-): Promise<Set<string>> {
+): Promise<CacheEntry> {
     const key = cacheKey(org, token);
     const now = Date.now();
     const hit = cache.get(key);
     if (hit && hit.expiresAt > now) {
-        return hit.logins;
+        return hit;
     }
 
-    const logins = new Set<string>();
+    const logins: string[] = [];
     let page = 1;
     const perPage = 100;
 
@@ -74,7 +82,7 @@ export async function fetchOrgMemberLogins(
                 "login" in row &&
                 typeof (row as { login: string }).login === "string"
             ) {
-                logins.add((row as { login: string }).login.toLowerCase());
+                logins.push((row as { login: string }).login);
             }
         }
 
@@ -84,8 +92,35 @@ export async function fetchOrgMemberLogins(
         page += 1;
     }
 
-    cache.set(key, { logins, expiresAt: now + TTL_MS });
-    return logins;
+    const loginsLower = new Set(logins.map((l) => l.toLowerCase()));
+    const members = sortMemberLogins(logins);
+    const entry: CacheEntry = {
+        members,
+        loginsLower,
+        expiresAt: now + TTL_MS,
+    };
+    cache.set(key, entry);
+    return entry;
+}
+
+/**
+ * Fetches all member logins for the org (paginated), with in-memory TTL cache.
+ */
+export async function fetchOrgMemberLogins(
+    org: string,
+    token: string,
+): Promise<Set<string>> {
+    const e = await getOrgMembersEntry(org, token);
+    return e.loginsLower;
+}
+
+/** Sorted logins as returned by GitHub (for admin UI / debugging). */
+export async function fetchOrgMemberLoginsSorted(
+    org: string,
+    token: string,
+): Promise<string[]> {
+    const e = await getOrgMembersEntry(org, token);
+    return e.members;
 }
 
 export async function isLoginInOrgMemberList(
@@ -93,6 +128,6 @@ export async function isLoginInOrgMemberList(
     org: string,
     token: string,
 ): Promise<boolean> {
-    const logins = await fetchOrgMemberLogins(org, token);
-    return logins.has(login.toLowerCase());
+    const e = await getOrgMembersEntry(org, token);
+    return e.loginsLower.has(login.toLowerCase());
 }

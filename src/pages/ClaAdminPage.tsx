@@ -5,12 +5,22 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 
 type PendingRow = { login: string; at: string; claVersion: string };
 
+type OrgDebugPayload = {
+    org: string | null;
+    tokenConfigured: boolean;
+    members: string[] | null;
+    memberCount: number | null;
+    yourLoginInList: boolean | null;
+    error: string | null;
+};
+
 export function ClaAdminPage(): JSX.Element {
     const cla = useClaSession();
     const [admin, setAdmin] = useState<boolean | null>(null);
     const [pending, setPending] = useState<PendingRow[] | null>(null);
     const [err, setErr] = useState<string | null>(null);
     const [busyKey, setBusyKey] = useState<string | null>(null);
+    const [orgDebug, setOrgDebug] = useState<OrgDebugPayload | null>(null);
 
     const load = useCallback(async () => {
         setErr(null);
@@ -33,15 +43,21 @@ export function ClaAdminPage(): JSX.Element {
             return;
         }
         setAdmin(true);
-        const pRes = await fetch("/api/gh/admin/pending", {
-            credentials: "include",
-        });
+        const [pRes, oRes] = await Promise.all([
+            fetch("/api/gh/admin/pending", { credentials: "include" }),
+            fetch("/api/gh/admin/org-debug", { credentials: "include" }),
+        ]);
         if (!pRes.ok) {
             setErr("Could not load queue");
             return;
         }
         const data = (await pRes.json()) as { pending?: PendingRow[] };
         setPending(data.pending ?? []);
+        if (oRes.ok) {
+            setOrgDebug((await oRes.json()) as OrgDebugPayload);
+        } else {
+            setOrgDebug(null);
+        }
     }, []);
 
     useEffect(() => {
@@ -141,6 +157,87 @@ export function ClaAdminPage(): JSX.Element {
                 <p className="rounded-lg border border-red-500/30 bg-red-950/40 px-4 py-3 text-sm text-red-200">
                     {err}
                 </p>
+            ) : null}
+
+            {orgDebug ? (
+                <section className="rounded-xl border border-white/10 bg-zinc-950/50 p-4">
+                    <h2 className="mt-0 text-sm font-semibold uppercase tracking-wide text-zinc-400">
+                        Org membership (debug)
+                    </h2>
+                    <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                        <div>
+                            <dt className="text-zinc-500">CLA_ADMIN_ORG</dt>
+                            <dd className="font-mono text-zinc-200">
+                                {orgDebug.org ?? "—"}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt className="text-zinc-500">
+                                GITHUB_ORG_MEMBERSHIP_TOKEN
+                            </dt>
+                            <dd className="text-zinc-200">
+                                {orgDebug.tokenConfigured ? (
+                                    <span className="text-emerald-300/95">
+                                        set
+                                    </span>
+                                ) : (
+                                    <span className="text-amber-300/95">
+                                        not set
+                                    </span>
+                                )}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt className="text-zinc-500">Your login in list</dt>
+                            <dd className="text-zinc-200">
+                                {orgDebug.yourLoginInList === null
+                                    ? "—"
+                                    : orgDebug.yourLoginInList
+                                    ? (
+                                          <span className="text-emerald-300/95">
+                                              yes
+                                          </span>
+                                      )
+                                    : (
+                                          <span className="text-amber-300/95">
+                                              no
+                                          </span>
+                                      )}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt className="text-zinc-500">Member count</dt>
+                            <dd className="font-mono text-zinc-200">
+                                {orgDebug.memberCount ?? "—"}
+                            </dd>
+                        </div>
+                    </dl>
+                    {orgDebug.error ? (
+                        <p className="mt-3 rounded-lg border border-amber-500/25 bg-amber-950/30 px-3 py-2 font-mono text-xs text-amber-100/95">
+                            {orgDebug.error}
+                        </p>
+                    ) : null}
+                    {orgDebug.members && orgDebug.members.length > 0 ? (
+                        <div className="mt-4 max-h-48 overflow-auto rounded-lg border border-white/10 bg-black/20 p-3">
+                            <ul className="columns-1 gap-x-6 text-sm sm:columns-2">
+                                {orgDebug.members.map((login) => (
+                                    <li
+                                        key={login}
+                                        className={`mb-1 break-all font-mono ${
+                                            cla.login &&
+                                            login.toLowerCase() ===
+                                                cla.login.toLowerCase()
+                                                ? "text-emerald-300/95"
+                                                : "text-zinc-300"
+                                        }`}
+                                    >
+                                        @{login}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : null}
+                </section>
             ) : null}
 
             {pending === null ? (
