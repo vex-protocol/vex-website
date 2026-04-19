@@ -1,0 +1,30 @@
+# Merge into your vex.wtf server block: proxy /api/* to the Node OAuth API (npm run start:api).
+# The /api/ location MUST be defined so it does not fall through to try_files → /index.html.
+
+upstream vex_wtf_api {
+    server 127.0.0.1:8787;
+    keepalive 8;
+}
+
+server {
+    server_name vex.wtf;
+    root /home/ender/vex.wtf/dist;
+    index index.html;
+
+    # GitHub OAuth + session API (tsx scripts/local-api-server.ts or pm2/systemd)
+    location /api/ {
+        proxy_pass http://vex_wtf_api;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # ... ssl, static assets location, etc.
+}

@@ -8,6 +8,7 @@
     "scripts": {
         "dev": "vite",
         "dev:api": "tsx scripts/local-api-server.ts",
+        "start:api": "tsx scripts/local-api-server.ts",
         "dev:all": "npx concurrently -n site,api -c blue,magenta \"vite\" \"npm run dev:api\"",
         "start": "vite",
         "build": "vite build",
