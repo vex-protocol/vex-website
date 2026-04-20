@@ -53,7 +53,7 @@ export async function appendClaAuditEvent(event: ClaAuditEvent): Promise<void> {
  * Returns null if missing (e.g. approved before audit existed).
  */
 export async function getLatestApproveForLogin(
-    login: string,
+    login: string
 ): Promise<{ actor: string; at: string } | null> {
     const lower = login.toLowerCase();
     const events = await readClaAuditEvents();

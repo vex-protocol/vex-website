@@ -36,7 +36,7 @@ function claVersionLabel(v: string): string {
 
 export default async function handler(
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ): Promise<void> {
     if (req.method !== "GET") {
         res.statusCode = 405;
@@ -69,10 +69,7 @@ export default async function handler(
 
     const events = [...eventsNewestFirst].reverse();
 
-    const approveMeta = new Map<
-        string,
-        { actor: string; at: string }
-    >();
+    const approveMeta = new Map<string, { actor: string; at: string }>();
     const rejectMeta = new Map<string, { actor: string; at: string }>();
     for (const ev of events) {
         const key = ev.login.toLowerCase();

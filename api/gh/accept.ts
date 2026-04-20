@@ -9,11 +9,7 @@ import {
 import { getSessionSecret } from "../lib/ghOAuthEnv";
 import { GH_SESSION_COOKIE, readGithubSession } from "../lib/ghSession";
 import { seal } from "../lib/siteSession";
-import {
-    readJsonBody,
-    sendJson,
-    useSecureCookies,
-} from "../lib/nodeHttp";
+import { readJsonBody, sendJson, useSecureCookies } from "../lib/nodeHttp";
 
 const COOKIE_ACCEPTED = "cla_sdk_accepted";
 
@@ -30,7 +26,7 @@ type AcceptedCookie = {
 
 export default async function handler(
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ): Promise<void> {
     if (req.method === "OPTIONS") {
         res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -116,11 +112,7 @@ export default async function handler(
     if (isPrCheckConfigured()) {
         const pr = await checkAuthorHasOpenPullRequest(session.login);
         if (!pr.ok) {
-            console.error(
-                "cla_pr_check_github",
-                pr.status,
-                pr.detail ?? "",
-            );
+            console.error("cla_pr_check_github", pr.status, pr.detail ?? "");
             sendJson(res, 503, {
                 error: "pr_check_failed",
                 message:
@@ -152,12 +144,14 @@ export default async function handler(
 
     const sealedAccepted = seal(
         secret,
-        accepted as unknown as Record<string, unknown>,
+        (accepted as unknown) as Record<string, unknown>
     );
 
     const secure = useSecureCookies();
 
-    const clearSession = `${GH_SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? "; Secure" : ""}`;
+    const clearSession = `${GH_SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${
+        secure ? "; Secure" : ""
+    }`;
     const setAccepted = [
         `${COOKIE_ACCEPTED}=${encodeURIComponent(sealedAccepted)}`,
         "Path=/",
@@ -176,7 +170,7 @@ export default async function handler(
             github_id: session.id,
             cla_version: CLA_SDK_VERSION,
             at,
-        }),
+        })
     );
 
     void appendClaAuditEvent({

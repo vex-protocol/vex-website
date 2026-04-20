@@ -8,7 +8,7 @@ const TTL_MS = 5 * 60 * 1000;
 
 export default async function handler(
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ): Promise<void> {
     if (req.method !== "GET") {
         res.statusCode = 405;
@@ -33,7 +33,7 @@ export default async function handler(
         });
         res.setHeader(
             "Cache-Control",
-            "public, max-age=120, stale-while-revalidate=300",
+            "public, max-age=120, stale-while-revalidate=300"
         );
         sendJson(res, 200, { text, sourceRepo });
     } catch (err: unknown) {

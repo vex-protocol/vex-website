@@ -13,7 +13,7 @@ function sign(secret: string, payload: string): string {
 
 export function seal(secret: string, data: Record<string, unknown>): string {
     const payload = Buffer.from(JSON.stringify(data), "utf8").toString(
-        "base64url",
+        "base64url"
     );
     const sig = sign(secret, payload);
     return `${payload}.${sig}`;
@@ -21,7 +21,7 @@ export function seal(secret: string, data: Record<string, unknown>): string {
 
 export function open<T extends Record<string, unknown>>(
     secret: string,
-    token: string,
+    token: string
 ): T | null {
     const lastDot = token.lastIndexOf(".");
     if (lastDot === -1) {
@@ -51,7 +51,7 @@ export function open<T extends Record<string, unknown>>(
 }
 
 export function parseCookies(
-    header: string | undefined,
+    header: string | undefined
 ): Record<string, string> {
     if (!header || header.length === 0) {
         return {};

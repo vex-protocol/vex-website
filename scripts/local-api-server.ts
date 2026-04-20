@@ -26,7 +26,7 @@ import { ghOAuthMissingForCallback } from "../api/lib/ghOAuthEnv";
 
 type Handler = (
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ) => void | Promise<void>;
 
 const routes: Array<{ method: string; path: string; handler: Handler }> = [
@@ -40,7 +40,11 @@ const routes: Array<{ method: string; path: string; handler: Handler }> = [
     { method: "GET", path: "/api/gh/cla-status", handler: claStatus },
     { method: "GET", path: "/api/gh/cla-markdown", handler: claMarkdown },
     { method: "GET", path: "/api/gh/admin/me", handler: adminMe },
-    { method: "GET", path: "/api/gh/admin/contributors", handler: adminContributors },
+    {
+        method: "GET",
+        path: "/api/gh/admin/contributors",
+        handler: adminContributors,
+    },
     { method: "GET", path: "/api/gh/admin/pending", handler: adminPending },
     { method: "POST", path: "/api/gh/admin/approve", handler: adminApprove },
     { method: "POST", path: "/api/gh/admin/reject", handler: adminReject },
@@ -49,9 +53,21 @@ const routes: Array<{ method: string; path: string; handler: Handler }> = [
         path: "/api/gh/admin/allow-resubmit",
         handler: allowResubmit,
     },
-    { method: "GET", path: "/api/gh/public/libvex-github", handler: libvexGithub },
-    { method: "GET", path: "/api/gh/public/spire-github", handler: spireGithub },
-    { method: "GET", path: "/api/gh/public/privacy-commits", handler: privacyCommits },
+    {
+        method: "GET",
+        path: "/api/gh/public/libvex-github",
+        handler: libvexGithub,
+    },
+    {
+        method: "GET",
+        path: "/api/gh/public/spire-github",
+        handler: spireGithub,
+    },
+    {
+        method: "GET",
+        path: "/api/gh/public/privacy-commits",
+        handler: privacyCommits,
+    },
 ];
 
 const PORT = Number(process.env.CLA_API_PORT ?? "8787");
@@ -59,10 +75,10 @@ const PORT = Number(process.env.CLA_API_PORT ?? "8787");
 const server = http.createServer((req, res) => {
     const url = new URL(
         req.url ?? "/",
-        `http://${req.headers.host ?? "localhost"}`,
+        `http://${req.headers.host ?? "localhost"}`
     );
     const route = routes.find(
-        (r) => r.method === req.method && r.path === url.pathname,
+        (r) => r.method === req.method && r.path === url.pathname
     );
     if (!route) {
         res.statusCode = 404;
@@ -82,10 +98,12 @@ const server = http.createServer((req, res) => {
 server.on("error", (err: NodeJS.ErrnoException) => {
     if (err.code === "EADDRINUSE") {
         process.stderr.write(
-            `Port ${String(PORT)} is already in use (often a leftover dev:api).\n` +
+            `Port ${String(
+                PORT
+            )} is already in use (often a leftover dev:api).\n` +
                 `  • Quit the other process, or\n` +
                 `  • Set CLA_API_PORT=8788 in .env (Vite reads the same var for the /api proxy).\n` +
-                `  • macOS: lsof -i :${String(PORT)}  then kill <pid>\n`,
+                `  • macOS: lsof -i :${String(PORT)}  then kill <pid>\n`
         );
         process.exit(1);
     }
@@ -94,13 +112,15 @@ server.on("error", (err: NodeJS.ErrnoException) => {
 
 server.listen(PORT, () => {
     process.stdout.write(
-        `GitHub OAuth API (local) http://127.0.0.1:${String(PORT)}  (Vite proxies /api here)\n`,
+        `GitHub OAuth API (local) http://127.0.0.1:${String(
+            PORT
+        )}  (Vite proxies /api here)\n`
     );
     const missing = ghOAuthMissingForCallback();
     if (missing.length > 0) {
         process.stderr.write(
             `[gh-oauth] Env incomplete (missing ${missing.join(", ")}). ` +
-                `Fill vex.wtf/.env (see .env.example), then restart.\n`,
+                `Fill vex.wtf/.env (see .env.example), then restart.\n`
         );
     }
 });

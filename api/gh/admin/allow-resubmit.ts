@@ -9,7 +9,7 @@ import { readJsonBody, sendJson } from "../../lib/nodeHttp";
 
 export default async function handler(
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ): Promise<void> {
     if (req.method !== "POST") {
         res.statusCode = 405;

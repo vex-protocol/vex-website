@@ -11,7 +11,7 @@ const COOKIE_STATE = "gh_oauth_state";
  */
 export default function handler(
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ): void {
     if (req.method !== "GET" && req.method !== "POST") {
         res.statusCode = 405;

@@ -1,9 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import {
-    cachedJson,
-    fetchGithubApiJson,
-} from "../../lib/githubPublicCache";
+import { cachedJson, fetchGithubApiJson } from "../../lib/githubPublicCache";
 import { sendJson } from "../../lib/nodeHttp";
 
 const CACHE_KEY = "public:privacy-commits:v1";
@@ -11,7 +8,7 @@ const TTL_MS = 120_000;
 
 export default async function handler(
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ): Promise<void> {
     if (req.method !== "GET") {
         res.statusCode = 405;
@@ -25,11 +22,11 @@ export default async function handler(
             fetchGithubApiJson("repos/vex-chat/privacy-policy/commits", {
                 sha: "main",
                 per_page: "3",
-            }),
+            })
         );
         res.setHeader(
             "Cache-Control",
-            "public, max-age=90, stale-while-revalidate=180",
+            "public, max-age=90, stale-while-revalidate=180"
         );
         sendJson(res, 200, body);
     } catch (err: unknown) {

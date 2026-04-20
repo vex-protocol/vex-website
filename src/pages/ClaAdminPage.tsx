@@ -57,9 +57,7 @@ function sortContributorRows(rows: ContributorRow[]): ContributorRow[] {
     });
 }
 
-function statusBadgeClass(
-    status: ContributorRow["status"],
-): string {
+function statusBadgeClass(status: ContributorRow["status"]): string {
     switch (status) {
         case "pending_review":
             return "border-amber-500/35 bg-amber-950/40 text-amber-200";
@@ -83,7 +81,9 @@ export function ClaAdminPage(): JSX.Element {
 
     const load = useCallback(async () => {
         setErr(null);
-        const meRes = await fetch("/api/gh/admin/me", { credentials: "include" });
+        const meRes = await fetch("/api/gh/admin/me", {
+            credentials: "include",
+        });
         const me = (await meRes.json()) as {
             authenticated?: boolean;
             admin?: boolean;
@@ -123,7 +123,7 @@ export function ClaAdminPage(): JSX.Element {
     async function postAction(
         path: string,
         login: string,
-        busy: string,
+        busy: string
     ): Promise<void> {
         setBusyKey(busy);
         setErr(null);
@@ -159,7 +159,7 @@ export function ClaAdminPage(): JSX.Element {
         void postAction(
             "/api/gh/admin/allow-resubmit",
             login,
-            `allow:${login}`,
+            `allow:${login}`
         );
     }
 
@@ -200,10 +200,10 @@ export function ClaAdminPage(): JSX.Element {
                     CLA admin
                 </h1>
                 <p className="mt-2 text-zinc-400">
-                    Your account ({cla.login}) is not authorized for this dashboard.
-                    Configure{" "}
-                    <code className="text-zinc-300">CLA_ADMIN_LOGINS</code> on the
-                    server.
+                    Your account ({cla.login}) is not authorized for this
+                    dashboard. Configure{" "}
+                    <code className="text-zinc-300">CLA_ADMIN_LOGINS</code> on
+                    the server.
                 </p>
             </section>
         );
@@ -245,7 +245,9 @@ export function ClaAdminPage(): JSX.Element {
                                 className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 p-4 sm:flex-row sm:items-start"
                             >
                                 <a
-                                    href={`https://github.com/${encodeURIComponent(row.login)}`}
+                                    href={`https://github.com/${encodeURIComponent(
+                                        row.login
+                                    )}`}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="shrink-0"
@@ -262,7 +264,9 @@ export function ClaAdminPage(): JSX.Element {
                                 <div className="min-w-0 flex-1 space-y-2">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <a
-                                            href={`https://github.com/${encodeURIComponent(row.login)}`}
+                                            href={`https://github.com/${encodeURIComponent(
+                                                row.login
+                                            )}`}
                                             target="_blank"
                                             rel="noreferrer"
                                             className="font-mono text-base font-semibold text-zinc-100 hover:text-red-200"
@@ -271,7 +275,7 @@ export function ClaAdminPage(): JSX.Element {
                                         </a>
                                         <span
                                             className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusBadgeClass(
-                                                row.status,
+                                                row.status
                                             )}`}
                                         >
                                             {row.statusLabel}
@@ -285,7 +289,10 @@ export function ClaAdminPage(): JSX.Element {
                                             Submitted
                                         </span>{" "}
                                         {formatDateTime(row.submittedAt)}
-                                        <span className="text-zinc-600"> · </span>
+                                        <span className="text-zinc-600">
+                                            {" "}
+                                            ·{" "}
+                                        </span>
                                         {formatRelativeTime(row.submittedAt)}
                                     </p>
                                     {row.decidedAt ? (
@@ -293,7 +300,8 @@ export function ClaAdminPage(): JSX.Element {
                                             <span className="text-zinc-500">
                                                 {row.status === "approved"
                                                     ? "Approved"
-                                                    : row.status === "rejected" ||
+                                                    : row.status ===
+                                                          "rejected" ||
                                                       row.status ===
                                                           "cleared_to_resubmit"
                                                     ? "Declined"
@@ -307,7 +315,9 @@ export function ClaAdminPage(): JSX.Element {
                                                         by
                                                     </span>{" "}
                                                     <a
-                                                        href={`https://github.com/${encodeURIComponent(row.actorLogin)}`}
+                                                        href={`https://github.com/${encodeURIComponent(
+                                                            row.actorLogin
+                                                        )}`}
                                                         target="_blank"
                                                         rel="noreferrer"
                                                         className="font-mono text-zinc-300 hover:text-red-200"

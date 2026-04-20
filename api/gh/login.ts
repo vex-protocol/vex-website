@@ -6,18 +6,14 @@ import {
     getSessionSecret,
 } from "../lib/ghOAuthEnv";
 import { sanitizeNextPath } from "../lib/safeNextPath";
-import {
-    randomState,
-    seal,
-    siteOrigin,
-} from "../lib/siteSession";
+import { randomState, seal, siteOrigin } from "../lib/siteSession";
 import { redirect, sendText, useSecureCookies } from "../lib/nodeHttp";
 
 const COOKIE_STATE = "gh_oauth_state";
 
 export default function handler(
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ): void {
     if (req.method !== "GET") {
         res.statusCode = 405;
@@ -36,11 +32,11 @@ export default function handler(
 
     const loginUrl = new URL(
         req.url ?? "/",
-        `http://${req.headers.host ?? "localhost"}`,
+        `http://${req.headers.host ?? "localhost"}`
     );
     const nextPath = sanitizeNextPath(
         loginUrl.searchParams.get("next") ??
-            loginUrl.searchParams.get("return_to"),
+            loginUrl.searchParams.get("return_to")
     );
 
     const state = randomState();
@@ -73,6 +69,6 @@ export default function handler(
     });
     redirect(
         res,
-        `https://github.com/login/oauth/authorize?${params.toString()}`,
+        `https://github.com/login/oauth/authorize?${params.toString()}`
     );
 }

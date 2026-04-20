@@ -52,7 +52,7 @@ export type OpenPrCheckResult =
  * Returns whether `login` has ≥1 open PR matching org/repos filters.
  */
 export async function checkAuthorHasOpenPullRequest(
-    login: string,
+    login: string
 ): Promise<OpenPrCheckResult> {
     const q = buildSearchQuery(login);
     if (!q) {
@@ -60,7 +60,9 @@ export async function checkAuthorHasOpenPullRequest(
     }
 
     const token = process.env.GITHUB_CLA_PR_CHECK_TOKEN?.trim();
-    const url = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=1`;
+    const url = `https://api.github.com/search/issues?q=${encodeURIComponent(
+        q
+    )}&per_page=1`;
 
     const headers: Record<string, string> = {
         Accept: "application/vnd.github+json",
@@ -83,7 +85,6 @@ export async function checkAuthorHasOpenPullRequest(
     }
 
     const data = (await res.json()) as { total_count?: number };
-    const count =
-        typeof data.total_count === "number" ? data.total_count : 0;
+    const count = typeof data.total_count === "number" ? data.total_count : 0;
     return { ok: true, count };
 }

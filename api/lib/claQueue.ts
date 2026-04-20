@@ -65,8 +65,7 @@ function normalizeQueueFile(raw: unknown): QueueFile {
                 typeof row === "object" &&
                 typeof (row as { login?: string }).login === "string" &&
                 typeof (row as { at?: string }).at === "string" &&
-                typeof (row as { claVersion?: string }).claVersion ===
-                    "string"
+                typeof (row as { claVersion?: string }).claVersion === "string"
             ) {
                 const r = row as PendingCla;
                 pending.push({
@@ -89,8 +88,7 @@ function normalizeQueueFile(raw: unknown): QueueFile {
                     "string" &&
                 typeof (row as { rejectedAt?: string }).rejectedAt ===
                     "string" &&
-                typeof (row as { claVersion?: string }).claVersion ===
-                    "string"
+                typeof (row as { claVersion?: string }).claVersion === "string"
             ) {
                 const r = row as RejectedCla;
                 rejected.push({
@@ -120,8 +118,7 @@ function normalizeQueueFile(raw: unknown): QueueFile {
                 typeof row === "object" &&
                 typeof (row as { login?: string }).login === "string" &&
                 typeof (row as { at?: string }).at === "string" &&
-                typeof (row as { claVersion?: string }).claVersion ===
-                    "string"
+                typeof (row as { claVersion?: string }).claVersion === "string"
             ) {
                 const r = row as CompletedCla;
                 completed.push({
@@ -171,7 +168,9 @@ export type ClaEligibility =
           approvedAt: string | null;
       };
 
-export async function getClaEligibility(login: string): Promise<ClaEligibility> {
+export async function getClaEligibility(
+    login: string
+): Promise<ClaEligibility> {
     const q = await readQueue();
     const lower = login.toLowerCase();
 
@@ -217,9 +216,7 @@ export async function addPending(entry: PendingCla): Promise<void> {
         return;
     }
 
-    const rejIdx = q.rejected.findIndex(
-        (r) => r.login.toLowerCase() === lower,
-    );
+    const rejIdx = q.rejected.findIndex((r) => r.login.toLowerCase() === lower);
     if (rejIdx >= 0) {
         if (!q.resubmitAllowed.includes(lower)) {
             return;
@@ -267,9 +264,7 @@ export async function rejectPending(login: string): Promise<PendingCla | null> {
 export async function allowResubmit(login: string): Promise<boolean> {
     const q = await readQueue();
     const lower = login.toLowerCase();
-    if (
-        !q.rejected.some((r) => r.login.toLowerCase() === lower)
-    ) {
+    if (!q.rejected.some((r) => r.login.toLowerCase() === lower)) {
         return false;
     }
     if (!q.resubmitAllowed.includes(lower)) {

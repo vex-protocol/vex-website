@@ -29,7 +29,7 @@ function cacheKey(org: string, token: string): string {
 
 function sortMemberLogins(logins: string[]): string[] {
     return [...logins].sort((a, b) =>
-        a.localeCompare(b, undefined, { sensitivity: "base" }),
+        a.localeCompare(b, undefined, { sensitivity: "base" })
     );
 }
 
@@ -50,18 +50,22 @@ function authHeaders(token: string): Record<string, string> {
  */
 export async function fetchOrgPublicMemberLoginsSorted(
     org: string,
-    token: string,
+    token: string
 ): Promise<string[]> {
     const logins: string[] = [];
     let page = 1;
     const perPage = 100;
     for (;;) {
         const url = new URL(
-            `https://api.github.com/orgs/${encodeURIComponent(org)}/public_members`,
+            `https://api.github.com/orgs/${encodeURIComponent(
+                org
+            )}/public_members`
         );
         url.searchParams.set("per_page", String(perPage));
         url.searchParams.set("page", String(page));
-        const res = await fetch(url.toString(), { headers: authHeaders(token) });
+        const res = await fetch(url.toString(), {
+            headers: authHeaders(token),
+        });
         if (!res.ok) {
             return [];
         }
@@ -91,16 +95,18 @@ export async function fetchOrgPublicMemberLoginsSorted(
 export async function checkOrgMembershipDirect(
     login: string,
     org: string,
-    token: string,
+    token: string
 ): Promise<boolean> {
-    const url = `https://api.github.com/orgs/${encodeURIComponent(org)}/members/${encodeURIComponent(login)}`;
+    const url = `https://api.github.com/orgs/${encodeURIComponent(
+        org
+    )}/members/${encodeURIComponent(login)}`;
     const res = await fetch(url, { headers: authHeaders(token) });
     return res.status === 204;
 }
 
 async function getOrgMembersEntry(
     org: string,
-    token: string,
+    token: string
 ): Promise<CacheEntry> {
     const key = cacheKey(org, token);
     const now = Date.now();
@@ -115,7 +121,7 @@ async function getOrgMembersEntry(
 
     for (;;) {
         const url = new URL(
-            `https://api.github.com/orgs/${encodeURIComponent(org)}/members`,
+            `https://api.github.com/orgs/${encodeURIComponent(org)}/members`
         );
         url.searchParams.set("per_page", String(perPage));
         url.searchParams.set("page", String(page));
@@ -132,7 +138,7 @@ async function getOrgMembersEntry(
                 "github_org_members_list",
                 org,
                 res.status,
-                body.slice(0, 500),
+                body.slice(0, 500)
             );
             throw new Error(`github_org_members:${String(res.status)}`);
         }
@@ -173,7 +179,7 @@ async function getOrgMembersEntry(
 
 export async function fetchOrgMemberLogins(
     org: string,
-    token: string,
+    token: string
 ): Promise<Set<string>> {
     const e = await getOrgMembersEntry(org, token);
     return e.loginsLower;
@@ -181,7 +187,7 @@ export async function fetchOrgMemberLogins(
 
 export async function fetchOrgMemberLoginsSorted(
     org: string,
-    token: string,
+    token: string
 ): Promise<string[]> {
     const e = await getOrgMembersEntry(org, token);
     return e.members;
@@ -190,7 +196,7 @@ export async function fetchOrgMemberLoginsSorted(
 export async function isLoginInOrgMemberList(
     login: string,
     org: string,
-    token: string,
+    token: string
 ): Promise<boolean> {
     const e = await getOrgMembersEntry(org, token);
     if (e.loginsLower.has(login.toLowerCase())) {

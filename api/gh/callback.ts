@@ -7,12 +7,7 @@ import {
 } from "../lib/ghOAuthEnv";
 import { GH_SESSION_COOKIE } from "../lib/ghSession";
 import { sanitizeNextPath } from "../lib/safeNextPath";
-import {
-    open,
-    parseCookies,
-    seal,
-    siteOrigin,
-} from "../lib/siteSession";
+import { open, parseCookies, seal, siteOrigin } from "../lib/siteSession";
 import { redirect, useSecureCookies } from "../lib/nodeHttp";
 
 const COOKIE_STATE = "gh_oauth_state";
@@ -29,7 +24,7 @@ type GithubSession = {
 
 export default async function handler(
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ): Promise<void> {
     if (req.method !== "GET") {
         res.statusCode = 405;
@@ -51,7 +46,7 @@ export default async function handler(
 
     const url = new URL(
         req.url ?? "/",
-        `http://${req.headers.host ?? "localhost"}`,
+        `http://${req.headers.host ?? "localhost"}`
     );
     const code = url.searchParams.get("code") ?? "";
     const state = url.searchParams.get("state") ?? "";
@@ -86,26 +81,30 @@ export default async function handler(
     const nextPath = sanitizeNextPath(parsed.next) ?? "/";
 
     const redirectUri = `${origin}/api/gh/callback`;
-    const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
-        method: "POST",
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            client_id: clientId,
-            client_secret: clientSecret,
-            code,
-            redirect_uri: redirectUri,
-        }),
-    });
+    const tokenRes = await fetch(
+        "https://github.com/login/oauth/access_token",
+        {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                client_id: clientId,
+                client_secret: clientSecret,
+                code,
+                redirect_uri: redirectUri,
+            }),
+        }
+    );
 
     const tokenJson: unknown = await tokenRes.json();
     const accessToken =
         typeof tokenJson === "object" &&
         tokenJson !== null &&
         "access_token" in tokenJson &&
-        typeof (tokenJson as { access_token: unknown }).access_token === "string"
+        typeof (tokenJson as { access_token: unknown }).access_token ===
+            "string"
             ? (tokenJson as { access_token: string }).access_token
             : null;
 
@@ -151,11 +150,16 @@ export default async function handler(
         exp,
         oauth_access_token: accessToken,
     };
-    const sealedSession = seal(secret, session as unknown as Record<string, unknown>);
+    const sealedSession = seal(
+        secret,
+        (session as unknown) as Record<string, unknown>
+    );
 
     const secure = useSecureCookies();
 
-    const clearState = `${COOKIE_STATE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? "; Secure" : ""}`;
+    const clearState = `${COOKIE_STATE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${
+        secure ? "; Secure" : ""
+    }`;
     const setSession = [
         `${GH_SESSION_COOKIE}=${encodeURIComponent(sealedSession)}`,
         "Path=/",

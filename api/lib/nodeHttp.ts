@@ -6,7 +6,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 export function redirect(
     res: ServerResponse,
     location: string,
-    statusCode: number = 302,
+    statusCode: number = 302
 ): void {
     res.writeHead(statusCode, { Location: location });
     res.end();
@@ -15,7 +15,7 @@ export function redirect(
 export function sendJson(
     res: ServerResponse,
     statusCode: number,
-    body: unknown,
+    body: unknown
 ): void {
     res.statusCode = statusCode;
     res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -26,7 +26,7 @@ export function sendText(
     res: ServerResponse,
     statusCode: number,
     body: string,
-    contentType: string = "text/plain; charset=utf-8",
+    contentType: string = "text/plain; charset=utf-8"
 ): void {
     res.statusCode = statusCode;
     res.setHeader("Content-Type", contentType);

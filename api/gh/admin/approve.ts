@@ -2,11 +2,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { isClaAdmin } from "../../lib/adminAuth";
 import { appendClaAuditEvent } from "../../lib/claAudit";
-import {
-    addCompleted,
-    readQueue,
-    removePending,
-} from "../../lib/claQueue";
+import { addCompleted, readQueue, removePending } from "../../lib/claQueue";
 import { getSessionSecret } from "../../lib/ghOAuthEnv";
 import { readGithubSession } from "../../lib/ghSession";
 import {
@@ -17,7 +13,7 @@ import { readJsonBody, sendJson } from "../../lib/nodeHttp";
 
 export default async function handler(
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ): Promise<void> {
     if (req.method !== "POST") {
         res.statusCode = 405;
@@ -66,7 +62,7 @@ export default async function handler(
 
     const q = await readQueue();
     const row = q.pending.find(
-        (p) => p.login.toLowerCase() === login.toLowerCase(),
+        (p) => p.login.toLowerCase() === login.toLowerCase()
     );
     if (!row) {
         sendJson(res, 404, { error: "not_in_queue" });
@@ -89,7 +85,7 @@ export default async function handler(
                 botToken,
                 owner,
                 repo,
-                login,
+                login
             );
             if (result.ok) {
                 github.push({

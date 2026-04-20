@@ -18,17 +18,19 @@ async function hasRepoWriteAccess(
     login: string,
     token: string,
     owner: string,
-    repo: string,
+    repo: string
 ): Promise<boolean> {
     const res = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/collaborators/${encodeURIComponent(login)}/permission`,
+        `https://api.github.com/repos/${owner}/${repo}/collaborators/${encodeURIComponent(
+            login
+        )}/permission`,
         {
             headers: {
                 Authorization: `Bearer ${token}`,
                 Accept: "application/vnd.github+json",
                 "User-Agent": "vex.wtf-cla-admin",
             },
-        },
+        }
     );
 
     if (!res.ok) {
@@ -43,17 +45,19 @@ async function hasRepoWriteAccess(
 /** When no PAT is available to list members; uses the signed-in user’s OAuth token. */
 async function userMembershipActive(
     oauthAccessToken: string,
-    orgSlug: string,
+    orgSlug: string
 ): Promise<boolean> {
     const res = await fetch(
-        `https://api.github.com/user/memberships/orgs/${encodeURIComponent(orgSlug)}`,
+        `https://api.github.com/user/memberships/orgs/${encodeURIComponent(
+            orgSlug
+        )}`,
         {
             headers: {
                 Authorization: `Bearer ${oauthAccessToken}`,
                 Accept: "application/vnd.github+json",
                 "User-Agent": "vex.wtf-cla-admin",
             },
-        },
+        }
     );
     if (res.status !== 200) {
         if (res.status !== 404) {
@@ -62,7 +66,7 @@ async function userMembershipActive(
                 "github_user_org_membership",
                 orgSlug,
                 res.status,
-                body.slice(0, 400),
+                body.slice(0, 400)
             );
         }
         return false;
@@ -73,7 +77,7 @@ async function userMembershipActive(
 
 export async function isClaAdmin(
     login: string,
-    oauthAccessToken?: string | null,
+    oauthAccessToken?: string | null
 ): Promise<boolean> {
     const allow = process.env.CLA_ADMIN_LOGINS?.trim();
     if (allow) {
@@ -81,7 +85,7 @@ export async function isClaAdmin(
             allow
                 .split(",")
                 .map((s) => s.trim().toLowerCase())
-                .filter(Boolean),
+                .filter(Boolean)
         );
         return set.has(login.toLowerCase());
     }

@@ -8,7 +8,7 @@ const store = new Map<string, { expiresAt: number; value: unknown }>();
 export async function cachedJson<T>(
     key: string,
     ttlMs: number,
-    fetcher: () => Promise<T>,
+    fetcher: () => Promise<T>
 ): Promise<T> {
     const now = Date.now();
     const hit = store.get(key);
@@ -28,7 +28,7 @@ const GH_HEADERS: Record<string, string> = {
 
 export async function fetchGithubApiJson(
     path: string,
-    searchParams?: Record<string, string>,
+    searchParams?: Record<string, string>
 ): Promise<unknown> {
     const url = new URL(`https://api.github.com/${path.replace(/^\//, "")}`);
     if (searchParams) {

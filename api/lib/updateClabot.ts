@@ -13,19 +13,21 @@ export async function addContributorToClabotRepo(
     token: string,
     owner: string,
     repo: string,
-    login: string,
+    login: string
 ): Promise<ClabotUpdateResult> {
     const repoKey = `${owner}/${repo}`;
     const filePath = ".clabot";
     const getRes = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`,
+        `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(
+            filePath
+        )}`,
         {
             headers: {
                 Authorization: `Bearer ${token}`,
                 Accept: "application/vnd.github+json",
                 "User-Agent": "vex.wtf-clabot",
             },
-        },
+        }
     );
 
     if (!getRes.ok) {
@@ -58,20 +60,26 @@ export async function addContributorToClabotRepo(
     }
 
     const normalized = login.trim();
-    if (json.contributors.some((c) => c.toLowerCase() === normalized.toLowerCase())) {
+    if (
+        json.contributors.some(
+            (c) => c.toLowerCase() === normalized.toLowerCase()
+        )
+    ) {
         return { repo: repoKey, ok: true, skipped: true };
     }
 
     json.contributors.push(normalized);
     json.contributors.sort((a, b) =>
-        a.localeCompare(b, undefined, { sensitivity: "base" }),
+        a.localeCompare(b, undefined, { sensitivity: "base" })
     );
 
     const newBody = JSON.stringify(json, null, 2) + "\n";
     const content = Buffer.from(newBody, "utf8").toString("base64");
 
     const putRes = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(filePath)}`,
+        `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(
+            filePath
+        )}`,
         {
             method: "PUT",
             headers: {
@@ -84,7 +92,7 @@ export async function addContributorToClabotRepo(
                 content,
                 sha: file.sha,
             }),
-        },
+        }
     );
 
     if (!putRes.ok) {
@@ -99,7 +107,9 @@ export async function addContributorToClabotRepo(
     return { repo: repoKey, ok: true };
 }
 
-export function parseRepoList(raw: string | undefined): Array<{
+export function parseRepoList(
+    raw: string | undefined
+): Array<{
     owner: string;
     repo: string;
 }> {

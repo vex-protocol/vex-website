@@ -12,12 +12,7 @@ type ClaStatusOk = {
     sourceRepo: string;
     clabotRepos: string[];
     claVersion: string;
-    eligibility:
-        | null
-        | "can_submit"
-        | "pending"
-        | "rejected"
-        | "completed";
+    eligibility: null | "can_submit" | "pending" | "rejected" | "completed";
     submittedAt?: string;
     rejectedAt?: string;
     canResubmit?: boolean;
@@ -54,7 +49,9 @@ export function ClaPage(): JSX.Element {
             })
             .catch(() => {
                 if (!cancelled) {
-                    setLoadErr("Could not load CLA configuration from the server.");
+                    setLoadErr(
+                        "Could not load CLA configuration from the server."
+                    );
                 }
             });
         return () => {
@@ -79,7 +76,7 @@ export function ClaPage(): JSX.Element {
             .catch(() => {
                 if (!cancelled) {
                     setLoadErr(
-                        "Could not load CLA text (server could not fetch from GitHub).",
+                        "Could not load CLA text (server could not fetch from GitHub)."
                     );
                 }
             });
@@ -93,8 +90,7 @@ export function ClaPage(): JSX.Element {
         status.authenticated &&
         status.login &&
         (status.eligibility === "can_submit" ||
-            (status.eligibility === "rejected" &&
-                status.canResubmit === true));
+            (status.eligibility === "rejected" && status.canResubmit === true));
 
     async function onSubmit(e: Event): Promise<void> {
         e.preventDefault();
@@ -117,9 +113,7 @@ export function ClaPage(): JSX.Element {
                 message?: string;
             };
             if (!res.ok) {
-                setSubmitErr(
-                    data.message ?? data.error ?? "Request failed",
-                );
+                setSubmitErr(data.message ?? data.error ?? "Request failed");
                 return;
             }
             setSubmitOk(true);
@@ -226,10 +220,10 @@ export function ClaPage(): JSX.Element {
                                             Agreement recorded
                                         </h2>
                                         <p className="mt-2 text-sm leading-relaxed text-emerald-100/85">
-                                            Your CLA acceptance is saved. You&apos;re
-                                            in the maintainer queue — no need to sign
-                                            again until they approve or ask you to
-                                            resubmit.
+                                            Your CLA acceptance is saved.
+                                            You&apos;re in the maintainer queue
+                                            — no need to sign again until they
+                                            approve or ask you to resubmit.
                                         </p>
                                         <a
                                             href="/"
@@ -242,7 +236,8 @@ export function ClaPage(): JSX.Element {
                             </div>
                         ) : null}
 
-                        {status?.eligibility === "pending" && !showJustSignedFlash ? (
+                        {status?.eligibility === "pending" &&
+                        !showJustSignedFlash ? (
                             <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/25 px-4 py-3 text-sm text-emerald-100/95">
                                 <p className="m-0 font-semibold text-emerald-50">
                                     In the review queue
@@ -252,8 +247,8 @@ export function ClaPage(): JSX.Element {
                                     {status.submittedAt
                                         ? ` (submitted ${status.submittedAt}).`
                                         : "."}{" "}
-                                    You don&apos;t need to sign again while it&apos;s
-                                    pending.
+                                    You don&apos;t need to sign again while
+                                    it&apos;s pending.
                                 </p>
                             </div>
                         ) : null}
@@ -274,14 +269,16 @@ export function ClaPage(): JSX.Element {
                                                 approved contributors
                                             </strong>{" "}
                                             list for this program (CLA version{" "}
-                                            {status.completedClaVersion ?? "—"}). You
-                                            don&apos;t need to sign again unless
-                                            maintainers ask you to.
+                                            {status.completedClaVersion ?? "—"}
+                                            ). You don&apos;t need to sign again
+                                            unless maintainers ask you to.
                                         </p>
                                         {status.approvedByLogin ? (
                                             <div className="mt-4 flex flex-col gap-2 border-t border-emerald-500/25 pt-4 sm:flex-row sm:items-center sm:gap-3">
                                                 <img
-                                                    src={`https://github.com/${encodeURIComponent(status.approvedByLogin)}.png`}
+                                                    src={`https://github.com/${encodeURIComponent(
+                                                        status.approvedByLogin
+                                                    )}.png`}
                                                     alt=""
                                                     width={40}
                                                     height={40}
@@ -292,23 +289,28 @@ export function ClaPage(): JSX.Element {
                                                     <p className="m-0 font-medium text-emerald-100/95">
                                                         Approved by{" "}
                                                         <a
-                                                            href={`https://github.com/${encodeURIComponent(status.approvedByLogin)}`}
+                                                            href={`https://github.com/${encodeURIComponent(
+                                                                status.approvedByLogin
+                                                            )}`}
                                                             target="_blank"
                                                             rel="noreferrer"
                                                             className="font-mono font-semibold text-emerald-50 underline decoration-emerald-400/50 underline-offset-2 hover:text-white"
                                                         >
-                                                            @{status.approvedByLogin}
+                                                            @
+                                                            {
+                                                                status.approvedByLogin
+                                                            }
                                                         </a>
                                                     </p>
                                                     {status.approvedAt ? (
                                                         <p className="m-0 mt-1 text-emerald-200/75">
                                                             {formatApprovedWhen(
-                                                                status.approvedAt,
+                                                                status.approvedAt
                                                             )}{" "}
                                                             <span className="text-emerald-300/60">
                                                                 (
                                                                 {formatRelativeTime(
-                                                                    status.approvedAt,
+                                                                    status.approvedAt
                                                                 )}
                                                                 )
                                                             </span>
@@ -345,10 +347,13 @@ export function ClaPage(): JSX.Element {
                                             declined by maintainers
                                         </strong>
                                         . This is{" "}
-                                        <strong className="text-red-50">not</strong>{" "}
+                                        <strong className="text-red-50">
+                                            not
+                                        </strong>{" "}
                                         the same as an approved contributor. You
-                                        cannot sign again until a maintainer allows
-                                        another attempt from the CLA admin queue.
+                                        cannot sign again until a maintainer
+                                        allows another attempt from the CLA
+                                        admin queue.
                                     </p>
                                     {status.rejectedAt ? (
                                         <p className="mt-2 text-xs text-red-200/70">
@@ -368,7 +373,7 @@ export function ClaPage(): JSX.Element {
                                         onChange={(e) =>
                                             setAgreed(
                                                 (e.target as HTMLInputElement)
-                                                    .checked,
+                                                    .checked
                                             )
                                         }
                                         disabled={!canSubmit}

@@ -15,7 +15,7 @@ export type GithubSessionPayload = {
 
 export function readGithubSession(
     req: IncomingMessage,
-    secret: string,
+    secret: string
 ): GithubSessionPayload | null {
     const cookies = parseCookies(req.headers.cookie);
     const raw = cookies[GH_SESSION_COOKIE];

@@ -15,7 +15,7 @@ export function getClaSourceRepoFullName(): string {
 /** Repos where approving updates `.clabot` (from env). */
 export function getClabotRepoFullNames(): string[] {
     return parseRepoList(process.env.CLA_BOT_REPOS).map(
-        (r) => `${r.owner}/${r.repo}`,
+        (r) => `${r.owner}/${r.repo}`
     );
 }
 

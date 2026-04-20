@@ -16,58 +16,44 @@ export function Navbar(props: { currentPath: string }): JSX.Element {
     const [menuOpen, setMenuOpen] = useState(false);
     const cla = useClaSession();
 
-    const showAdmin =
-        !cla.loading && cla.authenticated && cla.adminAccess;
+    const showAdmin = !cla.loading && cla.authenticated && cla.adminAccess;
 
     return (
         <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-zinc-950/90 backdrop-blur">
-            <nav className="mx-auto flex h-20 w-full max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                <a href="/" className="inline-flex items-center gap-3">
-                    <img
-                        src={logo}
-                        alt="Vex logo"
-                        className="h-10 w-10 rounded-sm"
-                    />
-                    <span className="text-sm font-semibold tracking-[0.18em] text-zinc-100 sm:text-base">
-                        {LOGO_TEXT}
-                    </span>
-                </a>
+            <nav className="mx-auto flex h-20 w-full max-w-5xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+                <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-5">
+                    <a
+                        href="/"
+                        className="inline-flex shrink-0 items-center gap-3"
+                    >
+                        <img
+                            src={logo}
+                            alt="Vex logo"
+                            className="h-10 w-10 rounded-sm"
+                        />
+                        <span className="text-sm font-semibold tracking-[0.18em] text-zinc-100 sm:text-base">
+                            {LOGO_TEXT}
+                        </span>
+                    </a>
 
-                <button
-                    type="button"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/20 text-zinc-100 lg:hidden"
-                    onClick={() => setMenuOpen((value) => !value)}
-                    aria-expanded={menuOpen}
-                    aria-label="Toggle navigation menu"
-                    title="Menu"
-                >
-                    <MenuIcon className="h-5 w-5" />
-                </button>
-
-                <ul className="m-0 hidden list-none items-center gap-1 p-0 lg:flex">
-                    {LINKS.map((link) => (
-                        <li key={link.href} className="list-none">
-                            <NavItem
-                                href={link.href}
-                                label={link.label}
-                                isActive={currentPath === link.href}
-                            />
-                        </li>
-                    ))}
-                    {showAdmin ? (
-                        <li className="relative list-none">
-                            <div className="group">
+                    {/* Left of main links: admin so it doesn’t pop in at the end of the row */}
+                    <div className="hidden min-h-10 shrink-0 items-center lg:flex">
+                        {showAdmin ? (
+                            <div className="group relative">
                                 <button
                                     type="button"
                                     className="inline-flex cursor-default items-center gap-1 rounded-md border-0 bg-transparent px-3 py-2 text-xs uppercase tracking-[0.16em] text-zinc-300 sm:text-sm"
                                     aria-haspopup="true"
                                 >
                                     Admin
-                                    <span className="text-[0.65em] opacity-60" aria-hidden>
+                                    <span
+                                        className="text-[0.65em] opacity-60"
+                                        aria-hidden
+                                    >
                                         ▾
                                     </span>
                                 </button>
-                                <div className="invisible absolute right-0 top-full z-[60] pt-1 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100">
+                                <div className="invisible absolute left-0 top-full z-[60] pt-1 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100">
                                     <div className="min-w-[13rem] rounded-md border border-white/10 bg-zinc-950 py-1 shadow-[0_0.5rem_2rem_-0.25rem_rgba(0,0,0,0.85)]">
                                         {ADMIN_APP_LINKS.map((link) => (
                                             <a
@@ -86,26 +72,41 @@ export function Navbar(props: { currentPath: string }): JSX.Element {
                                     </div>
                                 </div>
                             </div>
-                        </li>
-                    ) : null}
-                </ul>
+                        ) : null}
+                    </div>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-1">
+                    <ul className="m-0 hidden list-none items-center gap-1 p-0 lg:flex">
+                        {LINKS.map((link) => (
+                            <li key={link.href} className="list-none">
+                                <NavItem
+                                    href={link.href}
+                                    label={link.label}
+                                    isActive={currentPath === link.href}
+                                />
+                            </li>
+                        ))}
+                    </ul>
+
+                    <button
+                        type="button"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/20 text-zinc-100 lg:hidden"
+                        onClick={() => setMenuOpen((value) => !value)}
+                        aria-expanded={menuOpen}
+                        aria-label="Toggle navigation menu"
+                        title="Menu"
+                    >
+                        <MenuIcon className="h-5 w-5" />
+                    </button>
+                </div>
             </nav>
 
             {menuOpen && (
                 <ul className="m-0 list-none space-y-1 border-t border-white/10 px-4 py-3 lg:hidden">
-                    {LINKS.map((link) => (
-                        <li key={link.href} className="list-none">
-                            <NavItem
-                                href={link.href}
-                                label={link.label}
-                                isActive={currentPath === link.href}
-                                onNavigate={() => setMenuOpen(false)}
-                            />
-                        </li>
-                    ))}
                     {showAdmin ? (
                         <>
-                            <li className="list-none px-3 pt-3 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-zinc-500">
+                            <li className="list-none px-3 pt-1 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-zinc-500">
                                 Admin
                             </li>
                             {ADMIN_APP_LINKS.map((link) => (
@@ -120,6 +121,16 @@ export function Navbar(props: { currentPath: string }): JSX.Element {
                             ))}
                         </>
                     ) : null}
+                    {LINKS.map((link) => (
+                        <li key={link.href} className="list-none">
+                            <NavItem
+                                href={link.href}
+                                label={link.label}
+                                isActive={currentPath === link.href}
+                                onNavigate={() => setMenuOpen(false)}
+                            />
+                        </li>
+                    ))}
                 </ul>
             )}
         </header>

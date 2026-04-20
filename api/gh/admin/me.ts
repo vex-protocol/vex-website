@@ -7,7 +7,7 @@ import { sendJson } from "../../lib/nodeHttp";
 
 export default async function handler(
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ): Promise<void> {
     if (req.method !== "GET") {
         res.statusCode = 405;
@@ -31,10 +31,7 @@ export default async function handler(
         return;
     }
 
-    const admin = await isClaAdmin(
-        session.login,
-        session.oauth_access_token,
-    );
+    const admin = await isClaAdmin(session.login, session.oauth_access_token);
     sendJson(res, 200, {
         authenticated: true,
         login: session.login,

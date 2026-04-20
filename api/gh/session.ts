@@ -6,7 +6,7 @@ import { sendJson } from "../lib/nodeHttp";
 
 export default function handler(
     req: IncomingMessage,
-    res: ServerResponse,
+    res: ServerResponse
 ): void {
     if (req.method !== "GET") {
         res.statusCode = 405;

@@ -1,7 +1,9 @@
 /**
  * OAuth post-login redirect: only same-origin paths, no protocol-relative or open redirects.
  */
-export function sanitizeNextPath(raw: string | null | undefined): string | undefined {
+export function sanitizeNextPath(
+    raw: string | null | undefined
+): string | undefined {
     if (raw == null) {
         return undefined;
     }
