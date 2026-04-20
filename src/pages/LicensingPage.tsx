@@ -1,6 +1,6 @@
 import type { JSX } from "preact";
 
-const COMMERCIAL_EMAIL = "yuki@vex.wtf";
+const COMMERCIAL_EMAIL = "licensing@vex.wtf";
 const MAILTO = `mailto:${COMMERCIAL_EMAIL}?subject=${encodeURIComponent(
     "Vex commercial license inquiry"
 )}`;

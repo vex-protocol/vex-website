@@ -156,7 +156,6 @@ const SPIRE_UPTIME_TIMESERIES_URL = "https://monitor.vex.wtf/spire/timeseries";
 const SPIRE_DOCS_URL = "https://spire.vex.wtf";
 const DOCS_URL = "https://lib.vex.wtf";
 const LIBVEX_NPM_URL = "https://www.npmjs.com/package/@vex-chat/libvex";
-const LIBVEX_GITHUB_URL = "https://github.com/vex-protocol/libvex-js";
 const SPIRE_GITHUB_URL = "https://github.com/vex-protocol/spire";
 const UPTIME_BLOCK_WINDOW_HOURS = 24;
 const UPTIME_BLOCK_BUCKET_MINUTES = 60;
@@ -987,6 +986,35 @@ function BuildCommitPill(props: {
 const DOC_SOURCE_LINK_CLASS =
     "inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-zinc-950 px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0.5rem_1.5rem_rgba(0,0,0,0.4)] transition hover:border-white/35 hover:bg-zinc-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950";
 
+const STACK_LINK_CLASS =
+    "inline-flex items-center gap-1 rounded-lg border border-white/15 bg-zinc-950/80 px-3 py-2 text-sm font-semibold text-zinc-100 transition hover:border-white/30 hover:bg-zinc-900/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950";
+
+function StackLinkRow(props: {
+    serverHref: string;
+    clientHref: string;
+}): JSX.Element {
+    return (
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <a
+                href={props.serverHref}
+                target="_blank"
+                rel="noreferrer"
+                className={STACK_LINK_CLASS}
+            >
+                Server →
+            </a>
+            <a
+                href={props.clientHref}
+                target="_blank"
+                rel="noreferrer"
+                className={STACK_LINK_CLASS}
+            >
+                Client Library →
+            </a>
+        </div>
+    );
+}
+
 function DocsSourceLinkRow(props: {
     docsHref: string;
     sourceHref: string;
@@ -1280,13 +1308,16 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                 <div className="pointer-events-none absolute -bottom-28 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-[#e70000]/10 blur-3xl" />
                 <div className="relative">
                     <h1 className="max-w-4xl text-balance text-3xl font-bold tracking-tight text-zinc-50 sm:text-5xl">
-                        Add private chat anywhere.
+                        Private communications infrastructure.
                     </h1>
+                    <p className="mt-3 max-w-3xl text-lg font-semibold tracking-tight text-zinc-200 sm:text-xl">
+                        Your server. Your keys. Your stack.
+                    </p>
                     <p className="hero-lede mt-4 max-w-3xl text-base leading-7 text-zinc-300 sm:text-lg">
-                        We believe privacy is a fundamental human right.{" "}
-                        <code>libvex</code> is an open source javascript library
-                        and server enabling end to end encrypted messaging to
-                        nearly anything.
+                        Vex is an open source end-to-end encrypted messaging
+                        protocol. Deploy the server, integrate the client
+                        library, and own your entire communications stack with no
+                        third party in the loop.
                     </p>
                     <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/90 px-3.5 py-3 sm:p-5">
                         <div className="flex items-center justify-between gap-3">
@@ -1349,9 +1380,9 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                             </div>
                         ) : null}
                     </div>
-                    <DocsSourceLinkRow
-                        docsHref={DOCS_URL}
-                        sourceHref={LIBVEX_GITHUB_URL}
+                    <StackLinkRow
+                        serverHref={SPIRE_DOCS_URL}
+                        clientHref={DOCS_URL}
                     />
                 </div>
             </div>
@@ -1366,8 +1397,9 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
                         Reliable and resilient.
                     </h2>
                     <p className="hero-lede mt-4 max-w-3xl text-base leading-7 text-zinc-300 sm:text-lg">
-                        Use our hosted API or deploy your own to control your
-                        communications stack.
+                        Our reference deployment runs the same stack—monitored
+                        continuously so you can see the protocol under real
+                        load.
                     </p>
                     <div className="mt-6 rounded-xl border border-white/10 bg-zinc-950/90 px-3.5 py-3 sm:p-5">
                         <div className="flex items-center justify-between gap-3">

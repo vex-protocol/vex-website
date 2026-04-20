@@ -6,7 +6,7 @@ import {
     getSessionSecret,
 } from "../lib/ghOAuthEnv";
 import { sanitizeNextPath } from "../lib/safeNextPath";
-import { randomState, seal, siteOrigin } from "../lib/siteSession";
+import { randomState, seal, siteOriginFromRequest } from "../lib/siteSession";
 import { redirect, sendText, useSecureCookies } from "../lib/nodeHttp";
 
 const COOKIE_STATE = "gh_oauth_state";
@@ -47,7 +47,7 @@ export default function handler(
         ...(nextPath && nextPath !== "/" ? { next: nextPath } : {}),
     } as Record<string, unknown>);
 
-    const origin = siteOrigin();
+    const origin = siteOriginFromRequest(req);
     const redirectUri = `${origin}/api/gh/callback`;
 
     const secure = useSecureCookies();
