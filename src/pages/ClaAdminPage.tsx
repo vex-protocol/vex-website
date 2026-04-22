@@ -1,5 +1,6 @@
 import type { JSX } from "preact";
 import { useClaSession } from "../ClaSessionContext";
+import { CrosshairSpinner } from "../components/CrosshairSpinner";
 import { RoutePanel } from "../components/RoutePanel";
 import { GH_LOGIN_URL } from "../lib/githubAuth";
 import { formatRelativeTime } from "../lib/relativeTime";
@@ -167,9 +168,9 @@ export function ClaAdminPage(): JSX.Element {
     if (cla.loading || admin === null) {
         return (
             <RoutePanel splotch="status">
-                <div className="inline-flex items-center gap-2 text-zinc-300">
-                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
-                    Loading…
+                <div className="inline-flex items-center gap-2.5 text-zinc-300">
+                    <CrosshairSpinner className="text-zinc-200" />
+                    Loading
                 </div>
             </RoutePanel>
         );

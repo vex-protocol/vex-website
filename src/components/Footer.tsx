@@ -1,3 +1,4 @@
+import { CrosshairSpinner } from "./CrosshairSpinner";
 import { GithubIcon, TwitterIcon } from "./Icons";
 import { useClaSession } from "../ClaSessionContext";
 import { COMPANY_NAME } from "../lib/brand";
@@ -12,7 +13,10 @@ export function Footer(): JSX.Element {
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <span>{COMPANY_NAME}</span>
                     {cla.loading ? (
-                        <span className="inline-block h-3 w-3 animate-spin rounded-full border border-zinc-600 border-t-zinc-400" />
+                        <CrosshairSpinner
+                            className="text-zinc-500"
+                            sizeClassName="h-3.5 w-3.5"
+                        />
                     ) : cla.authenticated && cla.login ? (
                         <>
                             <span className="text-zinc-600">·</span>

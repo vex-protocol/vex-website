@@ -3,6 +3,7 @@ import { useEffect, useState } from "preact/hooks";
 import { ClaSessionProvider } from "./ClaSessionContext";
 import { Footer } from "./components/Footer";
 import { Navbar } from "./components/Navbar";
+import { CrosshairSpinner } from "./components/CrosshairSpinner";
 import { RoutePanel } from "./components/RoutePanel";
 
 export function App(): JSX.Element {
@@ -163,9 +164,9 @@ export function App(): JSX.Element {
 function PrivacyPolicyLoading(): JSX.Element {
     return (
         <RoutePanel splotch="soft">
-            <div className="inline-flex items-center gap-2 text-zinc-300">
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
-                <span>Loading privacy policy…</span>
+            <div className="inline-flex items-center gap-2.5 text-zinc-300">
+                <CrosshairSpinner className="text-zinc-200" />
+                <span>Loading privacy policy</span>
             </div>
         </RoutePanel>
     );
@@ -174,9 +175,9 @@ function PrivacyPolicyLoading(): JSX.Element {
 function LicensingPageLoading(): JSX.Element {
     return (
         <RoutePanel splotch="tilt">
-            <div className="inline-flex items-center gap-2 text-zinc-300">
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
-                <span>Loading…</span>
+            <div className="inline-flex items-center gap-2.5 text-zinc-300">
+                <CrosshairSpinner className="text-zinc-200" />
+                <span>Loading</span>
             </div>
         </RoutePanel>
     );
@@ -185,9 +186,9 @@ function LicensingPageLoading(): JSX.Element {
 function HomePageLoading(): JSX.Element {
     return (
         <RoutePanel splotch="home">
-            <div className="inline-flex items-center gap-2 text-zinc-300">
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
-                <span>Loading…</span>
+            <div className="inline-flex items-center gap-2.5 text-zinc-300">
+                <CrosshairSpinner className="text-zinc-200" />
+                <span>Loading</span>
             </div>
         </RoutePanel>
     );
@@ -196,9 +197,9 @@ function HomePageLoading(): JSX.Element {
 function ClaPageLoading(): JSX.Element {
     return (
         <RoutePanel splotch="tilt">
-            <div className="inline-flex items-center gap-2 text-zinc-300">
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
-                <span>Loading CLA…</span>
+            <div className="inline-flex items-center gap-2.5 text-zinc-300">
+                <CrosshairSpinner className="text-zinc-200" />
+                <span>Loading CLA</span>
             </div>
         </RoutePanel>
     );
@@ -207,9 +208,9 @@ function ClaPageLoading(): JSX.Element {
 function ClaAdminPageLoading(): JSX.Element {
     return (
         <RoutePanel splotch="status">
-            <div className="inline-flex items-center gap-2 text-zinc-300">
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
-                <span>Loading admin…</span>
+            <div className="inline-flex items-center gap-2.5 text-zinc-300">
+                <CrosshairSpinner className="text-zinc-200" />
+                <span>Loading admin</span>
             </div>
         </RoutePanel>
     );
@@ -218,9 +219,9 @@ function ClaAdminPageLoading(): JSX.Element {
 function StatusPageLoading(): JSX.Element {
     return (
         <RoutePanel splotch="status" cardOverflowVisible>
-            <div className="inline-flex items-center gap-2 text-zinc-300">
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
-                <span>Loading status…</span>
+            <div className="inline-flex items-center gap-2.5 text-zinc-300">
+                <CrosshairSpinner className="text-zinc-200" />
+                <span>Loading status</span>
             </div>
         </RoutePanel>
     );
