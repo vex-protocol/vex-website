@@ -71,21 +71,23 @@ export function PrivacyPolicyPage(_: { path?: string }): JSX.Element {
     return (
         <RoutePanel splotch="soft">
             {status === "loading" && (
-                <div className="mt-4 inline-flex items-center gap-2 text-zinc-300">
+                <div className="inline-flex items-center gap-2 text-zinc-300">
                     <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
-                    <span>Loading policy...</span>
+                    <span>Loading policy…</span>
                 </div>
             )}
 
             {status === "error" && (
-                <p className="mt-4 text-red-300">
+                <p className="text-red-300">
                     Could not load policy from GitHub right now.
                 </p>
             )}
 
             {status === "idle" ? (
                 <>
-                    <article className="mt-6 max-w-none">
+                    <article
+                        className="max-w-none [&>h1:first-of-type]:mt-0 [&>h1:first-of-type]:text-2xl [&>h1:first-of-type]:font-bold [&>h1:first-of-type]:tracking-tight sm:[&>h1:first-of-type]:text-3xl [&>p:first-child]:mt-0"
+                    >
                         {renderQuickMarkdown(policyText)}
                     </article>
 
