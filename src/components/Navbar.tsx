@@ -7,6 +7,7 @@ import { MenuIcon } from "./Icons";
 
 const LINKS = [
     { href: "/", label: "Home" },
+    { href: "/status", label: "Status" },
     { href: "/licensing", label: "Licensing" },
     { href: "/privacy-policy", label: "Privacy Policy" },
 ];
@@ -49,7 +50,9 @@ export function Navbar(props: { currentPath: string }): JSX.Element {
                                 <div className="group">
                                     <button
                                         type="button"
-                                        className={`${navItemClass(adminNavActive)} cursor-pointer border-0 bg-transparent`}
+                                        className={`${navItemClass(
+                                            adminNavActive
+                                        )} cursor-pointer border-0 bg-transparent`}
                                         aria-haspopup="true"
                                     >
                                         Admin
@@ -68,7 +71,8 @@ export function Navbar(props: { currentPath: string }): JSX.Element {
                                                     href={link.href}
                                                     className={[
                                                         "block px-3 py-2.5 text-xs uppercase tracking-[0.14em] no-underline transition-colors",
-                                                        currentPath === link.href
+                                                        currentPath ===
+                                                        link.href
                                                             ? "bg-[#e70000]/15 text-[#e70000]"
                                                             : "text-zinc-300 hover:bg-white/5 hover:text-white",
                                                     ].join(" ")}
@@ -144,11 +148,7 @@ function NavItem(props: {
     const { href, label, isActive, onNavigate } = props;
 
     return (
-        <a
-            href={href}
-            onClick={onNavigate}
-            className={navItemClass(isActive)}
-        >
+        <a href={href} onClick={onNavigate} className={navItemClass(isActive)}>
             {label}
         </a>
     );

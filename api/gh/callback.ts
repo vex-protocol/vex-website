@@ -7,7 +7,12 @@ import {
 } from "../lib/ghOAuthEnv";
 import { GH_SESSION_COOKIE } from "../lib/ghSession";
 import { sanitizeNextPath } from "../lib/safeNextPath";
-import { open, parseCookies, seal, siteOriginFromRequest } from "../lib/siteSession";
+import {
+    open,
+    parseCookies,
+    seal,
+    siteOriginFromRequest,
+} from "../lib/siteSession";
 import { redirect, useSecureCookies } from "../lib/nodeHttp";
 
 const COOKIE_STATE = "gh_oauth_state";

@@ -9,7 +9,7 @@ export function LicensingPage(_: { path?: string }): JSX.Element {
     return (
         <section className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 sm:p-10">
             <h1 className="mt-0 text-3xl font-bold tracking-tight text-zinc-50">
-                Commercial licensing
+                Commercial licensing & support
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-relaxed text-zinc-300">
                 The Vex SDK and related projects are available under{" "}
@@ -18,7 +18,9 @@ export function LicensingPage(_: { path?: string }): JSX.Element {
                 </strong>{" "}
                 for open-source use. For proprietary products, redistribution
                 without copyleft, or other commercial terms, please reach out
-                directly.
+                directly. We offer custom licensing, technical and integration
+                support for our software. Please contact us for more
+                information.
             </p>
             <p className="mt-6 text-zinc-300">
                 <a
@@ -27,10 +29,6 @@ export function LicensingPage(_: { path?: string }): JSX.Element {
                 >
                     {COMMERCIAL_EMAIL}
                 </a>
-            </p>
-            <p className="mt-4 text-sm text-zinc-500">
-                We&apos;ll get back to you with licensing options and next
-                steps.
             </p>
         </section>
     );

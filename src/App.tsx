@@ -22,6 +22,9 @@ export function App(): JSX.Element {
     const [ClaAdminPage, setClaAdminPage] = useState<ComponentType<{
         path?: string;
     }> | null>(null);
+    const [StatusPage, setStatusPage] = useState<ComponentType<{
+        path?: string;
+    }> | null>(null);
 
     useEffect(() => {
         if (
@@ -29,7 +32,8 @@ export function App(): JSX.Element {
             currentPath === "/privacy-policy" ||
             currentPath === "/licensing" ||
             currentPath === "/cla" ||
-            currentPath === "/cla-admin"
+            currentPath === "/cla-admin" ||
+            currentPath === "/status"
         )
             return;
         let cancelled = false;
@@ -95,6 +99,19 @@ export function App(): JSX.Element {
         };
     }, [ClaAdminPage, currentPath]);
 
+    useEffect(() => {
+        if (StatusPage || currentPath !== "/status") return;
+        let cancelled = false;
+        void import("./pages/StatusPage").then((module) => {
+            if (!cancelled) {
+                setStatusPage(() => module.StatusPage);
+            }
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [StatusPage, currentPath]);
+
     return (
         <ClaSessionProvider>
             <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -123,6 +140,12 @@ export function App(): JSX.Element {
                             <ClaAdminPage />
                         ) : (
                             <ClaAdminPageLoading />
+                        )
+                    ) : currentPath === "/status" ? (
+                        StatusPage ? (
+                            <StatusPage />
+                        ) : (
+                            <StatusPageLoading />
                         )
                     ) : HomePage ? (
                         <HomePage />
@@ -186,6 +209,17 @@ function ClaAdminPageLoading(): JSX.Element {
             <div className="inline-flex items-center gap-2">
                 <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
                 <span>Loading admin…</span>
+            </div>
+        </section>
+    );
+}
+
+function StatusPageLoading(): JSX.Element {
+    return (
+        <section className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 text-zinc-300">
+            <div className="inline-flex items-center gap-2">
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
+                <span>Loading status…</span>
             </div>
         </section>
     );
