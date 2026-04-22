@@ -19,17 +19,24 @@ const SplotchContent: Record<RoutePanelSplotch, { a: string; b: string }> = {
         b:
             "absolute -bottom-28 right-16 h-56 w-56 rounded-full bg-[#e70000]/10 blur-3xl",
     },
+    /**
+     * Licensing: same blur strength as home / status. Mix home + status splots so it is
+     * visibly distinct on the page (older tilt/soft presets were too weak and read as blank).
+     */
     tilt: {
         a:
-            "absolute -right-16 top-1/3 h-48 w-48 -translate-y-1/2 rounded-full bg-[#e70000]/16 blur-3xl",
+            "absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#e70000]/20 blur-3xl",
         b:
-            "absolute -left-12 -bottom-8 h-44 w-44 rounded-full bg-[#e70000]/11 blur-3xl",
+            "absolute -bottom-28 right-16 h-56 w-56 rounded-full bg-[#e70000]/10 blur-3xl",
     },
+    /**
+     * Privacy: softer second blob uses the same /10 as elsewhere; two corners stay obvious.
+     */
     soft: {
         a:
-            "absolute right-0 top-0 h-64 w-64 translate-x-1/4 -translate-y-1/4 rounded-full bg-[#e70000]/12 blur-3xl",
+            "absolute -left-20 -top-24 h-52 w-52 rounded-full bg-[#e70000]/20 blur-3xl",
         b:
-            "absolute left-1/4 bottom-0 h-52 w-52 -translate-x-1/2 translate-y-1/3 rounded-full bg-[#e70000]/8 blur-3xl",
+            "absolute -bottom-28 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-[#e70000]/10 blur-3xl",
     },
 };
 
