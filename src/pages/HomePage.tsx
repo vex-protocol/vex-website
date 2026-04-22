@@ -1,5 +1,6 @@
 import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
+import { RoutePanel } from "../components/RoutePanel";
 import {
     CheckCircle2Icon,
     GithubIcon,
@@ -441,29 +442,20 @@ export function HomePage(_: { path?: string; default?: boolean }): JSX.Element {
     }, []);
 
     return (
-        <section className="space-y-6">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 px-4 py-3 sm:p-10">
-                <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#e70000]/20 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-28 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-[#e70000]/10 blur-3xl" />
-                <div className="relative">
-                    <h1 className="max-w-4xl text-balance text-3xl font-bold tracking-tight text-zinc-50 sm:text-5xl">
-                        Control your own communications infrastructure.
-                    </h1>
-                    <p className="mt-3 max-w-3xl text-lg font-semibold tracking-tight text-zinc-200 sm:text-xl">
-                        No third parties. No logging. No surveillance.
-                    </p>
-                    <p className="hero-lede mt-4 max-w-3xl text-base leading-7 text-zinc-300 sm:text-lg">
-                        Vex is an open source end-to-end encrypted messaging
-                        protocol. Our software is designed to facilitate
-                        communications in forward environments where privacy and
-                        ephemerality are critical concerns.
-                    </p>
-                    <StackPillars
-                        libvexMeta={libvexMeta}
-                        spireMeta={spireMeta}
-                    />
-                </div>
-            </div>
-        </section>
+        <RoutePanel splotch="home">
+            <h1 className="mt-0 max-w-4xl text-balance text-3xl font-bold tracking-tight text-zinc-50 sm:text-5xl">
+                Control your own communications infrastructure.
+            </h1>
+            <p className="mt-4 max-w-3xl text-lg font-semibold tracking-tight text-zinc-200 sm:text-xl">
+                No third parties. No logging. No surveillance.
+            </p>
+            <p className="hero-lede mt-4 max-w-3xl text-base leading-7 text-zinc-300 sm:text-lg">
+                Vex is an open source end-to-end encrypted messaging protocol.
+                Our software is designed to facilitate communications in forward
+                environments where privacy and ephemerality are critical
+                concerns.
+            </p>
+            <StackPillars libvexMeta={libvexMeta} spireMeta={spireMeta} />
+        </RoutePanel>
     );
 }

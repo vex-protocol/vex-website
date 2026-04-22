@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { RoutePanel } from "../components/RoutePanel";
 import { renderQuickMarkdown } from "../lib/quickMarkdown";
 import { formatRelativeTime } from "../lib/relativeTime";
 
@@ -68,14 +69,7 @@ export function PrivacyPolicyPage(_: { path?: string }): JSX.Element {
     }, []);
 
     return (
-        <section className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.03] p-6 sm:p-10">
-            <h1 className="text-4xl font-bold tracking-tight text-red-200 sm:text-5xl">
-                Privacy Policy
-            </h1>
-            <p className="mt-3 text-sm text-zinc-300 sm:text-base">
-                How your data is handled, with recent policy updates below.
-            </p>
-
+        <RoutePanel splotch="soft">
             {status === "loading" && (
                 <div className="mt-4 inline-flex items-center gap-2 text-zinc-300">
                     <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-200" />
@@ -91,40 +85,63 @@ export function PrivacyPolicyPage(_: { path?: string }): JSX.Element {
 
             {status === "idle" ? (
                 <>
-                    <div className="mt-8">
-                        {commits.length > 0 ? (
-                            <ul className="divide-y divide-white/10 overflow-hidden rounded-xl border border-white/10 bg-zinc-950/50">
-                                {commits.map((commit) => (
-                                    <UpdateItem
-                                        key={commit.sha}
-                                        commit={commit}
-                                    />
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="rounded-lg border border-white/10 bg-zinc-950/40 p-4 text-sm text-zinc-300">
-                                No update details found.
-                            </p>
-                        )}
-                    </div>
-
-                    <p className="mt-4 text-sm text-zinc-300">
-                        <a
-                            href={PRIVACY_POLICY_HISTORY_URL}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-red-200 underline decoration-red-400/60 underline-offset-4 hover:text-red-100"
-                        >
-                            View full update history
-                        </a>
-                    </p>
-
-                    <article className="mt-10 border-t border-white/10 pt-8">
+                    <article className="mt-6 max-w-none">
                         {renderQuickMarkdown(policyText)}
                     </article>
+
+                    <h2
+                        className="mt-6 border-t border-white/10 pt-6 text-lg font-semibold tracking-tight text-zinc-100"
+                        id="policy-recent-updates"
+                    >
+                        Recent updates
+                    </h2>
+                    <div className="mt-3">
+                        <PolicyUpdatesList commits={commits} />
+                    </div>
                 </>
             ) : null}
-        </section>
+        </RoutePanel>
+    );
+}
+
+function PolicyUpdatesList(props: { commits: CommitInfo[] }): JSX.Element {
+    if (props.commits.length > 0) {
+        return (
+            <>
+                <ul className="divide-y divide-white/10 overflow-hidden rounded-xl border border-white/10 bg-zinc-950/50">
+                    {props.commits.map((commit) => (
+                        <UpdateItem key={commit.sha} commit={commit} />
+                    ))}
+                </ul>
+                <p className="mt-4 text-sm text-zinc-300">
+                    <a
+                        href={PRIVACY_POLICY_HISTORY_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-red-200 underline decoration-red-400/60 underline-offset-4 hover:text-red-100"
+                    >
+                        View full update history
+                    </a>
+                </p>
+            </>
+        );
+    }
+    return (
+        <>
+            <p className="rounded-lg border border-white/10 bg-zinc-950/40 p-4 text-sm text-zinc-300">
+                No update details found.
+            </p>
+            <p className="mt-4 text-sm text-zinc-300">
+                <a
+                    href={PRIVACY_POLICY_HISTORY_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-red-200 underline decoration-red-400/60 underline-offset-4 hover:text-red-100"
+                >
+                    View full update history
+                </a>
+            </p>
+        </>
     );
 }
 
