@@ -50,12 +50,7 @@ export function CrosshairSpinner({
                     />
                 </g>
             </g>
-            <circle
-                className="fill-[#e70000]/50"
-                cx="12"
-                cy="12"
-                r="1.5"
-            />
+            <circle className="fill-[#e70000]/50" cx="12" cy="12" r="1.5" />
         </svg>
     );
 }

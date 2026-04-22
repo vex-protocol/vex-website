@@ -86,9 +86,7 @@ export function PrivacyPolicyPage(_: { path?: string }): JSX.Element {
 
             {status === "idle" ? (
                 <>
-                    <article
-                        className="max-w-none [&>h1:first-of-type]:mt-0 [&>h1:first-of-type]:text-2xl [&>h1:first-of-type]:font-bold [&>h1:first-of-type]:tracking-tight sm:[&>h1:first-of-type]:text-3xl [&>p:first-child]:mt-0"
-                    >
+                    <article className="max-w-none [&>h1:first-of-type]:mt-0 [&>h1:first-of-type]:text-2xl [&>h1:first-of-type]:font-bold [&>h1:first-of-type]:tracking-tight sm:[&>h1:first-of-type]:text-3xl [&>p:first-child]:mt-0">
                         {renderQuickMarkdown(policyText)}
                     </article>
 

@@ -166,13 +166,13 @@ export function ClaPage(): JSX.Element {
                     {loadErr ? (
                         <p className="text-sm text-red-300">{loadErr}</p>
                     ) : body === null ? (
-                    <div className="flex items-center gap-2.5 text-zinc-400">
-                        <CrosshairSpinner
-                            className="text-zinc-300"
-                            sizeClassName="h-4 w-4"
-                        />
-                        Loading CLA
-                    </div>
+                        <div className="flex items-center gap-2.5 text-zinc-400">
+                            <CrosshairSpinner
+                                className="text-zinc-300"
+                                sizeClassName="h-4 w-4"
+                            />
+                            Loading CLA
+                        </div>
                     ) : (
                         <div className="max-h-[min(28rem,55vh)] overflow-y-auto rounded-xl border border-white/10 bg-zinc-950/40 px-4 py-5 sm:px-6">
                             <article className="[&_h1]:mt-0">
