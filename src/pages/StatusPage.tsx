@@ -676,9 +676,11 @@ export function StatusPage(_: { path?: string }): JSX.Element {
                         <p className="text-[0.6875rem] uppercase tracking-[0.12em] text-zinc-500">
                             Availability (24h)
                         </p>
-                        <p className="mt-1 font-mono text-lg text-zinc-100">
-                            {spireMeta?.uptimePercent !== null
-                                ? `${spireMeta?.uptimePercent?.toFixed(2)}%`
+                        <p className="mt-1 min-h-[1.75rem] font-mono text-lg text-zinc-100">
+                            {spireMeta == null
+                                ? null
+                                : spireMeta.uptimePercent != null
+                                ? `${spireMeta.uptimePercent.toFixed(2)}%`
                                 : "n/a"}
                         </p>
                     </div>
@@ -686,11 +688,11 @@ export function StatusPage(_: { path?: string }): JSX.Element {
                         <p className="text-[0.6875rem] uppercase tracking-[0.12em] text-zinc-500">
                             Avg latency
                         </p>
-                        <p className="mt-1 font-mono text-lg text-zinc-100">
-                            {spireMeta?.averageLatencyMs !== null
-                                ? `${Math.round(
-                                      spireMeta?.averageLatencyMs ?? 0
-                                  )}ms`
+                        <p className="mt-1 min-h-[1.75rem] font-mono text-lg text-zinc-100">
+                            {spireMeta == null
+                                ? null
+                                : spireMeta.averageLatencyMs != null
+                                ? `${Math.round(spireMeta.averageLatencyMs)}ms`
                                 : "n/a"}
                         </p>
                     </div>

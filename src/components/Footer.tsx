@@ -36,7 +36,7 @@ export function Footer(): JSX.Element {
                             className="text-zinc-400 no-underline transition-colors hover:text-zinc-200"
                             title="Staff & contributor sign-in (GitHub)"
                         >
-                            Sign in
+                            STAFF SIGN IN
                         </a>
                     )}
                 </div>
